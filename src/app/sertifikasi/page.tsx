@@ -152,7 +152,7 @@ export default function SertifikasiPage() {
         }
 
         // SIMPAN DATA KE SUPABASE
-        await supabase.from('sertifikasi').insert([{
+        const { error: insertError } = await supabase.from('sertifikasi').insert([{
           nip: pegawai.nip,
           jenis_sertifikasi: k.jenis_sertifikasi,
           jenis_kursus: k.jenis_kursus,
@@ -161,12 +161,18 @@ export default function SertifikasiPage() {
           institusi_penyelenggara: k.institusi_penyelenggara,
           nomor_sertifikasi: k.nomor_sertifikasi,
           tanggal_sertifikasi: `${k.tanggal_mulai} s.d ${k.tanggal_akhir}`,
-          tahun: k.tahun,
           jumlah_jp: parseInt(k.jumlah_jp),
           pejabat: k.pejabat,
           biaya: k.biaya_tipe,
           link_sertifikat: finalUrl
         }]);
+
+        if (insertError) {
+          console.error("Supabase insert error:", insertError);
+          alert("Data gagal disimpan ke database: " + insertError.message);
+          setIsSubmitting(false);
+          return;
+        }
       }
       
       // Update total_jp di tabel pegawai
