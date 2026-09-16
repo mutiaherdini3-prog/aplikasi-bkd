@@ -13,6 +13,8 @@ export default function AdminPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'PNS' | 'PPPK' | 'PW'>('all');
+  const [tahunFilter, setTahunFilter] = useState<string>('all');
+  const [rawPegawaiList, setRawPegawaiList] = useState<any[]>([]);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -24,15 +26,26 @@ export default function AdminPage() {
     const fetchData = async () => {
       const { data } = await supabase.from('pegawai').select('*, sertifikasi(*)').neq('nip', 'admin');
       if (data) {
-        const computed = data.map(p => {
-          const jp = p.sertifikasi?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
-          return { ...p, jp };
-        });
-        setPegawaiList(computed);
+        setRawPegawaiList(data);
       }
     };
     fetchData();
   }, [router]);
+
+  useEffect(() => {
+    const computed = rawPegawaiList.map(p => {
+      const filteredSertifikasi = tahunFilter === 'all' 
+        ? p.sertifikasi 
+        : p.sertifikasi?.filter((s: any) => s.tahun === tahunFilter);
+      const jp = filteredSertifikasi?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
+      return { ...p, jp, filteredSertifikasi };
+    });
+    setPegawaiList(computed);
+  }, [rawPegawaiList, tahunFilter]);
+
+  const availableYears = Array.from(new Set(
+    rawPegawaiList.flatMap(p => p.sertifikasi?.map((s: any) => s.tahun).filter(Boolean))
+  )).sort().reverse();
 
   const lulus = pegawaiList.filter(p => p.jp >= 20).length;
   const belum = pegawaiList.length - lulus;
@@ -154,6 +167,17 @@ export default function AdminPage() {
                         {filterMode === 'belum' && <span className="badge bg-warning text-dark ms-2 fs-6">Filter: Belum Memenuhi</span>}
                       </h5>
                       <div className="d-flex gap-2">
+                        <select 
+                          className="form-select form-select-sm"
+                          value={tahunFilter}
+                          onChange={(e) => setTahunFilter(e.target.value)}
+                          style={{ width: 'auto', minWidth: '120px' }}
+                        >
+                          <option value="all">Semua Tahun</option>
+                          {availableYears.map(year => (
+                            <option key={year as string} value={year as string}>{year as string}</option>
+                          ))}
+                        </select>
                         <select 
                           className="form-select form-select-sm" 
                           value={statusFilter} 

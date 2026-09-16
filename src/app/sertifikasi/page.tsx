@@ -161,6 +161,7 @@ export default function SertifikasiPage() {
           institusi_penyelenggara: k.institusi_penyelenggara,
           nomor_sertifikasi: k.nomor_sertifikasi,
           tanggal_sertifikasi: `${k.tanggal_mulai} s.d ${k.tanggal_akhir}`,
+          tahun: k.tahun,
           jumlah_jp: parseInt(k.jumlah_jp),
           pejabat: k.pejabat,
           biaya: k.biaya_tipe,
