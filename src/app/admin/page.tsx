@@ -83,11 +83,7 @@ export default function AdminPage() {
     });
 
     const excelData = finalFiltered.map((p, index) => {
-      const links = (p.filteredSertifikasi || p.sertifikasi || [])
-        .map((s: any, i: number) => `(${i+1}) ${s.nama_kursus || s.jenis_sertifikasi}: ${s.link_sertifikat || 'Tidak ada link'}`)
-        .join('\n');
-      
-      return {
+      const baseRow: any = {
         "No": index + 1,
         "NIP": p.nip,
         "Nama Pegawai": p.nama,
@@ -98,8 +94,15 @@ export default function AdminPage() {
         "Unit Kerja": p.unit_kerja,
         "Total JP": p.jp,
         "Status Kelulusan": p.jp >= 20 ? "MEMENUHI" : "BELUM MEMENUHI",
-        "Rincian Sertifikat & Link Dokumen": links
       };
+
+      const certs = p.filteredSertifikasi || p.sertifikasi || [];
+      certs.forEach((s: any, i: number) => {
+        baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi;
+        baseRow[`Link Sertifikat ${i + 1}`] = s.link_sertifikat || 'Tidak ada link';
+      });
+
+      return baseRow;
     });
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
