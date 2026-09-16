@@ -529,7 +529,7 @@ export default function SertifikasiPage() {
                               <td>{k.institusi_penyelenggara}</td>
                               <td><span className="badge bg-info rounded-pill">{k.jumlah_jp} JP</span></td>
                               <td className="text-center">
-                                {k.file ? <a href={k.preview} target="_blank" className="btn btn-sm btn-outline-primary py-0 px-2" title="Lihat Dokumen"><i className="bi bi-search"></i> Lihat</a> : <i className="bi bi-x-circle-fill text-danger fs-5"></i>}
+                                {k.file ? <span className="text-success fw-medium"><i className="bi bi-file-earmark-check"></i> {k.file.name}</span> : <i className="bi bi-x-circle-fill text-danger fs-5"></i>}
                               </td>
                             </tr>
                           ))}
