@@ -22,7 +22,7 @@ export default function AdminPage() {
     }
 
     const fetchData = async () => {
-      const { data } = await supabase.from('pegawai').select('*, sertifikasi(*)');
+      const { data } = await supabase.from('pegawai').select('*, sertifikasi(*)').neq('nip', 'admin');
       if (data) {
         const computed = data.map(p => {
           const jp = p.sertifikasi?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;

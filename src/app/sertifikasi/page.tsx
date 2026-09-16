@@ -31,6 +31,7 @@ export default function SertifikasiPage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [previewModal, setPreviewModal] = useState<string | null>(null);
 
   useEffect(() => {
     const nip = localStorage.getItem('loggedInUser');
@@ -121,27 +122,32 @@ export default function SertifikasiPage() {
     
     try {
       for (const k of kegiatans) {
-        let finalUrl = k.preview; // fallback ke base64 jika storage gagal
+        let finalUrl = k.preview;
         
         if (k.file) {
-          // UPLOAD KE LOKAL SERVER (Sesuai Permintaan)
-          const formData = new FormData();
-          formData.append('file', k.file);
+          // UPLOAD KE SUPABASE STORAGE
+          const fileExt = k.file.name.split('.').pop();
+          const fileName = `${pegawai.nip}-${Date.now()}.${fileExt}`;
           
-          const uploadRes = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-          });
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('dokumen')
+            .upload(fileName, k.file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+            
+          if (uploadError) {
+            console.error("Supabase upload error:", uploadError);
+            alert("Gagal mengupload dokumen: " + uploadError.message);
+            setIsSubmitting(false);
+            return;
+          }
           
-          if (uploadRes.ok) {
-            const data = await uploadRes.json();
-            if (data.success) {
-              finalUrl = data.url; // Ini URL server lokal, misal: /uploads/sertifikat/123.jpg
-            } else {
-              console.log("Local upload failed", data.error);
-            }
-          } else {
-            console.log("Local upload request failed");
+          if (uploadData) {
+            const { data: publicUrlData } = supabase.storage
+              .from('dokumen')
+              .getPublicUrl(fileName);
+            finalUrl = publicUrlData.publicUrl;
           }
         }
 
@@ -498,10 +504,14 @@ export default function SertifikasiPage() {
                         <input type="file" className="form-control mb-3" accept=".pdf, .jpg, .jpeg, .png" required={!k.file} onChange={e => handleFileChange(k.id, e)} />
                         {k.preview && (
                           <div className="mt-2 p-2 border rounded bg-white d-inline-block text-center">
-                            <a href={k.preview} target="_blank" title="Klik untuk melihat dokumen lengkap">
-                              <img src={k.preview} alt="Preview Dokumen" className="img-thumbnail" style={{ height: '100px', objectFit: 'cover', cursor: 'pointer' }} />
+                            <button type="button" className="btn btn-link p-0 text-decoration-none" onClick={() => setPreviewModal(k.preview)} title="Klik untuk melihat dokumen lengkap">
+                              {(k.preview.startsWith('data:image') || k.preview.match(/\.(jpeg|jpg|gif|png)$/i)) ? (
+                                <img src={k.preview} alt="Preview Dokumen" className="img-thumbnail" style={{ height: '100px', objectFit: 'cover', cursor: 'pointer' }} />
+                              ) : (
+                                <div className="p-3 bg-light border rounded text-danger"><i className="bi bi-file-earmark-pdf fs-1"></i></div>
+                              )}
                               <div className="small mt-1 text-primary"><i className="bi bi-search"></i> Lihat Dokumen</div>
-                            </a>
+                            </button>
                           </div>
                         )}
                       </div>
@@ -574,6 +584,30 @@ export default function SertifikasiPage() {
 
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {previewModal && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Preview Dokumen</h5>
+                <button type="button" className="btn-close" onClick={() => setPreviewModal(null)}></button>
+              </div>
+              <div className="modal-body text-center p-0" style={{ height: '70vh' }}>
+                {(previewModal.startsWith('data:image') || previewModal.match(/\.(jpeg|jpg|gif|png)$/i)) ? (
+                  <img src={previewModal} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <iframe src={previewModal} style={{ width: '100%', height: '100%', border: 'none' }} title="Dokumen Preview" />
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setPreviewModal(null)}>Kembali</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
