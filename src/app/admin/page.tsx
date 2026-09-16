@@ -106,6 +106,17 @@ export default function AdminPage() {
     });
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Ubah teks URL menjadi clickable link di Excel
+    for (const cellAddress in worksheet) {
+      if (!cellAddress.startsWith('!')) {
+        const cell = worksheet[cellAddress];
+        if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
+          cell.l = { Target: cell.v, Tooltip: "Klik untuk melihat dokumen" };
+        }
+      }
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pegawai");
     XLSX.writeFile(workbook, `Laporan_Sertifikasi_Pegawai_${tahunFilter}.xlsx`);
