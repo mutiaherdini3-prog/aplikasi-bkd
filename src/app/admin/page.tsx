@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
+import * as XLSX from 'xlsx';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -67,6 +68,44 @@ export default function AdminPage() {
     if (activeTab === 'view-pegawai') return 'Manajemen Data Pegawai';
     if (activeTab === 'view-sertifikasi') return 'Manajemen Rekap Sertifikasi';
     return '';
+  };
+
+  const exportToExcel = () => {
+    const filteredByMode = pegawaiList.filter(p => {
+      if (filterMode === 'lulus') return p.jp >= 20;
+      if (filterMode === 'belum') return p.jp < 20;
+      return true;
+    });
+    const finalFiltered = filteredByMode.filter(p => {
+      if (statusFilter === 'all') return true;
+      if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
+      return p.status_pegawai === statusFilter;
+    });
+
+    const excelData = finalFiltered.map((p, index) => {
+      const links = (p.filteredSertifikasi || p.sertifikasi || [])
+        .map((s: any, i: number) => `(${i+1}) ${s.nama_kursus || s.jenis_sertifikasi}: ${s.link_sertifikat || 'Tidak ada link'}`)
+        .join('\n');
+      
+      return {
+        "No": index + 1,
+        "NIP": p.nip,
+        "Nama Pegawai": p.nama,
+        "Jenis Kelamin": p.jenis_kelamin,
+        "Status Pegawai": p.status_pegawai,
+        "Pangkat/Golongan": p.pangkat,
+        "Jabatan": p.jabatan,
+        "Unit Kerja": p.unit_kerja,
+        "Total JP": p.jp,
+        "Status Kelulusan": p.jp >= 20 ? "MEMENUHI" : "BELUM MEMENUHI",
+        "Rincian Sertifikat & Link Dokumen": links
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pegawai");
+    XLSX.writeFile(workbook, `Laporan_Sertifikasi_Pegawai_${tahunFilter}.xlsx`);
   };
 
   return (
@@ -162,11 +201,20 @@ export default function AdminPage() {
                   <div className="table-card">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                       <h5 className="fw-bold mb-0">
-                        Rekapitulasi Pemenuhan Kompetensi Pegawai
+                        <i className="bi bi-list-task me-2 text-primary"></i> 
+                        Daftar Pencapaian Pegawai 
+                        <span className="badge bg-secondary ms-2">{tahunFilter === 'all' ? 'Semua Tahun' : `Tahun ${tahunFilter}`}</span>
                         {filterMode === 'lulus' && <span className="badge bg-success ms-2 fs-6">Filter: Memenuhi Syarat</span>}
                         {filterMode === 'belum' && <span className="badge bg-warning text-dark ms-2 fs-6">Filter: Belum Memenuhi</span>}
                       </h5>
                       <div className="d-flex gap-2">
+                        <button 
+                          className="btn btn-sm btn-success"
+                          onClick={exportToExcel}
+                          title="Unduh laporan dalam format Excel"
+                        >
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                        </button>
                         <select 
                           className="form-select form-select-sm"
                           value={tahunFilter}
