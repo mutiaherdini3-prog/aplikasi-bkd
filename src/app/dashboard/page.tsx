@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -23,22 +22,22 @@ export default function DashboardPage() {
     }
 
     const fetchData = async () => {
-      const { data: pegawaiData } = await supabase.from('pegawai').select('*').eq('nip', nip).single();
-      if (pegawaiData) {
-        setPegawai(pegawaiData);
-      }
-
-      const { data: sertifData } = await supabase.from('sertifikasi').select('*').eq('nip', nip);
-      if (sertifData) {
-        setSertifikasi(sertifData);
-        let sum = 0;
-        sertifData.forEach(s => sum += (s.jumlah_jp || 0));
-        setTotalJP(sum);
-      }
-
-      const { data: pendData } = await supabase.from('pendidikan').select('*').eq('nip', nip);
-      if (pendData) {
-        setPendidikan(pendData);
+      try {
+        const res = await fetch(`/api/pegawai?nip=${nip}`);
+        const result = await res.json();
+        
+        if (result.success && result.data) {
+          if (result.data.pegawai) setPegawai(result.data.pegawai);
+          if (result.data.sertifikasi) {
+            setSertifikasi(result.data.sertifikasi);
+            let sum = 0;
+            result.data.sertifikasi.forEach((s: any) => sum += (s.jumlah_jp || 0));
+            setTotalJP(sum);
+          }
+          if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
+        }
+      } catch (error) {
+        console.error('Failed to fetch', error);
       }
     };
     fetchData();
@@ -50,25 +49,23 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
-  const hapusSertifikasi = async (id: string) => {
+  const hapusSertifikasi = async (rowIndex: string) => {
     if (confirm('Yakin ingin menghapus sertifikat ini?')) {
-      await supabase.from('sertifikasi').delete().eq('id', id);
-      const nip = localStorage.getItem('loggedInUser');
-      if (nip) {
-        const { data: allSertif } = await supabase.from('sertifikasi').select('jumlah_jp').eq('nip', nip);
-        if (allSertif) {
-          const totalJP = allSertif.reduce((sum, s) => sum + (s.jumlah_jp || 0), 0);
-          await supabase.from('pegawai').update({ total_jp: totalJP }).eq('nip', nip);
-        }
-      }
-      window.location.reload();
+      try {
+        const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
+        if (res.ok) window.location.reload();
+        else alert('Gagal menghapus sertifikat');
+      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
   };
 
-  const hapusPendidikan = async (id: string) => {
+  const hapusPendidikan = async (rowIndex: string) => {
     if (confirm('Yakin ingin menghapus riwayat pendidikan ini?')) {
-      await supabase.from('pendidikan').delete().eq('id', id);
-      window.location.reload();
+      try {
+        const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
+        if (res.ok) window.location.reload();
+        else alert('Gagal menghapus pendidikan');
+      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
   };
 
@@ -205,7 +202,7 @@ export default function DashboardPage() {
                         </tr>
                       ) : (
                         sertifikasi.map((s, index) => (
-                          <tr key={s.id}>
+                          <tr key={s._rowIndex || index}>
                             <td>{index + 1}</td>
                             <td className="fw-bold text-primary">{s.nama_kursus || s.jenis_sertifikasi}</td>
                             <td>{s.institusi_penyelenggara || '-'}</td>
@@ -213,7 +210,7 @@ export default function DashboardPage() {
                             <td>{s.tanggal_sertifikasi}</td>
                             <td><span className="badge bg-info rounded-pill">{s.jumlah_jp} JP</span></td>
                             <td className="text-center">
-                              <button className="btn btn-sm btn-outline-danger" title="Hapus" onClick={() => hapusSertifikasi(s.id)}>
+                              <button className="btn btn-sm btn-outline-danger" title="Hapus" onClick={() => hapusSertifikasi(s._rowIndex)}>
                                 <i className="bi bi-trash"></i>
                               </button>
                             </td>
@@ -248,14 +245,14 @@ export default function DashboardPage() {
                         </tr>
                       ) : (
                         pendidikan.map((p, index) => (
-                          <tr key={p.id}>
+                          <tr key={p._rowIndex || index}>
                             <td>{index + 1}</td>
                             <td className="fw-bold text-primary">{p.tingkat}</td>
                             <td>{p.institusi}</td>
                             <td>{p.jurusan || '-'}</td>
                             <td><span className="badge bg-secondary rounded-pill">{p.tahun}</span></td>
                             <td>
-                              <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPendidikan(p.id)}>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPendidikan(p._rowIndex)}>
                                 <i className="bi bi-trash"></i>
                               </button>
                             </td>

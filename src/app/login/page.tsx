@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,55 +14,19 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const cleanNip = nip.trim();
-      const cleanPassword = password.trim();
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', nip, password }),
+      });
 
-      // Cek di database Supabase (pakai string pencarian fleksibel untuk menghindari spasi nyangkut dari CSV)
-      const { data, error: dbError } = await supabase
-        .from('pegawai')
-        .select('*')
-        .eq('nip', cleanNip)
-        .maybeSingle(); // gunakan maybeSingle agar tidak throw error jika tidak ketemu
+      const result = await response.json();
 
-      // Jika data tidak ketemu, kemungkinan saat import CSV ada spasi/enter di NIP
-      if (!data) {
-        // Coba cari pakai ilike, jangan pakai single() karena bisa return > 1 (misal 2345 vs 12345)
-        const { data: fallbackDataList } = await supabase
-          .from('pegawai')
-          .select('*')
-          .ilike('nip', `%${cleanNip}%`);
-          
-        let fallbackData = null;
-        if (fallbackDataList && fallbackDataList.length > 0) {
-           // Cari yang setelah di-trim benar-benar sama persis dengan cleanNip
-           fallbackData = fallbackDataList.find(row => row.nip.trim() === cleanNip);
-        }
-
-        if (!fallbackData) {
-          throw new Error('NIP atau Password salah');
-        }
-        
-        if (fallbackData.password?.trim() !== cleanPassword) {
-            throw new Error('NIP atau Password salah');
-        }
-        
-        // Success with fallback
-        localStorage.setItem('loggedInUser', fallbackData.nip); // Gunakan NIP asli dari DB
-        localStorage.setItem('userRole', fallbackData.jabatan === 'Administrator' ? 'admin' : 'pegawai');
-        
-        if (fallbackData.jabatan === 'Administrator') {
-          router.push('/admin');
-        } else {
-          router.push('/dashboard');
-        }
-        return;
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'NIP atau Password salah');
       }
 
-      if (dbError || !data || data.password?.trim() !== cleanPassword) {
-        throw new Error('NIP atau Password salah');
-      }
-
-      // Jika berhasil
+      const data = result.data;
       localStorage.setItem('loggedInUser', data.nip);
       localStorage.setItem('userRole', data.jabatan === 'Administrator' ? 'admin' : 'pegawai');
       
@@ -88,13 +51,23 @@ export default function LoginPage() {
         return;
     }
     
-    const { error } = await supabase.from('pegawai').update({ password: pass.trim() }).eq('nip', resetNip.trim());
-    if (error) {
-        alert('Gagal mengganti sandi, pastikan NIP terdaftar.');
-    } else {
-        alert('Kata Sandi berhasil diganti. Silakan login kembali dengan sandi baru.');
-        // close modal via bootstrap if available or just reload
-        window.location.reload();
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset-password', nip: resetNip, password: pass }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Gagal mengganti sandi');
+      }
+
+      alert('Kata Sandi berhasil diganti. Silakan login kembali dengan sandi baru.');
+      window.location.reload();
+    } catch (error: any) {
+      alert('Gagal mengganti sandi, pastikan NIP terdaftar. Error: ' + error.message);
     }
   };
 
