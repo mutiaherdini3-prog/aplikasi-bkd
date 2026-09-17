@@ -82,6 +82,11 @@ export default function AdminPage() {
       return p.status_pegawai === statusFilter;
     });
 
+    const maxCerts = Math.max(0, ...finalFiltered.map(p => {
+      const certs = p.filteredSertifikasi || p.sertifikasi || [];
+      return certs.length;
+    }));
+
     const excelData = finalFiltered.map((p, index) => {
       const baseRow: any = {
         "No": index + 1,
@@ -97,10 +102,16 @@ export default function AdminPage() {
       };
 
       const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      certs.forEach((s: any, i: number) => {
-        baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi;
-        baseRow[`Link Sertifikat ${i + 1}`] = s.link_sertifikat || 'Tidak ada link';
-      });
+      for (let i = 0; i < maxCerts; i++) {
+        if (i < certs.length) {
+          const s = certs[i];
+          baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
+          baseRow[`Link Sertifikat ${i + 1}`] = s.link_sertifikat || 'Tidak ada link';
+        } else {
+          baseRow[`Nama Sertifikat ${i + 1}`] = '-';
+          baseRow[`Link Sertifikat ${i + 1}`] = '-';
+        }
+      }
 
       return baseRow;
     });
@@ -112,7 +123,11 @@ export default function AdminPage() {
       if (!cellAddress.startsWith('!')) {
         const cell = worksheet[cellAddress];
         if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
-          cell.l = { Target: cell.v, Tooltip: "Klik untuk melihat dokumen" };
+          const url = cell.v;
+          // Menggunakan formula HYPERLINK sesuai permintaan
+          worksheet[cellAddress] = {
+            f: `HYPERLINK("${url}", "Lihat Dokumen")`
+          };
         }
       }
     }
