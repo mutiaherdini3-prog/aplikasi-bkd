@@ -338,16 +338,25 @@ export default function AdminPage() {
                 <div className="table-card">
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
-                    <button className="btn btn-primary btn-sm" onClick={() => {
-                      const newNip = prompt('Masukkan NIP baru:');
-                      const newPass = prompt('Masukkan Password:');
-                      if (newNip && newPass) {
-                        supabase.from('pegawai').insert([{ nip: newNip, password: newPass }]).then(({error}) => {
-                          if (error) alert('Gagal: ' + error.message);
-                          else { alert('Berhasil!'); window.location.reload(); }
-                        });
-                      }
-                    }}><i className="bi bi-person-plus me-1"></i> Tambah Pegawai</button>
+                    <div className="d-flex gap-2">
+                      <button 
+                        className="btn btn-sm btn-success"
+                        onClick={exportToExcel}
+                        title="Unduh data pegawai ke Excel"
+                      >
+                        <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                      </button>
+                      <button className="btn btn-primary btn-sm" onClick={() => {
+                        const newNip = prompt('Masukkan NIP baru:');
+                        const newPass = prompt('Masukkan Password:');
+                        if (newNip && newPass) {
+                          supabase.from('pegawai').insert([{ nip: newNip, password: newPass }]).then(({error}) => {
+                            if (error) alert('Gagal: ' + error.message);
+                            else { alert('Berhasil!'); window.location.reload(); }
+                          });
+                        }
+                      }}><i className="bi bi-person-plus me-1"></i> Tambah Pegawai</button>
+                    </div>
                   </div>
                   <div className="table-responsive">
                     <table className="table table-hover align-middle">
@@ -360,6 +369,7 @@ export default function AdminPage() {
                           <th>Jabatan</th>
                           <th>Unit Kerja</th>
                           <th className="text-center">Total JP</th>
+                          <th className="text-center">Sertifikat</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -372,6 +382,9 @@ export default function AdminPage() {
                             <td>{p.jabatan || '-'}</td>
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                            <td className="text-center">
+                              <button className="btn btn-sm btn-outline-primary" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>Lihat Dokumen</button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
