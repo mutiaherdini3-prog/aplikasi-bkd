@@ -124,9 +124,11 @@ export default function AdminPage() {
         const cell = worksheet[cellAddress];
         if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
           const url = cell.v;
-          // Menggunakan formula HYPERLINK sesuai permintaan
+          // Menggunakan link native Excel agar otomatis berwarna biru
           worksheet[cellAddress] = {
-            f: `HYPERLINK("${url}", "Lihat Dokumen")`
+            t: 's',
+            v: "Lihat Dokumen",
+            l: { Target: url }
           };
         }
       }
