@@ -400,14 +400,14 @@ export default function LoginPage() {
             </div>
 
             <div className="hero-image-container">
-                <img src="/img/bupati.png" alt="Bupati dan Wakil Bupati Bangka Barat" />
+                <img src="https://sidilancuti.bangkabaratkab.go.id/assets/arsha/assets/img/bupati_wakil2025.png" alt="Bupati dan Wakil Bupati Bangka Barat" referrerPolicy="no-referrer" />
             </div>
 
             {/* PITA LOGO FULL WIDTH DI BAWAH */}
             <div className="hero-logos-band">
-                <img src="/img/berakhlak.png" alt="BerAKHLAK" style={{ objectPosition: 'left' }} />
-                <img src="/img/betason.png" alt="Betason" style={{ objectPosition: 'center' }} />
-                <img src="/img/employer.png" alt="Employer" style={{ objectPosition: 'right' }} />
+                <img src="https://sidilancuti.bangkabaratkab.go.id/assets/arsha/assets/img/clients/berakhlak-1.png" alt="BerAKHLAK" style={{ objectPosition: 'left' }} referrerPolicy="no-referrer" />
+                <img src="https://sidilancuti.bangkabaratkab.go.id/assets/arsha/assets/img/clients/Betason.png" alt="Betason" style={{ objectPosition: 'center' }} referrerPolicy="no-referrer" />
+                <img src="https://sidilancuti.bangkabaratkab.go.id/assets/arsha/assets/img/clients/employer.png" alt="Employer" style={{ objectPosition: 'right' }} referrerPolicy="no-referrer" />
             </div>
         </div>
         
