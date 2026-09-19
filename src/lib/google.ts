@@ -16,7 +16,21 @@ const getAuth = () => {
   });
 };
 
-export const getGoogleDrive = () => google.drive({ version: 'v3', auth: getAuth() });
+export function getGoogleDrive() {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('OAuth2 credentials for Google Drive are not set in .env.local');
+  }
+
+  const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+  return google.drive({ version: 'v3', auth: oauth2Client });
+}
+
 export const getGoogleSheets = () => google.sheets({ version: 'v4', auth: getAuth() });
 
 export const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!;

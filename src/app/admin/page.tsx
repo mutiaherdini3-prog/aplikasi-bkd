@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
 import * as XLSX from 'xlsx';
 
 export default function AdminPage() {
@@ -25,9 +24,14 @@ export default function AdminPage() {
     }
 
     const fetchData = async () => {
-      const { data } = await supabase.from('pegawai').select('*, sertifikasi(*)').neq('nip', 'admin');
-      if (data) {
-        setRawPegawaiList(data);
+      try {
+        const res = await fetch('/api/admin/data');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setRawPegawaiList(json.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch data', err);
       }
     };
     fetchData();
@@ -60,7 +64,14 @@ export default function AdminPage() {
 
   const handleLihatDokumen = (url: string) => {
     if (!url) return;
-    setPreviewUrl(url);
+    let docUrl = url;
+    if (docUrl.includes('/view?url=')) {
+      docUrl = decodeURIComponent(docUrl.split('/view?url=')[1]);
+    }
+    if (docUrl.includes('drive.google.com') && docUrl.includes('/view')) {
+      docUrl = docUrl.replace('/view?usp=drivesdk', '/preview').replace('/view', '/preview');
+    }
+    setPreviewUrl(docUrl);
   };
 
   const getTopbarTitle = () => {
@@ -106,7 +117,28 @@ export default function AdminPage() {
         if (i < certs.length) {
           const s = certs[i];
           baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
-          baseRow[`Link Sertifikat ${i + 1}`] = s.link_sertifikat || 'Tidak ada link';
+          
+          let linkUrl = s.link_sertifikat || 'Tidak ada link';
+          
+          // Bersihkan rumus =HYPERLINK lama jika ada agar tidak error di Excel
+          if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
+            const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
+            if (match && match[1]) {
+              linkUrl = match[1];
+            }
+          }
+
+          // Jika URL berupa relative /uploads, ubah jadi absolut
+          if (linkUrl.startsWith('/uploads')) {
+            linkUrl = `${window.location.origin}${linkUrl}`;
+          }
+
+          // Bungkus dengan /view agar link dari Excel membuka custom viewer (ada tombol Kembalinya)
+          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=')) {
+            linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
+          }
+
+          baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
         } else {
           baseRow[`Nama Sertifikat ${i + 1}`] = '-';
           baseRow[`Link Sertifikat ${i + 1}`] = '-';
@@ -346,16 +378,6 @@ export default function AdminPage() {
                       >
                         <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                       </button>
-                      <button className="btn btn-primary btn-sm" onClick={() => {
-                        const newNip = prompt('Masukkan NIP baru:');
-                        const newPass = prompt('Masukkan Password:');
-                        if (newNip && newPass) {
-                          supabase.from('pegawai').insert([{ nip: newNip, password: newPass }]).then(({error}) => {
-                            if (error) alert('Gagal: ' + error.message);
-                            else { alert('Berhasil!'); window.location.reload(); }
-                          });
-                        }
-                      }}><i className="bi bi-person-plus me-1"></i> Tambah Pegawai</button>
                     </div>
                   </div>
                   <div className="table-responsive">

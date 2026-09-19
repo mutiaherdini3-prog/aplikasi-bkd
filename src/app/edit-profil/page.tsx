@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
 
 export default function EditProfilPage() {
   const router = useRouter();
@@ -26,19 +25,25 @@ export default function EditProfilPage() {
     }
 
     const fetchData = async () => {
-      const { data } = await supabase.from('pegawai').select('*').eq('nip', nip).single();
-      if (data) {
-        setFormData({
-          nip: data.nip || '',
-          nama: data.nama || '',
-          status_pegawai: data.status_pegawai || '',
-          golonganPangkat: (data.golongan && data.pangkat && data.pangkat !== 'Tidak Ada' && data.pangkat !== '-')
-            ? `${data.golongan} - ${data.pangkat}`
-            : (data.golongan || ''),
-          jenkel: data.jenkel || '',
-          jabatan: data.jabatan || '',
-          unit_kerja: data.unit_kerja || ''
-        });
+      try {
+        const res = await fetch(`/api/pegawai?nip=${nip}`);
+        const json = await res.json();
+        const data = json.data?.pegawai;
+        if (data) {
+          setFormData({
+            nip: data.nip || '',
+            nama: data.nama || '',
+            status_pegawai: data.status_pegawai || '',
+            golonganPangkat: (data.golongan && data.pangkat && data.pangkat !== 'Tidak Ada' && data.pangkat !== '-')
+              ? `${data.golongan} - ${data.pangkat}`
+              : (data.golongan || ''),
+            jenkel: data.jenkel || '',
+            jabatan: data.jabatan || '',
+            unit_kerja: data.unit_kerja || ''
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch data', err);
       }
     };
     fetchData();
@@ -77,9 +82,11 @@ export default function EditProfilPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('pegawai')
-        .update({
+      const res = await fetch('/api/pegawai', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nip: formData.nip,
           nama: formData.nama,
           status_pegawai: formData.status_pegawai,
           pangkat: valPangkat,
@@ -88,9 +95,12 @@ export default function EditProfilPage() {
           jabatan: formData.jabatan,
           unit_kerja: formData.unit_kerja
         })
-        .eq('nip', formData.nip);
+      });
 
-      if (error) throw error;
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.message || json.error || 'Gagal menyimpan data');
+      }
       
       router.push('/dashboard');
     } catch (err: any) {

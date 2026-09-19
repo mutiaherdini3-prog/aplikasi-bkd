@@ -9,6 +9,7 @@ export default function DashboardPage() {
   const [sertifikasi, setSertifikasi] = useState<any[]>([]);
   const [pendidikan, setPendidikan] = useState<any[]>([]);
   const [totalJP, setTotalJP] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const nip = localStorage.getItem('loggedInUser');
@@ -210,6 +211,20 @@ export default function DashboardPage() {
                             <td>{s.tanggal_sertifikasi}</td>
                             <td><span className="badge bg-info rounded-pill">{s.jumlah_jp} JP</span></td>
                             <td className="text-center">
+                              {s.link_sertifikat && (
+                                <button className="btn btn-sm btn-outline-primary me-2" title="Lihat Dokumen" onClick={() => {
+                                  let docUrl = s.link_sertifikat;
+                                  if (docUrl.includes('/view?url=')) {
+                                    docUrl = decodeURIComponent(docUrl.split('/view?url=')[1]);
+                                  }
+                                  if (docUrl.includes('drive.google.com') && docUrl.includes('/view')) {
+                                    docUrl = docUrl.replace('/view?usp=drivesdk', '/preview').replace('/view', '/preview');
+                                  }
+                                  setPreviewUrl(docUrl);
+                                }}>
+                                  <i className="bi bi-file-earmark-text"></i> Lihat
+                                </button>
+                              )}
                               <button className="btn btn-sm btn-outline-danger" title="Hapus" onClick={() => hapusSertifikasi(s._rowIndex)}>
                                 <i className="bi bi-trash"></i>
                               </button>
@@ -247,10 +262,10 @@ export default function DashboardPage() {
                         pendidikan.map((p, index) => (
                           <tr key={p._rowIndex || index}>
                             <td>{index + 1}</td>
-                            <td className="fw-bold text-primary">{p.tingkat}</td>
-                            <td>{p.institusi}</td>
+                            <td className="fw-bold text-primary">{p.tingkat_pendidikan}</td>
+                            <td>{p.nama_institusi}</td>
                             <td>{p.jurusan || '-'}</td>
-                            <td><span className="badge bg-secondary rounded-pill">{p.tahun}</span></td>
+                            <td><span className="badge bg-secondary rounded-pill">{p.tahun_lulus}</span></td>
                             <td>
                               <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPendidikan(p._rowIndex)}>
                                 <i className="bi bi-trash"></i>
@@ -290,6 +305,31 @@ export default function DashboardPage() {
           <p className="mb-0">&copy; 2026 Badan Kepegawaian Daerah. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Modal Preview Dokumen */}
+      {previewUrl && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 1055 }}>
+          <div className="modal-dialog modal-xl modal-dialog-centered" style={{ maxWidth: '95vw', height: '95vh', margin: 'auto' }}>
+            <div className="modal-content border-0 bg-transparent" style={{ height: '100%' }}>
+              <div className="modal-header border-0 d-flex justify-content-between align-items-center p-3 bg-dark text-white rounded-top">
+                <h5 className="modal-title fw-bold"><i className="bi bi-file-earmark-text me-2"></i> Pratinjau Dokumen Sertifikat</h5>
+                <button type="button" className="btn btn-danger px-4" onClick={() => setPreviewUrl(null)}>
+                  <i className="bi bi-arrow-left me-1"></i> Kembali
+                </button>
+              </div>
+              <div className="modal-body p-0 bg-light rounded-bottom" style={{ height: 'calc(100% - 60px)', overflow: 'hidden' }}>
+                {(previewUrl.startsWith('data:image') || previewUrl.match(/\.(jpeg|jpg|gif|png)$/i)) ? (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto', padding: '20px' }}>
+                    <img src={previewUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' }} alt="Sertifikat" />
+                  </div>
+                ) : (
+                  <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Dokumen Preview" />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

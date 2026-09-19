@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
 
 export default function SertifikasiPage() {
   const router = useRouter();
@@ -40,8 +39,15 @@ export default function SertifikasiPage() {
       return;
     }
     const fetchData = async () => {
-      const { data } = await supabase.from('pegawai').select('*').eq('nip', nip).single();
-      if (data) setPegawai(data);
+      try {
+        const res = await fetch(`/api/pegawai?nip=${nip}`);
+        const result = await res.json();
+        if (result.success && result.data?.pegawai) {
+          setPegawai(result.data.pegawai);
+        }
+      } catch (err) {
+        console.error('Failed to fetch data', err);
+      }
     };
     fetchData();
   }, [router]);
@@ -121,39 +127,28 @@ export default function SertifikasiPage() {
     setIsSubmitting(true);
     
     try {
+      const processedKegiatans = [];
+
       for (const k of kegiatans) {
         let finalUrl = k.preview;
         
         if (k.file) {
-          // UPLOAD KE SUPABASE STORAGE
-          const fileExt = k.file.name.split('.').pop();
-          const fileName = `${pegawai.nip}-${Date.now()}.${fileExt}`;
-          
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('dokumen')
-            .upload(fileName, k.file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-            
-          if (uploadError) {
-            console.error("Supabase upload error:", uploadError);
-            alert("Gagal mengupload dokumen: " + uploadError.message);
+          const formData = new FormData();
+          formData.append('file', k.file);
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+          const uploadData = await uploadRes.json();
+          if (!uploadRes.ok || !uploadData.success) {
+            alert("Gagal mengupload dokumen: " + (uploadData.error || 'Unknown error'));
             setIsSubmitting(false);
             return;
           }
-          
-          if (uploadData) {
-            const { data: publicUrlData } = supabase.storage
-              .from('dokumen')
-              .getPublicUrl(fileName);
-            finalUrl = publicUrlData.publicUrl;
-          }
+          finalUrl = uploadData.url;
         }
 
-        // SIMPAN DATA KE SUPABASE
-        const { error: insertError } = await supabase.from('sertifikasi').insert([{
-          nip: pegawai.nip,
+        processedKegiatans.push({
           jenis_sertifikasi: k.jenis_sertifikasi,
           jenis_kursus: k.jenis_kursus,
           nama_kursus: k.nama_kursus,
@@ -162,25 +157,27 @@ export default function SertifikasiPage() {
           nomor_sertifikasi: k.nomor_sertifikasi,
           tanggal_sertifikasi: `${k.tanggal_mulai} s.d ${k.tanggal_akhir}`,
           tahun: k.tahun,
-          jumlah_jp: parseInt(k.jumlah_jp),
+          jumlah_jp: parseInt(k.jumlah_jp) || 0,
           pejabat: k.pejabat,
           biaya: k.biaya_tipe,
           link_sertifikat: finalUrl
-        }]);
-
-        if (insertError) {
-          console.error("Supabase insert error:", insertError);
-          alert("Data gagal disimpan ke database: " + insertError.message);
-          setIsSubmitting(false);
-          return;
-        }
+        });
       }
-      
-      // Update total_jp di tabel pegawai
-      const { data: allSertif } = await supabase.from('sertifikasi').select('jumlah_jp').eq('nip', pegawai.nip);
-      if (allSertif) {
-        const totalJP = allSertif.reduce((sum, s) => sum + (s.jumlah_jp || 0), 0);
-        await supabase.from('pegawai').update({ total_jp: totalJP }).eq('nip', pegawai.nip);
+
+      const insertRes = await fetch('/api/sertifikasi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nip: pegawai.nip,
+          kegiatans: processedKegiatans
+        })
+      });
+
+      if (!insertRes.ok) {
+        const json = await insertRes.json();
+        alert("Data gagal disimpan ke database: " + (json.error || 'Unknown error'));
+        setIsSubmitting(false);
+        return;
       }
 
       router.push('/dashboard');

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
 
 export default function PendidikanPage() {
   const router = useRouter();
@@ -17,8 +16,9 @@ export default function PendidikanPage() {
       return;
     }
     const fetchData = async () => {
-      const { data } = await supabase.from('pegawai').select('*').eq('nip', nip).single();
-      if (data) setPegawai(data);
+      const res = await fetch(`/api/pegawai?nip=${nip}`);
+      const json = await res.json();
+      if (json.success && json.data?.pegawai) setPegawai(json.data.pegawai);
     };
     fetchData();
   }, [router]);
@@ -43,13 +43,19 @@ export default function PendidikanPage() {
     
     try {
       for (const p of pendidikans) {
-        await supabase.from('pendidikan').insert([{
-          nip: pegawai.nip,
-          tingkat: p.tingkat,
-          institusi: p.institusi,
-          jurusan: p.jurusan || null,
-          tahun: p.tahun_lulus
-        }]);
+        await fetch('/api/pendidikan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nip: pegawai.nip,
+            tingkat_pendidikan: p.tingkat,
+            nama_institusi: p.institusi,
+            jurusan: p.jurusan || '',
+            tahun_lulus: p.tahun_lulus,
+            nomor_ijazah: p.no_ijazah || '',
+            link_ijazah: ''
+          })
+        });
       }
       router.push('/dashboard');
     } catch (err) {
@@ -141,13 +147,9 @@ export default function PendidikanPage() {
                           <label className="form-label fw-medium small">Nomor Ijazah *</label>
                           <input type="text" className="form-control" placeholder="Masukkan nomor ijazah lengkap" required value={p.no_ijazah || ''} onChange={e => handleChange(p.id, 'no_ijazah', e.target.value)} />
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-6">
                           <label className="form-label fw-medium small">Tahun Lulus *</label>
                           <input type="number" className="form-control" placeholder="Contoh: 2018" required min="1950" max="2050" value={p.tahun_lulus || ''} onChange={e => handleChange(p.id, 'tahun_lulus', e.target.value)} />
-                        </div>
-                        <div className="col-md-8">
-                          <label className="form-label fw-medium small">Upload Scan Ijazah (PDF/JPG) * <small className="text-muted">(Maks. 2MB)</small></label>
-                          <input type="file" className="form-control" accept=".pdf, .jpg, .jpeg, .png" required />
                         </div>
                       </div>
                     </div>
