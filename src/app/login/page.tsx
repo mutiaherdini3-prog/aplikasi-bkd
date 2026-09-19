@@ -445,7 +445,8 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <div className="bupati-item">
-                    <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" />
+                    {/* Skala foto Wakil diturunkan sedikit (90%) agar tingginya sejajar dengan Bupati */}
+                    <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" style={{ width: '92%', transformOrigin: 'bottom' }} />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10 }}>
                         <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>WAKIL BUPATI BANGKA BARAT</p>
                         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>H. YUS DERAHMAN</h3>
