@@ -399,8 +399,21 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <div className="hero-image-container">
-                <img src="/img/bupati_new.jpg" alt="Bupati dan Wakil Bupati Bangka Barat" style={{ borderRadius: '10px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', width: '80%', height: 'auto', bottom: 'auto' }} />
+            <div className="hero-image-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '2rem', width: '90%', bottom: '10%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '45%' }}>
+                    <img src="/img/bupati1.png" alt="Bupati Bangka Barat" style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.4))' }} />
+                    <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Markus, S.H.</h3>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Bupati Bangka Barat</p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '45%' }}>
+                    <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.4))' }} />
+                    <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>H. Yus Derahman</h3>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Wakil Bupati Bangka Barat</p>
+                    </div>
+                </div>
             </div>
 
             {/* LOGOS BAND DIHAPUS KARENA GAMBAR BARU SUDAH MENGANDUNG LOGO */}
