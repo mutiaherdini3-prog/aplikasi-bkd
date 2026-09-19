@@ -264,6 +264,27 @@ export default function LoginPage() {
             object-fit: contain;
         }
 
+        /* KHUSUS FOTO BUPATI & WAKIL BARU */
+        .hero-image-container.new-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 1rem;
+            width: 60%;
+            z-index: 5;
+        }
+        .bupati-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 48%;
+        }
+        .bupati-item img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.4));
+        }
+
         /* Responsiveness: Tampilan Handphone & Tablet */
         @media (max-width: 1199px) {
             .login-container {
@@ -288,14 +309,24 @@ export default function LoginPage() {
             .hero-text h1 {
                 font-size: 2rem;
             }
-            .hero-image-container {
+            .hero-image-container.new-layout {
                 position: relative;
                 width: 100%;
                 flex: 1;
                 min-height: auto; /* Biarkan tinggi menyesuaikan foto */
                 bottom: 0;
-                margin-top: 1rem;
-                padding: 0 1rem; /* Jarak aman di HP */
+                margin-top: 2rem;
+                padding: 0; 
+                gap: 0.5rem; /* Rapatkan sedikit di HP */
+            }
+            .bupati-item {
+                width: 48%;
+            }
+            .bupati-item h3 {
+                font-size: 1rem !important;
+            }
+            .bupati-item p {
+                font-size: 0.75rem !important;
             }
             .hero-image-container > img {
                 object-position: bottom center; /* Posisikan bupati di tengah layar HP */
@@ -324,8 +355,8 @@ export default function LoginPage() {
             .hero-side {
                 order: -1;
                 flex-direction: column;
-                min-height: 450px;
-                padding: 0 2rem;
+                min-height: auto; /* Jangan paksa tinggi 450px */
+                padding: 0 1rem;
             }
             .hero-content {
                 max-width: 100%;
@@ -401,16 +432,16 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <div className="hero-image-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '1rem', width: '55%', zIndex: 5 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '48%' }}>
-                    <img src="/img/bupati1.png" alt="Bupati Bangka Barat" style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.4))' }} />
+            <div className="hero-image-container new-layout">
+                <div className="bupati-item">
+                    <img src="/img/bupati1.png" alt="Bupati Bangka Barat" />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10 }}>
                         <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>BUPATI BANGKA BARAT</p>
                         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>MARKUS, S.H.</h3>
                     </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '48%' }}>
-                    <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.4))' }} />
+                <div className="bupati-item">
+                    <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10 }}>
                         <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>WAKIL BUPATI BANGKA BARAT</p>
                         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>H. YUS DERAHMAN</h3>
