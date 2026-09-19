@@ -77,7 +77,7 @@ export default function LoginPage() {
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
       <style dangerouslySetInnerHTML={{__html: `
         body, html {
-            height: 100%;
+            min-height: 100vh;
             margin: 0;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: #ffffff;
@@ -295,8 +295,10 @@ export default function LoginPage() {
             .hero-side { 
                 display: flex; 
                 flex-direction: column;
-                min-height: auto; /* Dibuat auto agar tidak terlalu tinggi di HP */
+                min-height: auto;
                 padding: 0;
+                overflow: visible; /* Biarkan konten memanjang ke bawah */
+                flex: none; /* Jangan paksa berbagi ruang layar */
             }
             .hero-content {
                 position: relative; /* Buang posisi absolut */
@@ -345,7 +347,9 @@ export default function LoginPage() {
             .login-side {
                 width: 100%;
                 padding: 4rem 2rem;
-                border-radius: 0; /* Buang lengkungan samping */
+                border-radius: 0;
+                overflow-y: visible; /* Scroll dikembalikan ke body */
+                flex: none;
             }
         }
         @media (max-width: 991px) {
