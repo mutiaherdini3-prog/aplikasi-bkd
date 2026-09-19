@@ -274,7 +274,7 @@ export default function LoginPage() {
             .hero-side { 
                 display: flex; 
                 flex-direction: column;
-                min-height: 100vh; /* Layar pertama penuh dengan Hero */
+                min-height: auto; /* Dibuat auto agar tidak terlalu tinggi di HP */
                 padding: 0;
             }
             .hero-content {
@@ -291,9 +291,11 @@ export default function LoginPage() {
             .hero-image-container {
                 position: relative;
                 width: 100%;
-                flex: 1; /* Mengisi sisa ruang vertikal */
-                min-height: 350px; /* Minimal tinggi foto */
+                flex: 1;
+                min-height: auto; /* Biarkan tinggi menyesuaikan foto */
                 bottom: 0;
+                margin-top: 1rem;
+                padding: 0 1rem; /* Jarak aman di HP */
             }
             .hero-image-container > img {
                 object-position: bottom center; /* Posisikan bupati di tengah layar HP */
@@ -399,19 +401,19 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <div className="hero-image-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '2rem', width: '90%', bottom: '10%' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '45%' }}>
+            <div className="hero-image-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '1rem', width: '55%', zIndex: 5 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '48%' }}>
                     <img src="/img/bupati1.png" alt="Bupati Bangka Barat" style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.4))' }} />
-                    <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white' }}>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>BUPATI BANGKA BARAT</p>
-                        <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>MARKUS, S.H.</h3>
+                    <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10 }}>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>BUPATI BANGKA BARAT</p>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>MARKUS, S.H.</h3>
                     </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '45%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '48%' }}>
                     <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.4))' }} />
-                    <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white' }}>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>WAKIL BUPATI BANGKA BARAT</p>
-                        <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>H. YUS DERAHMAN</h3>
+                    <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10 }}>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>WAKIL BUPATI BANGKA BARAT</p>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>H. YUS DERAHMAN</h3>
                     </div>
                 </div>
             </div>
