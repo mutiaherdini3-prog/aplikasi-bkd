@@ -68,8 +68,9 @@ export default function AdminPage() {
     if (docUrl.includes('/view?url=')) {
       docUrl = decodeURIComponent(docUrl.split('/view?url=')[1]);
     }
-    if (docUrl.includes('drive.google.com') && docUrl.includes('/view')) {
-      docUrl = docUrl.replace('/view?usp=drivesdk', '/preview').replace('/view', '/preview');
+    if (docUrl.includes('drive.google.com')) {
+      window.open(docUrl, '_blank');
+      return;
     }
     setPreviewUrl(docUrl);
   };
