@@ -135,7 +135,8 @@ export default function AdminPage() {
           }
 
           // Bungkus dengan /view agar link dari Excel membuka custom viewer (ada tombol Kembalinya)
-          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=')) {
+          // KECUALI untuk link Google Drive agar langsung membuka Drive asli.
+          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
             linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
           }
 
