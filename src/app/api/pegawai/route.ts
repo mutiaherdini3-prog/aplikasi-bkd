@@ -14,11 +14,16 @@ export async function DELETE(request: Request) {
     const pSheet = sheetInfo.data.sheets?.find(s => s.properties?.title === 'pegawai');
     const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
     const pRows = pRes.data.values || [];
+    const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
+    const nipIdx = pHeaders.indexOf('nip');
+    
     let pRowIndex = -1;
-    for (let i = 1; i < pRows.length; i++) {
-      if (pRows[i][0] && pRows[i][0].toString().trim() === nip.trim()) {
-        pRowIndex = i;
-        break;
+    if (nipIdx !== -1) {
+      for (let i = 1; i < pRows.length; i++) {
+        if (pRows[i][nipIdx] && pRows[i][nipIdx].toString().trim() === nip.trim()) {
+          pRowIndex = i;
+          break;
+        }
       }
     }
     
