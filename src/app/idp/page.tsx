@@ -173,7 +173,7 @@ export default function IDPPage() {
           <div className="col-lg-6">
             <div className="breadcrumb-text"><strong>IDP</strong> &nbsp;|&nbsp; Home &gt; Layanan ASN &gt; Update Data &gt; Individual Development Plan (IDP)</div>
             <div className="card card-custom p-4">
-              <h5 className="fw-bold text-primary mb-4 border-bottom pb-2"><i className="bi bi-calendar2-check-fill me-2"></i> INDIVIDUAL DEVELOPMENT PLAN (IDP)</h5>
+              <h5 className="fw-bold text-primary mb-4 border-bottom pb-2"><i className="bi bi-calendar2-check-fill me-2"></i> Individual Development Plan (IDP)</h5>
 
               <form onSubmit={handleSubmit}>
                 <div className="card mb-4 border-0 bg-primary bg-opacity-10">

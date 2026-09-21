@@ -310,7 +310,7 @@ export default function DashboardPage() {
 
                 <a onClick={() => router.push('/idp')} className="menu-card mb-3 text-decoration-none">
                   <div className="menu-icon"><i className="bi bi-calendar2-check-fill"></i></div>
-                  <div className="menu-title">INDIVIDUAL DEVELOPMENT PLAN (IDP)</div>
+                  <div className="menu-title">Individual Development Plan (IDP)</div>
                   <div className="menu-desc">Penyusunan rencana pengembangan kompetensi individu.</div>
                 </a>
               </div>
