@@ -93,7 +93,7 @@ export default function EditProfilPage() {
       if (data.success) {
         let directUrl = data.url;
         if (data.fileId) {
-          directUrl = `https://drive.google.com/uc?export=view&id=${data.fileId}`;
+          directUrl = `https://drive.google.com/thumbnail?id=${data.fileId}&sz=w500`;
         }
         setFormData({ ...formData, foto_profil: directUrl });
       } else {
@@ -104,6 +104,14 @@ export default function EditProfilPage() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('drive.google.com/uc?export=view&id=')) {
+      return url.replace('uc?export=view&id=', 'thumbnail?id=') + '&sz=w500';
+    }
+    return url;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -189,7 +197,7 @@ export default function EditProfilPage() {
                       onClick={() => fileInputRef.current?.click()}
                     >
                       {formData.foto_profil ? (
-                        <img src={formData.foto_profil} alt="Foto Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={getImageUrl(formData.foto_profil)} alt="Foto Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
                         <i className="bi bi-person text-secondary" style={{ fontSize: '4rem' }}></i>
                       )}

@@ -116,7 +116,11 @@ export default function DashboardPage() {
           {/* Banner */}
           <div className="profile-banner">
             {pegawai?.foto_profil ? (
-              <img src={pegawai.foto_profil} alt="Foto Profil" className="profile-img-large" />
+              <img 
+                src={pegawai.foto_profil.includes('drive.google.com/uc?export=view&id=') ? pegawai.foto_profil.replace('uc?export=view&id=', 'thumbnail?id=') + '&sz=w500' : pegawai.foto_profil} 
+                alt="Foto Profil" 
+                className="profile-img-large" 
+              />
             ) : (
               <div className="profile-img-large">
                 <i className="bi bi-person"></i>
