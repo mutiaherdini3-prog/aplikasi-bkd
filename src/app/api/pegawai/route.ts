@@ -15,6 +15,80 @@ const getColumnName = (n: number) => {
   return s;
 };
 
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif } = body;
+    
+    if (!nip || !nama) return NextResponse.json({ success: false, message: 'NIP and Nama are required' }, { status: 400 });
+
+    const sheets = getGoogleSheets();
+    
+    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
+    const pRows = pRes.data.values || [];
+    
+    let pHeaders = [];
+    if (pRows.length > 0) {
+      pHeaders = pRows[0].map((h: string) => h.toLowerCase());
+    } else {
+      pHeaders = ['nip', 'password', 'nama', 'status pegawai', 'pangkat', 'golongan ', 'jankel', 'jabatan', 'unit kerja', 'jumlah jp', 'status aktif'];
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: 'pegawai!A1:K1',
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [pHeaders] }
+      });
+    }
+
+    // Check if NIP already exists
+    const nipIdx = pHeaders.indexOf('nip');
+    if (nipIdx !== -1) {
+      for (let i = 1; i < pRows.length; i++) {
+        if (pRows[i][nipIdx]?.trim() === nip.trim()) {
+          return NextResponse.json({ success: false, message: 'NIP sudah terdaftar' }, { status: 400 });
+        }
+      }
+    }
+
+    const newRow = new Array(pHeaders.length).fill('');
+    
+    const setVal = (field: string, val: string) => {
+      const idx = pHeaders.indexOf(field);
+      if (idx !== -1) newRow[idx] = val || '';
+    };
+
+    setVal('nip', nip);
+    setVal('password', password || '123456');
+    setVal('nama', nama);
+    setVal('status pegawai', status_pegawai);
+    setVal('pangkat', pangkat);
+    setVal('golongan ', golongan);
+    setVal('jankel', jenkel);
+    setVal('jabatan', jabatan);
+    setVal('unit kerja', unit_kerja);
+    setVal('jumlah jp', '0');
+    
+    let statusAktifIdx = pHeaders.indexOf('status aktif');
+    if (statusAktifIdx === -1) {
+      statusAktifIdx = pHeaders.length;
+      pHeaders.push('status aktif');
+      // We don't update header row in sheet immediately, but it's fine since append will just add to column K
+    }
+    newRow[statusAktifIdx] = status_aktif || 'Aktif';
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: GOOGLE_SHEET_ID,
+      range: 'pegawai!A:Z',
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [newRow] }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (e: any) {
+    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -80,10 +154,59 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const nip = searchParams.get('nip');
-    if (!nip) return NextResponse.json({ success: false }, { status: 400 });
+    const ketuaNip = searchParams.get('ketua_nip');
+    
+    if (!nip && !ketuaNip) return NextResponse.json({ success: false, message: 'NIP required' }, { status: 400 });
 
     const sheets = getGoogleSheets();
     
+    if (ketuaNip) {
+      // Hanya fetch IDP bawahan untuk ketua ini
+      let idpBawahan: any[] = [];
+      try {
+        const iRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'idp!A:Z' });
+        const iRows = iRes.data.values || [];
+        const iHeaders = iRows[0]?.map(h => h.toLowerCase()) || [];
+        const ketuaNipIdx = iHeaders.indexOf('nip_ketua');
+        
+        if (ketuaNipIdx !== -1) {
+          for (let i = 1; i < iRows.length; i++) {
+            if (iRows[i][ketuaNipIdx]?.trim() === ketuaNip.trim()) {
+              const row: any = { _rowIndex: i + 1 };
+              iHeaders.forEach((h, idx) => {
+                row[h] = iRows[i][idx] || '';
+              });
+              idpBawahan.push(row);
+            }
+          }
+        }
+        
+        // Populate nama pegawai for each IDP
+        const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
+        const pRows = pRes.data.values || [];
+        const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
+        const pNipIdx = pHeaders.indexOf('nip');
+        const pNamaIdx = pHeaders.indexOf('nama');
+        
+        if (pNipIdx !== -1 && pNamaIdx !== -1) {
+           const nipToNama: Record<string, string> = {};
+           for (let i = 1; i < pRows.length; i++) {
+             nipToNama[pRows[i][pNipIdx]] = pRows[i][pNamaIdx];
+           }
+           idpBawahan = idpBawahan.map(idp => ({
+             ...idp,
+             nama_pegawai: nipToNama[idp.nip] || 'Unknown'
+           }));
+        }
+
+        return NextResponse.json({ success: true, data: idpBawahan });
+      } catch(e) {
+        return NextResponse.json({ success: false, error: 'Failed to fetch IDP bawahan' }, { status: 500 });
+      }
+    }
+    
+    if (!nip) return NextResponse.json({ success: false, message: 'NIP required' }, { status: 400 });
+
     // Pegawai
     let pegawaiData = null;
     const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
@@ -101,6 +224,7 @@ export async function GET(request: Request) {
             if (key === 'unit kerja') key = 'unit_kerja';
             if (key === 'golongan ') key = 'golongan';
             if (key === 'foto profil') key = 'foto_profil';
+            if (key === 'status aktif') key = 'status_aktif';
             pegawaiData[key] = pRows[i][idx] || '';
           });
           break;
@@ -179,7 +303,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja } = body;
+    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif } = body;
     if (!nip) return NextResponse.json({ success: false }, { status: 400 });
 
     const sheets = getGoogleSheets();
@@ -222,6 +346,18 @@ export async function PUT(request: Request) {
     updateField('jankel', jenkel);
     updateField('jabatan', jabatan);
     updateField('unit kerja', unit_kerja);
+    
+    // Status Aktif
+    if (status_aktif !== undefined) {
+      let statusAktifIdx = pHeaders.indexOf('status aktif');
+      if (statusAktifIdx === -1) {
+        statusAktifIdx = pHeaders.length;
+        pHeaders.push('status aktif');
+        pRows[0].push('status aktif');
+      }
+      while (newRow.length <= statusAktifIdx) newRow.push('');
+      newRow[statusAktifIdx] = status_aktif;
+    }
 
     const foto_profil = body.foto_profil;
     let headersUpdated = false;

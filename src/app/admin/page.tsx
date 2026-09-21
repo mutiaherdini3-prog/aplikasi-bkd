@@ -10,6 +10,12 @@ export default function AdminPage() {
   const [pegawaiList, setPegawaiList] = useState<any[]>([]);
   const [selectedPegawai, setSelectedPegawai] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showPegawaiModal, setShowPegawaiModal] = useState(false);
+  const [pegawaiForm, setPegawaiForm] = useState<any>({});
+  const [showIdpModal, setShowIdpModal] = useState(false);
+  const [idpForm, setIdpForm] = useState<any>({});
+  const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
+  
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'PNS' | 'PPPK' | 'PW'>('all');
@@ -29,6 +35,12 @@ export default function AdminPage() {
         const json = await res.json();
         if (json.success && json.data) {
           setRawPegawaiList(json.data);
+        }
+        
+        const resAll = await fetch('/api/pegawai/all');
+        const jsonAll = await resAll.json();
+        if (jsonAll.success) {
+          setSemuaPegawai(jsonAll.data);
         }
       } catch (err) {
         console.error('Failed to fetch data', err);
@@ -54,6 +66,62 @@ export default function AdminPage() {
         const res = await fetch(`/api/pegawai?nip=${nip}`, { method: 'DELETE' });
         if (res.ok) window.location.reload();
         else alert('Gagal menghapus pegawai');
+      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+    }
+  };
+
+  const handleSavePegawai = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const method = pegawaiForm.isEdit ? 'PUT' : 'POST';
+      const res = await fetch('/api/pegawai', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pegawaiForm)
+      });
+      const json = await res.json();
+      if (json.success) window.location.reload();
+      else alert('Gagal menyimpan data pegawai: ' + (json.message || json.error));
+    } catch(e) {
+      alert('Terjadi kesalahan');
+    }
+  };
+
+  const handleSaveIdp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (idpForm.isEdit) {
+        // Edit IDP
+        const res = await fetch(`/api/idp?rowIndex=${idpForm._rowIndex}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(idpForm)
+        });
+        const json = await res.json();
+        if (json.success) window.location.reload();
+        else alert('Gagal mengedit IDP: ' + (json.message || json.error));
+      } else {
+        // Tambah IDP
+        const res = await fetch(`/api/idp?nip=${idpForm.nip}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([idpForm]) // POST expects array
+        });
+        const json = await res.json();
+        if (json.success) window.location.reload();
+        else alert('Gagal menambah IDP: ' + (json.message || json.error));
+      }
+    } catch(e) {
+      alert('Terjadi kesalahan');
+    }
+  };
+
+  const hapusIdp = async (rowIndex: number) => {
+    if (confirm('Yakin ingin menghapus pengajuan IDP ini?')) {
+      try {
+        const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
+        if (res.ok) window.location.reload();
+        else alert('Gagal menghapus IDP');
       } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
   };
@@ -407,6 +475,12 @@ export default function AdminPage() {
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
                     <div className="d-flex gap-2">
+                      <button className="btn btn-sm btn-primary" onClick={() => {
+                        setPegawaiForm({ isEdit: false, password: 'password123', status_aktif: 'Aktif', jp: 0 });
+                        setShowPegawaiModal(true);
+                      }}>
+                        <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
+                      </button>
                       <button 
                         className="btn btn-sm btn-success"
                         onClick={exportToExcel}
@@ -423,11 +497,11 @@ export default function AdminPage() {
                           <th>No</th>
                           <th>NIP</th>
                           <th>Nama Pegawai</th>
-                          <th>Status</th>
+                          <th>Status Aktif</th>
                           <th>Jabatan</th>
                           <th>Unit Kerja</th>
                           <th className="text-center">Total JP</th>
-                          <th className="text-center">Sertifikat</th>
+                          <th className="text-center">Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -436,12 +510,16 @@ export default function AdminPage() {
                             <td>{index + 1}</td>
                             <td>{p.nip}</td>
                             <td className="fw-bold">{p.nama || '-'}</td>
-                            <td>{p.status_pegawai || '-'}</td>
+                            <td>{p.status_aktif || 'Aktif'}</td>
                             <td>{p.jabatan || '-'}</td>
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
                             <td className="text-center">
-                              <button className="btn btn-sm btn-outline-primary me-2" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>Lihat Dokumen</button>
+                              <button className="btn btn-sm btn-outline-info me-1" title="Lihat Profil" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}><i className="bi bi-eye"></i></button>
+                              <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
+                                setPegawaiForm({ ...p, isEdit: true });
+                                setShowPegawaiModal(true);
+                              }}><i className="bi bi-pencil"></i></button>
                               <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
                             </td>
                           </tr>
@@ -510,7 +588,15 @@ export default function AdminPage() {
                   <div className="alert alert-warning mb-4">
                     <i className="bi bi-info-circle-fill me-2"></i> Modul ini masih dalam tahap pengembangan. Integrasi API untuk IDP belum sepenuhnya selesai. Ini adalah pratinjau tampilan tabel verifikasi.
                   </div>
-                  <h5 className="fw-bold mb-4">Daftar Pengajuan IDP Pegawai</h5>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="fw-bold mb-0">Daftar Pengajuan IDP Pegawai</h5>
+                    <button className="btn btn-sm btn-primary" onClick={() => {
+                      setIdpForm({ isEdit: false });
+                      setShowIdpModal(true);
+                    }}>
+                      <i className="bi bi-plus-lg me-1"></i> Tambah IDP
+                    </button>
+                  </div>
                   <div className="table-responsive">
                     <table className="table table-hover align-middle" style={{fontSize: '0.85rem'}}>
                       <thead className="table-light">
@@ -524,6 +610,7 @@ export default function AdminPage() {
                           <th>JP</th>
                           <th>Status</th>
                           <th className="text-center">Aksi Verifikasi</th>
+                          <th className="text-center">Aksi Admin</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -543,17 +630,25 @@ export default function AdminPage() {
                               <td>
                                 {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
                                  idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
-                                 <span className="badge bg-warning text-dark">Menunggu Persetujuan</span>}
+                                 idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua</span> :
+                                 <span className="badge bg-warning text-dark">Menunggu Ketua</span>}
                               </td>
                               <td className="text-center">
-                                {idp.status === 'Menunggu Persetujuan' ? (
+                                {idp.status === 'Menunggu Persetujuan Admin' ? (
                                   <>
-                                    <button className="btn btn-sm btn-success me-1" title="Setujui" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
+                                    <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
                                     <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
                                   </>
                                 ) : (
                                   <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
                                 )}
+                              </td>
+                              <td className="text-center">
+                                <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
+                                  setIdpForm({ ...idp, nip: p.nip, isEdit: true });
+                                  setShowIdpModal(true);
+                                }}><i className="bi bi-pencil"></i></button>
+                                <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex)}><i className="bi bi-trash"></i></button>
                               </td>
                             </tr>
                           ));
@@ -562,7 +657,7 @@ export default function AdminPage() {
                         {/* Jika kosong semua */}
                         {pegawaiList.flatMap(p => p.idp || []).length === 0 && (
                           <tr>
-                            <td colSpan={9} className="text-center text-muted py-4">Belum ada pengajuan IDP dari pegawai.</td>
+                            <td colSpan={10} className="text-center text-muted py-4">Belum ada pengajuan IDP dari pegawai.</td>
                           </tr>
                         )}
                       </tbody>
@@ -635,6 +730,165 @@ export default function AdminPage() {
               <div className="modal-footer border-0 bg-light">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Tutup</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Form Pegawai */}
+      {showPegawaiModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header bg-primary text-white border-0">
+                <h5 className="modal-title fw-bold"><i className="bi bi-person me-2"></i> {pegawaiForm.isEdit ? 'Edit Pegawai' : 'Tambah Pegawai'}</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowPegawaiModal(false)}></button>
+              </div>
+              <form onSubmit={handleSavePegawai}>
+                <div className="modal-body p-4 bg-light">
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label">NIP *</label>
+                      <input type="text" className="form-control" required value={pegawaiForm.nip || ''} onChange={e => setPegawaiForm({...pegawaiForm, nip: e.target.value})} disabled={pegawaiForm.isEdit} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Nama Lengkap *</label>
+                      <input type="text" className="form-control" required value={pegawaiForm.nama || ''} onChange={e => setPegawaiForm({...pegawaiForm, nama: e.target.value})} />
+                    </div>
+                    {!pegawaiForm.isEdit && (
+                      <div className="col-md-6">
+                        <label className="form-label">Password Default *</label>
+                        <input type="text" className="form-control" required value={pegawaiForm.password || ''} onChange={e => setPegawaiForm({...pegawaiForm, password: e.target.value})} />
+                      </div>
+                    )}
+                    <div className="col-md-6">
+                      <label className="form-label">Status Pegawai</label>
+                      <select className="form-select" value={pegawaiForm.status_pegawai || ''} onChange={e => setPegawaiForm({...pegawaiForm, status_pegawai: e.target.value})}>
+                        <option value="">- Pilih -</option>
+                        <option value="PNS">PNS</option>
+                        <option value="P3K">P3K</option>
+                        <option value="PW">PW</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Pangkat</label>
+                      <input type="text" className="form-control" value={pegawaiForm.pangkat || ''} onChange={e => setPegawaiForm({...pegawaiForm, pangkat: e.target.value})} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Golongan</label>
+                      <input type="text" className="form-control" value={pegawaiForm.golongan || ''} onChange={e => setPegawaiForm({...pegawaiForm, golongan: e.target.value})} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Jabatan</label>
+                      <input type="text" className="form-control" value={pegawaiForm.jabatan || ''} onChange={e => setPegawaiForm({...pegawaiForm, jabatan: e.target.value})} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Unit Kerja</label>
+                      <input type="text" className="form-control" value={pegawaiForm.unit_kerja || ''} onChange={e => setPegawaiForm({...pegawaiForm, unit_kerja: e.target.value})} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Status Aktif</label>
+                      <select className="form-select" value={pegawaiForm.status_aktif || 'Aktif'} onChange={e => setPegawaiForm({...pegawaiForm, status_aktif: e.target.value})}>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Tidak Aktif">Tidak Aktif</option>
+                        <option value="Mutasi">Mutasi</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer border-0 bg-light">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowPegawaiModal(false)}>Batal</button>
+                  <button type="submit" className="btn btn-primary">Simpan</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Form IDP */}
+      {showIdpModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header bg-primary text-white border-0">
+                <h5 className="modal-title fw-bold"><i className="bi bi-calendar2-check me-2"></i> {idpForm.isEdit ? 'Edit IDP' : 'Tambah IDP'}</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowIdpModal(false)}></button>
+              </div>
+              <form onSubmit={handleSaveIdp}>
+                <div className="modal-body p-4 bg-light">
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label">Pegawai Pemilik IDP *</label>
+                      <select className="form-select" required value={idpForm.nip || ''} onChange={e => setIdpForm({...idpForm, nip: e.target.value})}>
+                        <option value="">- Pilih Pegawai -</option>
+                        {semuaPegawai.map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Atasan / Ketua Penilai *</label>
+                      <select className="form-select" required value={idpForm.nip_ketua || ''} onChange={e => {
+                        const selected = semuaPegawai.find(p => p.nip === e.target.value);
+                        setIdpForm({...idpForm, nip_ketua: selected?.nip, nama_ketua: selected?.nama});
+                      }}>
+                        <option value="">- Pilih Atasan -</option>
+                        {semuaPegawai.filter(p => p.nip !== idpForm.nip).map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
+                      </select>
+                    </div>
+                    <div className="col-md-12"><hr/></div>
+                    <div className="col-md-6">
+                      <label className="form-label">Jenis Kompetensi *</label>
+                      <input type="text" className="form-control" required value={idpForm.jenis_kompetensi || ''} onChange={e => setIdpForm({...idpForm, jenis_kompetensi: e.target.value})} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Jenis Pengembangan *</label>
+                      <select className="form-select" required value={idpForm.jenis_pengembangan || ''} onChange={e => setIdpForm({...idpForm, jenis_pengembangan: e.target.value})}>
+                        <option value="">- Pilih -</option>
+                        <option value="Pelatihan Non Klasikal">Pelatihan Non Klasikal</option>
+                        <option value="Pelatihan Klasikal">Pelatihan Klasikal</option>
+                        <option value="Blended Learning">Blended Learning</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Jalur Pengembangan *</label>
+                      <input type="text" className="form-control" required value={idpForm.jalur_pengembangan || ''} onChange={e => setIdpForm({...idpForm, jalur_pengembangan: e.target.value})} />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Penyelenggara *</label>
+                      <input type="text" className="form-control" required value={idpForm.penyelenggara || ''} onChange={e => setIdpForm({...idpForm, penyelenggara: e.target.value})} />
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">Waktu Awal *</label>
+                      <input type="date" className="form-control" required value={idpForm.waktu_pelaksanaan_awal || ''} onChange={e => setIdpForm({...idpForm, waktu_pelaksanaan_awal: e.target.value})} />
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">Waktu Akhir *</label>
+                      <input type="date" className="form-control" required value={idpForm.waktu_pelaksanaan_akhir || ''} onChange={e => setIdpForm({...idpForm, waktu_pelaksanaan_akhir: e.target.value})} />
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">JP *</label>
+                      <input type="number" className="form-control" required value={idpForm.jp || ''} onChange={e => setIdpForm({...idpForm, jp: e.target.value})} />
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">Anggaran</label>
+                      <input type="number" className="form-control" value={idpForm.anggaran || ''} onChange={e => setIdpForm({...idpForm, anggaran: e.target.value})} />
+                    </div>
+                    <div className="col-md-12">
+                      <label className="form-label">Status Verifikasi</label>
+                      <select className="form-select" value={idpForm.status || 'Menunggu Persetujuan Ketua'} onChange={e => setIdpForm({...idpForm, status: e.target.value})}>
+                        <option value="Menunggu Persetujuan Ketua">Menunggu Persetujuan Ketua</option>
+                        <option value="Menunggu Persetujuan Admin">Menunggu Persetujuan Admin (Disetujui Ketua)</option>
+                        <option value="Disetujui">Disetujui Final</option>
+                        <option value="Ditolak">Ditolak</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer border-0 bg-light">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowIdpModal(false)}>Batal</button>
+                  <button type="submit" className="btn btn-primary">Simpan</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

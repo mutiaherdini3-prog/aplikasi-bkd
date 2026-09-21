@@ -6,6 +6,10 @@ import { useRouter } from 'next/navigation';
 export default function IDPPage() {
   const router = useRouter();
   const [pegawai, setPegawai] = useState<any>(null);
+  const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
+  const [selectedKetua, setSelectedKetua] = useState<{nip: string, nama: string} | null>(null);
+  const [searchKetua, setSearchKetua] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const [idps, setIdps] = useState<any[]>([{ 
     id: 1, 
@@ -35,6 +39,13 @@ export default function IDPPage() {
         const result = await res.json();
         if (result.success && result.data?.pegawai) {
           setPegawai(result.data.pegawai);
+        }
+
+        const resAll = await fetch('/api/pegawai/all');
+        const resultAll = await resAll.json();
+        if (resultAll.success) {
+          // Exclude self from ketua options
+          setSemuaPegawai(resultAll.data.filter((p: any) => p.nip !== nip));
         }
       } catch (err) {
         console.error('Failed to fetch data', err);
@@ -74,15 +85,26 @@ export default function IDPPage() {
         return;
       }
     }
+    if (!selectedKetua) {
+      alert("Silakan pilih Atasan (Ketua) terlebih dahulu!");
+      return;
+    }
 
     if (!pegawai) return;
     setIsSubmitting(true);
     
+    // Inject ketua info into each IDP row
+    const idpsWithKetua = idps.map(k => ({
+      ...k,
+      nip_ketua: selectedKetua.nip,
+      nama_ketua: selectedKetua.nama
+    }));
+
     try {
       const res = await fetch(`/api/idp?nip=${pegawai.nip}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(idps)
+        body: JSON.stringify(idpsWithKetua)
       });
       
       const json = await res.json();
@@ -133,6 +155,10 @@ export default function IDPPage() {
         .info-dot { position: absolute; left: -20px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background-color: #0ea5e9; color: white; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .info-title { font-weight: 600; font-size: 0.85rem; color: #0ea5e9; margin-bottom: 2px; }
         .info-desc { font-size: 0.75rem; color: #64748b; line-height: 1.4; }
+        .dropdown-menu-custom { position: absolute; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto; background-color: #fff; border: 1px solid #bae6fd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 4px; padding: 0; }
+        .dropdown-item-custom { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; }
+        .dropdown-item-custom:hover { background-color: #f0f9ff; }
+        .dropdown-item-custom:last-child { border-bottom: none; }
       `}} />
 
       <nav className="navbar-top d-flex justify-content-between align-items-center">
@@ -190,6 +216,54 @@ export default function IDPPage() {
                         <label className="form-label small text-muted mb-0">Jabatan</label>
                         <input type="text" className="form-control form-control-sm bg-transparent border-0 fw-bold px-0" readOnly value={pegawai?.jabatan || ''} />
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card mb-4 border-0 shadow-sm" style={{ backgroundColor: '#fff' }}>
+                  <div className="card-body">
+                    <h6 className="fw-bold text-dark mb-3"><i className="bi bi-person-check-fill text-primary me-2"></i>Pilih Atasan (Ketua) Penilai</h6>
+                    <div className="position-relative">
+                      {selectedKetua ? (
+                        <div className="d-flex align-items-center p-2 border rounded bg-light border-primary">
+                          <div className="me-auto">
+                            <div className="fw-bold text-dark">{selectedKetua.nama}</div>
+                            <div className="text-muted" style={{fontSize: '0.8rem'}}>NIP. {selectedKetua.nip}</div>
+                          </div>
+                          <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => { setSelectedKetua(null); setSearchKetua(''); }}>
+                            <i className="bi bi-x-lg"></i> Ganti
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <input 
+                            type="text" 
+                            className="form-control" 
+                            placeholder="Cari nama atau NIP ketua..." 
+                            value={searchKetua}
+                            onChange={(e) => { setSearchKetua(e.target.value); setIsDropdownOpen(true); }}
+                            onFocus={() => setIsDropdownOpen(true)}
+                          />
+                          {isDropdownOpen && searchKetua.length > 0 && (
+                            <div className="dropdown-menu-custom">
+                              {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || p.nip.includes(searchKetua)).slice(0, 10).map(p => (
+                                <div key={p.nip} className="dropdown-item-custom" onClick={() => {
+                                  setSelectedKetua({ nip: p.nip, nama: p.nama });
+                                  setIsDropdownOpen(false);
+                                  setSearchKetua('');
+                                }}>
+                                  <div className="fw-bold">{p.nama}</div>
+                                  <div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {p.nip} {p.jabatan ? `- ${p.jabatan}` : ''}</div>
+                                </div>
+                              ))}
+                              {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || p.nip.includes(searchKetua)).length === 0 && (
+                                <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Ketua tidak ditemukan</div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      <div className="form-text text-muted" style={{fontSize: '0.75rem'}}>IDP ini akan diteruskan ke atasan yang dipilih untuk disetujui.</div>
                     </div>
                   </div>
                 </div>

@@ -9,6 +9,7 @@ export default function DashboardPage() {
   const [sertifikasi, setSertifikasi] = useState<any[]>([]);
   const [pendidikan, setPendidikan] = useState<any[]>([]);
   const [idpList, setIdpList] = useState<any[]>([]);
+  const [idpBawahan, setIdpBawahan] = useState<any[]>([]);
   const [totalJP, setTotalJP] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -38,6 +39,12 @@ export default function DashboardPage() {
           }
           if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
           if (result.data.idp) setIdpList(result.data.idp);
+        }
+
+        const resBawahan = await fetch(`/api/pegawai?ketua_nip=${nip}`);
+        const resultBawahan = await resBawahan.json();
+        if (resultBawahan.success && resultBawahan.data) {
+          setIdpBawahan(resultBawahan.data);
         }
       } catch (error) {
         console.error('Failed to fetch', error);
@@ -69,6 +76,21 @@ export default function DashboardPage() {
         if (res.ok) window.location.reload();
         else alert('Gagal menghapus pendidikan');
       } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+    }
+  };
+
+  const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
+    if (confirm(`Yakin ingin mengubah status menjadi ${status}?`)) {
+      try {
+        const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(status)}`, { method: 'PUT' });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          alert('Gagal memperbarui status');
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan saat memperbarui status');
+      }
     }
   };
 
@@ -324,9 +346,11 @@ export default function DashboardPage() {
                             <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
                             <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
                             <td>
-                              {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
+                              {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui Final</span> :
+                               idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua, Menunggu Admin</span> :
+                               idp.status === 'Menunggu Persetujuan Ketua' ? <span className="badge bg-warning text-dark">Menunggu Persetujuan Ketua</span> :
                                idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
-                               <span className="badge bg-warning text-dark">Menunggu Persetujuan</span>}
+                               <span className="badge bg-secondary">{idp.status}</span>}
                             </td>
                           </tr>
                         ))
@@ -334,6 +358,51 @@ export default function DashboardPage() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Approval IDP Bawahan */}
+                {idpBawahan.length > 0 && (
+                  <>
+                    <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
+                      <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan</h5>
+                    </div>
+                    
+                    <div className="table-responsive border rounded-3 bg-white mb-4 border-success">
+                      <table className="table table-hover mb-0" style={{ fontSize: '0.9rem' }}>
+                        <thead className="bg-success text-white">
+                          <tr>
+                            <th>No</th>
+                            <th>Nama Pegawai</th>
+                            <th>Pengembangan</th>
+                            <th>Pelaksanaan</th>
+                            <th>JP</th>
+                            <th className="text-center">Aksi (Ketua)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {idpBawahan.map((idp, index) => (
+                            <tr key={index}>
+                              <td>{index + 1}</td>
+                              <td><div className="fw-bold text-dark">{idp.nama_pegawai}</div><div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {idp.nip}</div></td>
+                              <td>{idp.jenis_pengembangan} <br/><span className="text-muted" style={{fontSize: '0.8rem'}}>{idp.jalur_pengembangan}</span></td>
+                              <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
+                              <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
+                              <td className="text-center">
+                                {idp.status === 'Menunggu Persetujuan Ketua' ? (
+                                  <>
+                                    <button className="btn btn-sm btn-success me-1" title="Setujui IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Menunggu Persetujuan Admin')}><i className="bi bi-check-lg"></i> Setujui</button>
+                                    <button className="btn btn-sm btn-danger" title="Tolak IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i> Tolak</button>
+                                  </>
+                                ) : (
+                                  <span className={`badge ${idp.status === 'Ditolak' ? 'bg-danger' : 'bg-info'}`}>{idp.status === 'Ditolak' ? 'Ditolak' : 'Telah Disetujui'}</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Sidebar Menu Interaktif */}
