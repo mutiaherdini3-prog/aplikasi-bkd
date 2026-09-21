@@ -89,6 +89,7 @@ export default function AdminPage() {
     if (activeTab === 'view-dashboard') return 'Overview Kelulusan 20 JP Pegawai';
     if (activeTab === 'view-pegawai') return 'Manajemen Data Pegawai';
     if (activeTab === 'view-sertifikasi') return 'Manajemen Rekap Sertifikasi';
+    if (activeTab === 'view-idp') return 'Approval Individual Development Plan (IDP)';
     return '';
   };
 
@@ -229,6 +230,7 @@ export default function AdminPage() {
               <li><a onClick={() => setActiveTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
               <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai</a></li>
               <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
+              <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
               <li className="mt-5"><a onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-left"></i> Logout</a></li>
             </ul>
           </div>
@@ -482,6 +484,63 @@ export default function AdminPage() {
                             </tr>
                           ));
                         })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* APPROVAL IDP TAB */}
+              {activeTab === 'view-idp' && (
+                <div className="table-card">
+                  <div className="alert alert-warning mb-4">
+                    <i className="bi bi-info-circle-fill me-2"></i> Modul ini masih dalam tahap pengembangan. Integrasi API untuk IDP belum sepenuhnya selesai. Ini adalah pratinjau tampilan tabel verifikasi.
+                  </div>
+                  <h5 className="fw-bold mb-4">Daftar Pengajuan IDP Pegawai</h5>
+                  <div className="table-responsive">
+                    <table className="table table-hover align-middle" style={{fontSize: '0.85rem'}}>
+                      <thead className="table-light">
+                        <tr>
+                          <th>No</th>
+                          <th>Nama Pegawai</th>
+                          <th>Jenis Kompetensi</th>
+                          <th>Bentuk Pengembangan</th>
+                          <th>Penyelenggara</th>
+                          <th>Waktu</th>
+                          <th>JP</th>
+                          <th>Status</th>
+                          <th className="text-center">Aksi Verifikasi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Simulasi Data Sementara karena API belum ada */}
+                        <tr>
+                          <td>1</td>
+                          <td className="fw-bold">Joko Riswanto, S.Pd<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>197311172002121006</span></td>
+                          <td>Orientasi pada hasil (1)</td>
+                          <td>Pelatihan Non Klasikal<br/><span className="badge bg-secondary">Mentoring</span></td>
+                          <td>BPSDM</td>
+                          <td>Maret s.d. Juli 2025</td>
+                          <td><span className="badge bg-info text-dark rounded-pill">20 JP</span></td>
+                          <td><span className="badge bg-warning text-dark">Menunggu Persetujuan</span></td>
+                          <td className="text-center">
+                            <button className="btn btn-sm btn-success me-1" title="Setujui"><i className="bi bi-check-lg"></i></button>
+                            <button className="btn btn-sm btn-danger" title="Tolak"><i className="bi bi-x-lg"></i></button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>2</td>
+                          <td className="fw-bold">Rahmad Diyanto, S.IP<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>198307012006041005</span></td>
+                          <td>Pengembangan diri dan orang lain (1)</td>
+                          <td>Blended Learning<br/><span className="badge bg-secondary">Pelatihan Kepemimpinan Administrator</span></td>
+                          <td>BKPSDM Prov. Babel</td>
+                          <td>Maret s.d. Juli 2025</td>
+                          <td><span className="badge bg-info text-dark rounded-pill">825 JP</span></td>
+                          <td><span className="badge bg-success">Disetujui</span></td>
+                          <td className="text-center">
+                            <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>

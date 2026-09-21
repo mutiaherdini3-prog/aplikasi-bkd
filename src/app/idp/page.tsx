@@ -243,13 +243,9 @@ export default function IDPPage() {
                           <input type="number" className="form-control" placeholder="0" value={k.anggaran || ''} onChange={e => handleChange(k.id, 'anggaran', e.target.value)} />
                         </div>
                       </div>
-                      <div className="col-md-6">
-                        <label className="form-label">Status *</label>
-                        <select className="form-select" required value={k.status || 'Menunggu Persetujuan'} onChange={e => handleChange(k.id, 'status', e.target.value)}>
-                          <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
-                          <option value="Disetujui">Disetujui</option>
-                          <option value="Ditolak">Ditolak</option>
-                        </select>
+                      <div className="col-md-6 d-none">
+                        <label className="form-label">Status</label>
+                        <input type="text" className="form-control" value="Menunggu Persetujuan" readOnly />
                       </div>
                     </div>
                   </div>
