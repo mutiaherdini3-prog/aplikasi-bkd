@@ -513,33 +513,8 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {/* Simulasi Data Sementara karena API belum ada */}
                         <tr>
-                          <td>1</td>
-                          <td className="fw-bold">Joko Riswanto, S.Pd<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>197311172002121006</span></td>
-                          <td>Orientasi pada hasil (1)</td>
-                          <td>Pelatihan Non Klasikal<br/><span className="badge bg-secondary">Mentoring</span></td>
-                          <td>BPSDM</td>
-                          <td>Maret s.d. Juli 2025</td>
-                          <td><span className="badge bg-info text-dark rounded-pill">20 JP</span></td>
-                          <td><span className="badge bg-warning text-dark">Menunggu Persetujuan</span></td>
-                          <td className="text-center">
-                            <button className="btn btn-sm btn-success me-1" title="Setujui"><i className="bi bi-check-lg"></i></button>
-                            <button className="btn btn-sm btn-danger" title="Tolak"><i className="bi bi-x-lg"></i></button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>2</td>
-                          <td className="fw-bold">Rahmad Diyanto, S.IP<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>198307012006041005</span></td>
-                          <td>Pengembangan diri dan orang lain (1)</td>
-                          <td>Blended Learning<br/><span className="badge bg-secondary">Pelatihan Kepemimpinan Administrator</span></td>
-                          <td>BKPSDM Prov. Babel</td>
-                          <td>Maret s.d. Juli 2025</td>
-                          <td><span className="badge bg-info text-dark rounded-pill">825 JP</span></td>
-                          <td><span className="badge bg-success">Disetujui</span></td>
-                          <td className="text-center">
-                            <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
-                          </td>
+                          <td colSpan={9} className="text-center text-muted py-4">Belum ada pengajuan IDP dari pegawai.</td>
                         </tr>
                       </tbody>
                     </table>

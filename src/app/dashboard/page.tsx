@@ -309,22 +309,8 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {/* Simulasi data status pengajuan IDP */}
                       <tr>
-                        <td>1</td>
-                        <td className="fw-bold text-primary">Orientasi pada hasil (1)</td>
-                        <td>Pelatihan Non Klasikal (Mentoring)</td>
-                        <td>Maret s.d. Juli 2025</td>
-                        <td><span className="badge bg-secondary rounded-pill">20 JP</span></td>
-                        <td><span className="badge bg-warning text-dark">Menunggu Persetujuan</span></td>
-                      </tr>
-                      <tr>
-                        <td>2</td>
-                        <td className="fw-bold text-primary">Pengembangan diri dan orang lain (1)</td>
-                        <td>Blended Learning (PKA)</td>
-                        <td>Maret s.d. Juli 2025</td>
-                        <td><span className="badge bg-secondary rounded-pill">825 JP</span></td>
-                        <td><span className="badge bg-success">Disetujui</span></td>
+                        <td colSpan={6} className="text-center text-muted py-4">Belum ada pengajuan IDP.</td>
                       </tr>
                     </tbody>
                   </table>
