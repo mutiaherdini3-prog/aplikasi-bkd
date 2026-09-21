@@ -159,7 +159,7 @@ export default function SertifikasiPage() {
           tahun: k.tahun,
           jumlah_jp: parseInt(k.jumlah_jp) || 0,
           pejabat: k.pejabat,
-          biaya: k.biaya_tipe,
+          biaya: k.biaya_tipe === 'Gratis' ? 'Gratis' : (k.biaya_nominal || 'Berbayar'),
           link_sertifikat: finalUrl
         });
       }

@@ -116,17 +116,71 @@ export async function POST(request: Request) {
     });
 
     // INSERT INTO SERTIFIKASI SHEET!
-    const sertifikasiRows = kegiatans.map((k: any) => [
-      nip,
-      k.jenis_sertifikasi || '',
-      k.nama_kursus || '',
-      k.institusi_penyelenggara || '',
-      k.nomor_sertifikasi || '',
-      k.tanggal_sertifikasi || '',
-      k.tahun || '',
-      k.jumlah_jp || '0',
-      k.link_sertifikat || ''
-    ]);
+    const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
+    const sertRows = sertRes.data.values || [];
+    let sertHeaders: string[] = [];
+    if (sertRows.length > 0) {
+      sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase());
+    }
+
+    // Default headers if sheet is completely empty
+    const defaultHeaders = [
+      'NIP', 'Jenis Sertifikasi', 'Nama Kursus', 'Institusi Penyelenggara', 
+      'Nomor Sertifikasi', 'Tanggal Sertifikasi', 'Tahun', 'Jumlah JP', 'Link Sertifikat',
+      'Jenis Kursus', 'Klasifikasi Kursus', 'Penanda Tangan', 'Biaya Pelatihan'
+    ];
+
+    let headersUpdated = false;
+    if (sertHeaders.length === 0) {
+      sertHeaders = defaultHeaders.map(h => h.toLowerCase());
+      sertRows.push(defaultHeaders);
+      headersUpdated = true;
+    } else {
+      // Ensure new columns exist
+      const requiredColumns = ['Jenis Kursus', 'Klasifikasi Kursus', 'Penanda Tangan', 'Biaya Pelatihan'];
+      for (const col of requiredColumns) {
+        if (!sertHeaders.includes(col.toLowerCase())) {
+          sertHeaders.push(col.toLowerCase());
+          sertRows[0].push(col);
+          headersUpdated = true;
+        }
+      }
+    }
+
+    if (headersUpdated) {
+      const endCol = String.fromCharCode(65 + sertHeaders.length - 1);
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: `sertifikasi!A1:${endCol}1`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [sertRows[0]] }
+      });
+    }
+
+    const sertifikasiRows = kegiatans.map((k: any) => {
+      const row = new Array(sertHeaders.length).fill('');
+      const setValue = (headerName: string, value: any) => {
+        const idx = sertHeaders.indexOf(headerName.toLowerCase());
+        if (idx !== -1) row[idx] = value;
+      };
+
+      setValue('NIP', nip);
+      setValue('Jenis Sertifikasi', k.jenis_sertifikasi || '');
+      setValue('Nama Kursus', k.nama_kursus || '');
+      setValue('Institusi Penyelenggara', k.institusi_penyelenggara || '');
+      setValue('Nomor Sertifikasi', k.nomor_sertifikasi || '');
+      setValue('Tanggal Sertifikasi', k.tanggal_sertifikasi || '');
+      setValue('Tahun', k.tahun || '');
+      setValue('Jumlah JP', k.jumlah_jp || '0');
+      setValue('Link Sertifikat', k.link_sertifikat || '');
+      
+      setValue('Jenis Kursus', k.jenis_kursus || '');
+      setValue('Klasifikasi Kursus', k.klasifikasi_kursus || '');
+      setValue('Penanda Tangan', k.pejabat || '');
+      setValue('Biaya Pelatihan', k.biaya || '');
+
+      return row;
+    });
 
     if (sertifikasiRows.length > 0) {
       await sheets.spreadsheets.values.append({

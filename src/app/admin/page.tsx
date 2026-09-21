@@ -118,6 +118,10 @@ export default function AdminPage() {
         if (i < certs.length) {
           const s = certs[i];
           baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
+          baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
+          baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
+          baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
+          baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
           
           let linkUrl = s.link_sertifikat || 'Tidak ada link';
           
@@ -143,6 +147,10 @@ export default function AdminPage() {
           baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
         } else {
           baseRow[`Nama Sertifikat ${i + 1}`] = '-';
+          baseRow[`Jenis Kursus ${i + 1}`] = '-';
+          baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
+          baseRow[`Penanda Tangan ${i + 1}`] = '-';
+          baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
           baseRow[`Link Sertifikat ${i + 1}`] = '-';
         }
       }
