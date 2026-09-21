@@ -186,18 +186,40 @@ export async function PUT(request: Request) {
     updateField('jankel', jenkel);
     updateField('jabatan', jabatan);
     updateField('unit kerja', unit_kerja);
+
+    const foto_profil = body.foto_profil;
+    let headersUpdated = false;
+
+    if (foto_profil !== undefined) {
+      let fotoIdx = pHeaders.indexOf('foto profil');
+      if (fotoIdx === -1) {
+        fotoIdx = pHeaders.length;
+        pHeaders.push('foto profil');
+        pRows[0].push('foto profil');
+        headersUpdated = true;
+      }
+      while (newRow.length <= fotoIdx) newRow.push('');
+      newRow[fotoIdx] = foto_profil;
+    }
     
     while (newRow.length < pHeaders.length) {
       newRow.push('');
     }
 
     const endColumn = String.fromCharCode(65 + pHeaders.length - 1);
-    await sheets.spreadsheets.values.update({
+    
+    const batchRequests = [
+      { range: `pegawai!A${rowIndex}:${endColumn}${rowIndex}`, values: [newRow] }
+    ];
+    if (headersUpdated) {
+      batchRequests.unshift({ range: `pegawai!A1:${endColumn}1`, values: [pRows[0]] });
+    }
+
+    await sheets.spreadsheets.values.batchUpdate({
       spreadsheetId: GOOGLE_SHEET_ID,
-      range: `pegawai!A${rowIndex}:${endColumn}${rowIndex}`,
-      valueInputOption: 'USER_ENTERED',
       requestBody: {
-        values: [newRow]
+        valueInputOption: 'USER_ENTERED',
+        data: batchRequests
       }
     });
 

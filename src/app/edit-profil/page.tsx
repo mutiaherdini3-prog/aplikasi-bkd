@@ -14,8 +14,12 @@ export default function EditProfilPage() {
     golonganPangkat: '', // Gabungan untuk dropdown
     jenkel: '',
     jabatan: '',
-    unit_kerja: ''
+    unit_kerja: '',
+    foto_profil: ''
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const nip = localStorage.getItem('loggedInUser');
@@ -39,7 +43,8 @@ export default function EditProfilPage() {
               : (data.golongan || ''),
             jenkel: data.jenkel || '',
             jabatan: data.jabatan || '',
-            unit_kerja: data.unit_kerja || ''
+            unit_kerja: data.unit_kerja || '',
+            foto_profil: data.foto_profil || ''
           });
         }
       } catch (err) {
@@ -63,6 +68,42 @@ export default function EditProfilPage() {
       return ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII"].map(g => `Golongan ${g}`);
     }
     return [];
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran file maksimal 2MB');
+      return;
+    }
+
+    setIsUploading(true);
+    const form = new FormData();
+    form.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: form
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        let directUrl = data.url;
+        if (data.fileId) {
+          directUrl = `https://drive.google.com/uc?export=view&id=${data.fileId}`;
+        }
+        setFormData({ ...formData, foto_profil: directUrl });
+      } else {
+        alert('Gagal mengunggah foto: ' + data.error);
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat mengunggah foto');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,7 +134,8 @@ export default function EditProfilPage() {
           golongan: valGolongan,
           jenkel: formData.jenkel,
           jabatan: formData.jabatan,
-          unit_kerja: formData.unit_kerja
+          unit_kerja: formData.unit_kerja,
+          foto_profil: formData.foto_profil
         })
       });
 
@@ -141,8 +183,27 @@ export default function EditProfilPage() {
               <form onSubmit={handleSubmit}>
                 <div className="row g-3">
                   <div className="col-md-12 text-center mb-3">
-                    <div className="bg-light d-inline-flex justify-content-center align-items-center rounded-circle border border-3 shadow-sm mb-2 position-relative overflow-hidden" style={{ width: '120px', height: '120px' }}>
-                      <i className="bi bi-person text-secondary" style={{ fontSize: '4rem' }}></i>
+                    <div 
+                      className="bg-light d-inline-flex justify-content-center align-items-center rounded-circle border border-3 shadow-sm mb-2 position-relative overflow-hidden cursor-pointer" 
+                      style={{ width: '120px', height: '120px', cursor: 'pointer' }}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {formData.foto_profil ? (
+                        <img src={formData.foto_profil} alt="Foto Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <i className="bi bi-person text-secondary" style={{ fontSize: '4rem' }}></i>
+                      )}
+                      {isUploading && (
+                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75">
+                          <div className="spinner-border text-primary spinner-border-sm"></div>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <button type="button" className="btn btn-sm btn-outline-primary mt-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                        <i className="bi bi-camera me-1"></i> Ubah Foto
+                      </button>
+                      <input type="file" ref={fileInputRef} className="d-none" accept="image/*" onChange={handlePhotoUpload} />
                     </div>
                   </div>
                   

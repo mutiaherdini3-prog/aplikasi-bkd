@@ -114,7 +114,15 @@ export default function DashboardPage() {
       <div className="container mt-4">
         <div className="card profile-card">
           {/* Banner */}
-          <div className="profile-banner"></div>
+          <div className="profile-banner">
+            {pegawai?.foto_profil ? (
+              <img src={pegawai.foto_profil} alt="Foto Profil" className="profile-img-large" />
+            ) : (
+              <div className="profile-img-large">
+                <i className="bi bi-person"></i>
+              </div>
+            )}
+          </div>
           
           <div className="profile-info-section">
             {/* Header Profil */}
