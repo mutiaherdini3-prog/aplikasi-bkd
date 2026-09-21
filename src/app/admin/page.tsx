@@ -48,6 +48,16 @@ export default function AdminPage() {
     setPegawaiList(computed);
   }, [rawPegawaiList, tahunFilter]);
 
+  const hapusPegawai = async (nip: string) => {
+    if (confirm('Yakin ingin menghapus pegawai ini beserta seluruh datanya?')) {
+      try {
+        const res = await fetch(`/api/pegawai?nip=${nip}`, { method: 'DELETE' });
+        if (res.ok) window.location.reload();
+        else alert('Gagal menghapus pegawai');
+      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+    }
+  };
+
   const availableYears = Array.from(new Set(
     rawPegawaiList.flatMap(p => p.sertifikasi?.map((s: any) => s.tahun).filter(Boolean))
   )).sort().reverse();
@@ -415,7 +425,8 @@ export default function AdminPage() {
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
                             <td className="text-center">
-                              <button className="btn btn-sm btn-outline-primary" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>Lihat Dokumen</button>
+                              <button className="btn btn-sm btn-outline-primary me-2" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>Lihat Dokumen</button>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
                             </td>
                           </tr>
                         ))}

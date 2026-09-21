@@ -1,6 +1,62 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
 
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const nip = searchParams.get('nip');
+    if (!nip) return NextResponse.json({ success: false, error: 'Missing NIP' }, { status: 400 });
+
+    const sheets = getGoogleSheets();
+    const sheetInfo = await sheets.spreadsheets.get({ spreadsheetId: GOOGLE_SHEET_ID });
+    
+    // 1. Delete from pegawai sheet
+    const pSheet = sheetInfo.data.sheets?.find(s => s.properties?.title === 'pegawai');
+    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
+    const pRows = pRes.data.values || [];
+    let pRowIndex = -1;
+    for (let i = 1; i < pRows.length; i++) {
+      if (pRows[i][0] && pRows[i][0].toString().trim() === nip.trim()) {
+        pRowIndex = i;
+        break;
+      }
+    }
+    
+    if (pRowIndex !== -1 && pSheet) {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        requestBody: { requests: [{ deleteDimension: { range: { sheetId: pSheet.properties?.sheetId, dimension: 'ROWS', startIndex: pRowIndex, endIndex: pRowIndex + 1 } } }] }
+      });
+    }
+
+    // 2. We could delete from sertifikasi and pendidikan too, but iterating and finding all rows then deleting them from bottom to top to avoid index shifting is complex.
+    // Instead, we clear the rows so they are ignored, which is much safer and simpler.
+    // Actually, let's just clear the rows in sertifikasi and pendidikan that match this NIP.
+    const clearRelatedRows = async (sheetName: string) => {
+      const res = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: `${sheetName}!A:Z` });
+      const rows = res.data.values || [];
+      const nipColIdx = rows[0]?.map((h: string) => h.toLowerCase()).indexOf('nip') ?? -1;
+      
+      if (nipColIdx !== -1) {
+        for (let i = rows.length - 1; i >= 1; i--) {
+          if (rows[i][nipColIdx] && rows[i][nipColIdx].toString().trim() === nip.trim()) {
+             // Clear the row
+             await sheets.spreadsheets.values.clear({
+               spreadsheetId: GOOGLE_SHEET_ID,
+               range: `${sheetName}!A${i + 1}:Z${i + 1}`
+             });
+          }
+        }
+      }
+    };
+
+    await clearRelatedRows('sertifikasi');
+    await clearRelatedRows('pendidikan');
+
+    return NextResponse.json({ success: true });
+  } catch (e: any) { return NextResponse.json({ success: false, error: e.message }, { status: 500 }); }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
