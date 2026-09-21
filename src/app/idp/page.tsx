@@ -227,7 +227,7 @@ export default function IDPPage() {
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">Waktu Pelaksanaan *</label>
-                        <input type="text" className="form-control" placeholder="Contoh: Maret s.d. Juli 2025" required value={k.waktu_pelaksanaan || ''} onChange={e => handleChange(k.id, 'waktu_pelaksanaan', e.target.value)} />
+                        <input type="date" className="form-control" required value={k.waktu_pelaksanaan || ''} onChange={e => handleChange(k.id, 'waktu_pelaksanaan', e.target.value)} />
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">Durasi (JP) *</label>
