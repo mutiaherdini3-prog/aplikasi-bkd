@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
 
+const getColumnName = (n: number) => {
+  let ordA = 'A'.charCodeAt(0);
+  let ordZ = 'Z'.charCodeAt(0);
+  let len = ordZ - ordA + 1;
+  let s = "";
+  while (n >= 0) {
+    s = String.fromCharCode(n % len + ordA) + s;
+    n = Math.floor(n / len) - 1;
+  }
+  return s;
+};
+
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -206,7 +218,7 @@ export async function PUT(request: Request) {
       newRow.push('');
     }
 
-    const endColumn = String.fromCharCode(65 + pHeaders.length - 1);
+    const endColumn = getColumnName(pHeaders.length - 1);
     
     const batchRequests = [
       { range: `pegawai!A${rowIndex}:${endColumn}${rowIndex}`, values: [newRow] }
