@@ -13,7 +13,8 @@ export default function IDPPage() {
     jenis_pengembangan: '',
     jalur_pengembangan: '',
     penyelenggara: '',
-    waktu_pelaksanaan: '',
+    waktu_pelaksanaan_awal: '',
+    waktu_pelaksanaan_akhir: '',
     jp: '',
     anggaran: '',
     status: 'Menunggu Persetujuan'
@@ -46,7 +47,7 @@ export default function IDPPage() {
     setIdps(prev => [...prev, { 
       id: Date.now(), 
       jenis_kompetensi: '', jenis_pengembangan: '', jalur_pengembangan: '', penyelenggara: '',
-      waktu_pelaksanaan: '', jp: '', anggaran: '', status: 'Menunggu Persetujuan'
+      waktu_pelaksanaan_awal: '', waktu_pelaksanaan_akhir: '', jp: '', anggaran: '', status: 'Menunggu Persetujuan'
     }]);
   };
 
@@ -68,7 +69,7 @@ export default function IDPPage() {
     
     // Validasi
     for (const k of idps) {
-      if (!k.jenis_kompetensi || !k.jenis_pengembangan || !k.jalur_pengembangan || !k.penyelenggara || !k.waktu_pelaksanaan || !k.jp) {
+      if (!k.jenis_kompetensi || !k.jenis_pengembangan || !k.jalur_pengembangan || !k.penyelenggara || !k.waktu_pelaksanaan_awal || !k.waktu_pelaksanaan_akhir || !k.jp) {
         alert('Tolong isi semua kolom wajib (*) !');
         return;
       }
@@ -225,9 +226,13 @@ export default function IDPPage() {
                         <label className="form-label">Penyelenggara *</label>
                         <input type="text" className="form-control" placeholder="Contoh: BPSDM / Kemendagri" required value={k.penyelenggara || ''} onChange={e => handleChange(k.id, 'penyelenggara', e.target.value)} />
                       </div>
-                      <div className="col-md-6">
-                        <label className="form-label">Waktu Pelaksanaan *</label>
-                        <input type="date" className="form-control" required value={k.waktu_pelaksanaan || ''} onChange={e => handleChange(k.id, 'waktu_pelaksanaan', e.target.value)} />
+                      <div className="col-md-3">
+                        <label className="form-label">Waktu Awal Pelaksanaan *</label>
+                        <input type="date" className="form-control" required value={k.waktu_pelaksanaan_awal || ''} onChange={e => handleChange(k.id, 'waktu_pelaksanaan_awal', e.target.value)} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label">Waktu Akhir Pelaksanaan *</label>
+                        <input type="date" className="form-control" required value={k.waktu_pelaksanaan_akhir || ''} onChange={e => handleChange(k.id, 'waktu_pelaksanaan_akhir', e.target.value)} />
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">Durasi (JP) *</label>
