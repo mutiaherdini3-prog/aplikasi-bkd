@@ -87,7 +87,6 @@ export default function IDPPage() {
       
       const json = await res.json();
       if (json.success) {
-        alert('Data Individual Development Plan berhasil disimpan!');
         router.push('/dashboard');
       } else {
         alert('Gagal menyimpan IDP: ' + (json.message || json.error));

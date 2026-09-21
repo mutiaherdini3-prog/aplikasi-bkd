@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
 
+export const dynamic = 'force-dynamic';
+
 const getColumnName = (n: number) => {
   let ordA = 'A'.charCodeAt(0);
   let ordZ = 'Z'.charCodeAt(0);

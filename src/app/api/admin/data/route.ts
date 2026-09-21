@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const sheets = getGoogleSheets();
