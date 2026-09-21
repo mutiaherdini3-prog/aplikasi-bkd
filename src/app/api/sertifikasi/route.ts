@@ -1,11 +1,27 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
 
-async function updatePegawaiSertifikasi(nip: string, sheets: any) {
-  // 1. Ambil semua sertifikasi untuk NIP ini dari sheet sertifikasi
-  const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
-  const sertRows = sertRes.data.values || [];
-  if (sertRows.length === 0) return;
+// Helper for generating column letters (A, B, ..., Z, AA, AB, ...)
+const getColumnName = (n: number) => {
+  let ordA = 'A'.charCodeAt(0);
+  let ordZ = 'Z'.charCodeAt(0);
+  let len = ordZ - ordA + 1;
+  let s = "";
+  while (n >= 0) {
+    s = String.fromCharCode(n % len + ordA) + s;
+    n = Math.floor(n / len) - 1;
+  }
+  return s;
+};
+
+async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: any[] | null = null, prePegRows: any[] | null = null) {
+  // 1. Get sertifikasi data
+  let sertRows = preSertRows;
+  if (!sertRows) {
+    const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
+    sertRows = sertRes.data.values || [];
+  }
+  if (!sertRows || sertRows.length === 0) return;
   const sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase().replace(/_/g, ' '));
   
   const nipIdx = sertHeaders.indexOf('nip');
@@ -27,10 +43,13 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any) {
     }
   }
 
-  // 2. Fetch pegawai sheet
-  const pegRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
-  const pegRows = pegRes.data.values || [];
-  if (pegRows.length === 0) return;
+  // 2. Get pegawai data
+  let pegRows = prePegRows;
+  if (!pegRows) {
+    const pegRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
+    pegRows = pegRes.data.values || [];
+  }
+  if (!pegRows || pegRows.length === 0) return;
   
   const pegHeaders = pegRows[0].map((h: string) => h.trim().toLowerCase());
   const pegNipIdx = pegHeaders.indexOf('nip');
@@ -61,6 +80,7 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any) {
   });
 
   const maxCertsToProcess = Math.max(userCerts.length, maxCertIdxInHeaders);
+  let headersChanged = false;
 
   for (let certIdx = 1; certIdx <= maxCertsToProcess; certIdx++) {
     const cert = userCerts[certIdx - 1];
@@ -81,37 +101,29 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any) {
         hIdx = pegHeaders.length;
         pegHeaders.push(map.header.toLowerCase());
         pegRows[0].push(map.header);
+        headersChanged = true;
       }
       while (currentRow.length <= hIdx) currentRow.push('');
       currentRow[hIdx] = map.value;
     }
   }
-
-  const getColumnName = (n: number) => {
-    let ordA = 'A'.charCodeAt(0);
-    let ordZ = 'Z'.charCodeAt(0);
-    let len = ordZ - ordA + 1;
-    let s = "";
-    while (n >= 0) {
-      s = String.fromCharCode(n % len + ordA) + s;
-      n = Math.floor(n / len) - 1;
-    }
-    return s;
-  };
   
   const maxColName = getColumnName(pegHeaders.length - 1);
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: GOOGLE_SHEET_ID,
-    range: `pegawai!A1:${maxColName}1`,
-    valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [pegRows[0]] }
-  });
+  
+  const batchRequests = [
+    { range: `pegawai!A${pegRowIndex}:${maxColName}${pegRowIndex}`, values: [currentRow] }
+  ];
+  
+  if (headersChanged) {
+    batchRequests.unshift({ range: `pegawai!A1:${maxColName}1`, values: [pegRows[0]] });
+  }
 
-  await sheets.spreadsheets.values.update({
+  await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: GOOGLE_SHEET_ID,
-    range: `pegawai!A${pegRowIndex}:${maxColName}${pegRowIndex}`,
-    valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [currentRow] }
+    requestBody: {
+      valueInputOption: 'USER_ENTERED',
+      data: batchRequests
+    }
   });
 }
 
@@ -128,12 +140,14 @@ export async function DELETE(request: Request) {
     
     const rowIdx = parseInt(rowIndex, 10) - 1;
 
-    // Get NIP before deleting
-    const headerRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!1:1' });
+    // We can fetch the deleted row AND pegawai in parallel to save time, but it's okay for DELETE to be slightly slower.
+    const [headerRes, rowRes] = await Promise.all([
+      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!1:1' }),
+      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: `sertifikasi!A${rowIdx + 1}:Z${rowIdx + 1}` })
+    ]);
+    
     const headers = headerRes.data.values?.[0]?.map((h:string)=>h.trim().toLowerCase().replace(/_/g, ' ')) || [];
     const nipIdx = headers.indexOf('nip');
-    
-    const rowRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: `sertifikasi!A${rowIdx + 1}:Z${rowIdx + 1}` });
     const deletedRow = rowRes.data.values?.[0];
     const nip = (deletedRow && nipIdx !== -1) ? deletedRow[nipIdx] : null;
 
@@ -143,7 +157,7 @@ export async function DELETE(request: Request) {
         requestBody: { requests: [{ deleteDimension: { range: { sheetId: targetSheet.properties?.sheetId, dimension: 'ROWS', startIndex: rowIdx, endIndex: rowIdx + 1 } } }] }
     });
 
-    // Resync
+    // Resync (fetch all fresh since we just deleted a dimension)
     if (nip) {
         await updatePegawaiSertifikasi(nip, sheets);
     }
@@ -161,9 +175,15 @@ export async function POST(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    // 1. Fetch & update sertifikasi headers
-    const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!1:1' });
+    // 1. Fetch sertifikasi and pegawai in parallel to save huge amounts of time
+    const [sertRes, pegRes] = await Promise.all([
+      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' }),
+      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' })
+    ]);
+
     const sertRows = sertRes.data.values || [];
+    const pegRows = pegRes.data.values || [];
+    
     let sertHeaders: string[] = [];
     if (sertRows.length > 0) {
       sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase().replace(/_/g, ' '));
@@ -191,16 +211,6 @@ export async function POST(request: Request) {
       }
     }
 
-    if (headersUpdated) {
-      const endCol = String.fromCharCode(65 + sertHeaders.length - 1);
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: GOOGLE_SHEET_ID,
-        range: `sertifikasi!A1:${endCol}1`,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [sertRows[0]] }
-      });
-    }
-
     // 2. Format row array based on sertifikasi headers
     const sertifikasiRows = kegiatans.map((k: any) => {
       const row = new Array(sertHeaders.length).fill('');
@@ -219,7 +229,6 @@ export async function POST(request: Request) {
       setValue('Tahun', k.tahun || '');
       setValue('Jumlah JP', k.jumlah_jp || '0');
       setValue('Link Sertifikat', k.link_sertifikat || '');
-      
       setValue('Jenis Kursus', k.jenis_kursus || '');
       setValue('Klasifikasi Kursus', k.klasifikasi_kursus || '');
       setValue('Penanda Tangan', k.pejabat || '');
@@ -228,18 +237,33 @@ export async function POST(request: Request) {
       return row;
     });
 
-    // 3. Append to sertifikasi sheet
+    // 3. Update headers, Append new rows, and Sync Pegawai in PARALLEL
+    const promises = [];
+    
+    if (headersUpdated) {
+      const endCol = getColumnName(sertHeaders.length - 1);
+      promises.push(sheets.spreadsheets.values.update({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: `sertifikasi!A1:${endCol}1`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [sertRows[0]] }
+      }));
+    }
+
     if (sertifikasiRows.length > 0) {
-      await sheets.spreadsheets.values.append({
+      promises.push(sheets.spreadsheets.values.append({
         spreadsheetId: GOOGLE_SHEET_ID,
         range: 'sertifikasi!A:Z',
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: sertifikasiRows }
-      });
+      }));
       
-      // 4. Completely resync Pegawai horizontal columns
-      await updatePegawaiSertifikasi(nip, sheets);
+      // Inject the new rows into our local array before syncing so it counts the new JP
+      sertifikasiRows.forEach(row => sertRows.push(row));
+      promises.push(updatePegawaiSertifikasi(nip, sheets, sertRows, pegRows));
     }
+
+    await Promise.all(promises);
 
     return NextResponse.json({ success: true });
   } catch (e: any) {
