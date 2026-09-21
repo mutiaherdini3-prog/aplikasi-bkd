@@ -116,11 +116,13 @@ export async function POST(request: Request) {
     });
 
     // INSERT INTO SERTIFIKASI SHEET!
-    const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
+    // Hanya ambil baris pertama (headers) agar tidak lemot saat simpan
+    const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!1:1' });
     const sertRows = sertRes.data.values || [];
     let sertHeaders: string[] = [];
     if (sertRows.length > 0) {
-      sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase());
+      // Normalisasi header: ganti underscore '_' jadi spasi agar cocok dengan format pengecekan
+      sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase().replace(/_/g, ' '));
     }
 
     // Default headers if sheet is completely empty
@@ -160,7 +162,8 @@ export async function POST(request: Request) {
     const sertifikasiRows = kegiatans.map((k: any) => {
       const row = new Array(sertHeaders.length).fill('');
       const setValue = (headerName: string, value: any) => {
-        const idx = sertHeaders.indexOf(headerName.toLowerCase());
+        const normalizedHeaderName = headerName.toLowerCase().replace(/_/g, ' ');
+        const idx = sertHeaders.indexOf(normalizedHeaderName);
         if (idx !== -1) row[idx] = value;
       };
 
