@@ -307,6 +307,12 @@ export default function DashboardPage() {
                   <div className="menu-title">Riwayat Pendidikan</div>
                   <div className="menu-desc">Pemutakhiran gelar dan ijazah pendidikan.</div>
                 </a>
+
+                <a onClick={() => router.push('/idp')} className="menu-card mb-3 text-decoration-none">
+                  <div className="menu-icon"><i className="bi bi-calendar2-check-fill"></i></div>
+                  <div className="menu-title">INDIVIDUAL DEVELOPMENT PLAN (IDP)</div>
+                  <div className="menu-desc">Penyusunan rencana pengembangan kompetensi individu.</div>
+                </a>
               </div>
             </div>
           </div>
