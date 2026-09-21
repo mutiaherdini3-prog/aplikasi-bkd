@@ -290,6 +290,45 @@ export default function DashboardPage() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Status Pengajuan IDP */}
+                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
+                  <h5 className="fw-bold mb-0"><i className="bi bi-calendar2-check-fill me-2 text-primary"></i> Status Pengajuan IDP (Individual Development Plan)</h5>
+                </div>
+                
+                <div className="table-responsive border rounded-3 bg-white mb-4">
+                  <table className="table table-hover mb-0" style={{ fontSize: '0.9rem' }}>
+                    <thead className="bg-light">
+                      <tr>
+                        <th>No</th>
+                        <th>Jenis Kompetensi</th>
+                        <th>Bentuk Pengembangan</th>
+                        <th>Waktu Pelaksanaan</th>
+                        <th>JP</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Simulasi data status pengajuan IDP */}
+                      <tr>
+                        <td>1</td>
+                        <td className="fw-bold text-primary">Orientasi pada hasil (1)</td>
+                        <td>Pelatihan Non Klasikal (Mentoring)</td>
+                        <td>Maret s.d. Juli 2025</td>
+                        <td><span className="badge bg-secondary rounded-pill">20 JP</span></td>
+                        <td><span className="badge bg-warning text-dark">Menunggu Persetujuan</span></td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td className="fw-bold text-primary">Pengembangan diri dan orang lain (1)</td>
+                        <td>Blended Learning (PKA)</td>
+                        <td>Maret s.d. Juli 2025</td>
+                        <td><span className="badge bg-secondary rounded-pill">825 JP</span></td>
+                        <td><span className="badge bg-success">Disetujui</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Sidebar Menu Interaktif */}
