@@ -84,7 +84,7 @@ export async function GET(request: Request) {
     
     // Pegawai
     let pegawaiData = null;
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
+    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
     const pRows = pRes.data.values || [];
     const pHeaders = pRows[0]?.map(h => h.toLowerCase()) || [];
     const pNipIdx = pHeaders.indexOf('nip');
@@ -98,6 +98,7 @@ export async function GET(request: Request) {
             if (key === 'jankel') key = 'jenkel';
             if (key === 'unit kerja') key = 'unit_kerja';
             if (key === 'golongan ') key = 'golongan';
+            if (key === 'foto profil') key = 'foto_profil';
             pegawaiData[key] = pRows[i][idx] || '';
           });
           break;
@@ -160,7 +161,7 @@ export async function PUT(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
+    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
     const pRows = pRes.data.values || [];
     if (pRows.length === 0) return NextResponse.json({ success: false, message: 'Sheet empty' }, { status: 404 });
     
