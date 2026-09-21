@@ -149,7 +149,28 @@ export async function GET(request: Request) {
       }
     } catch(e) {}
 
-    return NextResponse.json({ success: true, data: { pegawai: pegawaiData, sertifikasi: sertifikasiData, pendidikan: pendidikanData }});
+    // IDP
+    let idpData: any[] = [];
+    try {
+      const iRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'idp!A:Z' });
+      const iRows = iRes.data.values || [];
+      const iHeaders = iRows[0]?.map(h => h.toLowerCase()) || [];
+      const iNipIdx = iHeaders.indexOf('nip');
+      if (iNipIdx !== -1) {
+        for (let i=1; i<iRows.length; i++) {
+          const rowNip = iRows[i][iNipIdx];
+          if (rowNip && rowNip.toString().trim() === nip.trim()) {
+            const row: any = { _rowIndex: i + 1 };
+            iHeaders.forEach((h, idx) => {
+              row[h] = iRows[i][idx] || '';
+            });
+            idpData.push(row);
+          }
+        }
+      }
+    } catch(e) {}
+
+    return NextResponse.json({ success: true, data: { pegawai: pegawaiData, sertifikasi: sertifikasiData, pendidikan: pendidikanData, idp: idpData }});
   } catch (e: any) { return NextResponse.json({ success: false }, { status: 500 }); }
 }
 

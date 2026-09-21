@@ -58,6 +58,19 @@ export default function AdminPage() {
     }
   };
 
+  const updateIdpStatus = async (rowIndex: number, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(newStatus)}`, { method: 'PUT' });
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        alert('Gagal memperbarui status');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat memperbarui status');
+    }
+  };
+
   const availableYears = Array.from(new Set(
     rawPegawaiList.flatMap(p => p.sertifikasi?.map((s: any) => s.tahun).filter(Boolean))
   )).sort().reverse();
@@ -65,6 +78,7 @@ export default function AdminPage() {
   const lulus = pegawaiList.filter(p => p.jp >= 20).length;
   const belum = pegawaiList.length - lulus;
   let sertifCounter = 1;
+  let idpCounter = 1;
 
   const handleLogout = () => {
     localStorage.removeItem('loggedInUser');
@@ -513,9 +527,44 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <td colSpan={9} className="text-center text-muted py-4">Belum ada pengajuan IDP dari pegawai.</td>
-                        </tr>
+                        {pegawaiList.flatMap((p) => {
+                          if (!p.idp || p.idp.length === 0) {
+                            return [];
+                          }
+                          return p.idp.map((idp: any) => (
+                            <tr key={idp._rowIndex}>
+                              <td>{idpCounter++}</td>
+                              <td className="fw-bold">{p.nama}<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>{p.nip}</span></td>
+                              <td>{idp.jenis_kompetensi}</td>
+                              <td>{idp.jenis_pengembangan}<br/><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
+                              <td>{idp.penyelenggara}</td>
+                              <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
+                              <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
+                              <td>
+                                {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
+                                 idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
+                                 <span className="badge bg-warning text-dark">Menunggu Persetujuan</span>}
+                              </td>
+                              <td className="text-center">
+                                {idp.status === 'Menunggu Persetujuan' ? (
+                                  <>
+                                    <button className="btn btn-sm btn-success me-1" title="Setujui" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
+                                    <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
+                                  </>
+                                ) : (
+                                  <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
+                                )}
+                              </td>
+                            </tr>
+                          ));
+                        })}
+                        
+                        {/* Jika kosong semua */}
+                        {pegawaiList.flatMap(p => p.idp || []).length === 0 && (
+                          <tr>
+                            <td colSpan={9} className="text-center text-muted py-4">Belum ada pengajuan IDP dari pegawai.</td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>

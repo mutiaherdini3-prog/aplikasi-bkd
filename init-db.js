@@ -41,8 +41,8 @@ async function main() {
     console.log("Sheet pegawai dibuat.");
   }
 
-  // Create sertifikasi & pendidikan
-  for (const title of ['sertifikasi', 'pendidikan']) {
+  // Create sertifikasi & pendidikan & idp
+  for (const title of ['sertifikasi', 'pendidikan', 'idp']) {
     if (!sheetTitles.includes(title)) {
       await sheets.spreadsheets.batchUpdate({
         spreadsheetId: sheetId,
@@ -82,6 +82,17 @@ async function main() {
   });
 
   console.log("Data awal Pegawai, Sertifikasi, dan Pendidikan berhasil ditambahkan!");
+
+  // Populate idp headers
+  const idpHeaders = ["nip", "jenis_kompetensi", "jenis_pengembangan", "jalur_pengembangan", "penyelenggara", "waktu_pelaksanaan_awal", "waktu_pelaksanaan_akhir", "jp", "anggaran", "status"];
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: sheetId,
+    range: 'idp!A1:J1',
+    valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [idpHeaders] }
+  });
+
+  console.log("Data awal IDP berhasil ditambahkan!");
 }
 
 main().catch(err => console.error("Error init DB:", err));

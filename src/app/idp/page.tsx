@@ -79,26 +79,25 @@ export default function IDPPage() {
     setIsSubmitting(true);
     
     try {
-      // Simulasi submit atau bisa juga hit endpoint /api/idp
-      /*
-      const insertRes = await fetch('/api/idp', {
+      const res = await fetch(`/api/idp?nip=${pegawai.nip}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nip: pegawai.nip,
-          idps: idps
-        })
+        body: JSON.stringify(idps)
       });
-      */
       
-      // Karena endpoint /api/idp mungkin belum ada, kita simulasikan sukses
-      await new Promise(r => setTimeout(r, 1000));
-      alert('Data Individual Development Plan berhasil disimpan!');
-      router.push('/dashboard');
-    } catch (err) {
-      alert('Gagal menyimpan');
+      const json = await res.json();
+      if (json.success) {
+        alert('Data Individual Development Plan berhasil disimpan!');
+        router.push('/dashboard');
+      } else {
+        alert('Gagal menyimpan IDP: ' + (json.message || json.error));
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Terjadi kesalahan saat menyimpan IDP');
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (

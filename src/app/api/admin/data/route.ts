@@ -28,6 +28,23 @@ export async function GET() {
       }
     } catch(e) {}
 
+    // Fetch IDP
+    let allIdp: any[] = [];
+    try {
+      const iRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'idp!A:Z' });
+      const iRows = iRes.data.values || [];
+      if (iRows.length > 0) {
+        const iHeaders = iRows[0].map((h: string) => h.toLowerCase());
+        for (let i = 1; i < iRows.length; i++) {
+          const row: any = { _rowIndex: i + 1 };
+          iHeaders.forEach((h: string, idx: number) => {
+            row[h] = iRows[i][idx] || '';
+          });
+          allIdp.push(row);
+        }
+      }
+    } catch(e) {}
+
     const headers = pRows[0].map((h: string) => h.trim().toLowerCase());
     const nipIdx = headers.indexOf('nip');
     const namaIdx = headers.indexOf('nama');
@@ -50,7 +67,8 @@ export async function GET() {
         pangkat: row[pangkatIdx] || '',
         jabatan: row[jabatanIdx] || '',
         unit_kerja: row[unitKerjaIdx] || '',
-        sertifikasi: allSertifikasi.filter(s => s.nip?.toString().trim() === currentNip)
+        sertifikasi: allSertifikasi.filter(s => s.nip?.toString().trim() === currentNip),
+        idp: allIdp.filter(idp => idp.nip?.toString().trim() === currentNip)
       };
 
       // Hitung JP dinamis dari sertifikasi aktual

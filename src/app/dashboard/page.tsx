@@ -8,6 +8,7 @@ export default function DashboardPage() {
   const [pegawai, setPegawai] = useState<any>(null);
   const [sertifikasi, setSertifikasi] = useState<any[]>([]);
   const [pendidikan, setPendidikan] = useState<any[]>([]);
+  const [idpList, setIdpList] = useState<any[]>([]);
   const [totalJP, setTotalJP] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -36,6 +37,7 @@ export default function DashboardPage() {
             setTotalJP(sum);
           }
           if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
+          if (result.data.idp) setIdpList(result.data.idp);
         }
       } catch (error) {
         console.error('Failed to fetch', error);
@@ -309,9 +311,26 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td colSpan={6} className="text-center text-muted py-4">Belum ada pengajuan IDP.</td>
-                      </tr>
+                      {idpList.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center text-muted py-4">Belum ada pengajuan IDP.</td>
+                        </tr>
+                      ) : (
+                        idpList.map((idp, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td className="fw-bold text-primary">{idp.jenis_kompetensi}</td>
+                            <td>{idp.jenis_pengembangan} <br/><span className="text-muted" style={{fontSize: '0.8rem'}}>{idp.jalur_pengembangan}</span></td>
+                            <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
+                            <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
+                            <td>
+                              {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
+                               idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
+                               <span className="badge bg-warning text-dark">Menunggu Persetujuan</span>}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
