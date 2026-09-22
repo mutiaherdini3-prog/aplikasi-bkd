@@ -18,9 +18,12 @@ export default function DashboardPage() {
     const nip = localStorage.getItem('loggedInUser');
     if (!nip) return;
     try {
-      const res = await fetch(`/api/pegawai?nip=${nip}`);
+      const [res, resBawahan] = await Promise.all([
+        fetch(`/api/pegawai?nip=${nip}`),
+        fetch(`/api/pegawai?ketua_nip=${nip}`)
+      ]);
+
       const result = await res.json();
-      
       if (result.success && result.data) {
         if (result.data.pegawai) setPegawai(result.data.pegawai);
         if (result.data.sertifikasi) {
@@ -34,7 +37,6 @@ export default function DashboardPage() {
         if (result.data.isAtasan) setIsAtasan(result.data.isAtasan);
       }
 
-      const resBawahan = await fetch(`/api/pegawai?ketua_nip=${nip}`);
       const resultBawahan = await resBawahan.json();
       if (resultBawahan.success && resultBawahan.data) {
         setIdpBawahan(resultBawahan.data);
