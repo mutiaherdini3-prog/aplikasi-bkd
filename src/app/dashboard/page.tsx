@@ -84,6 +84,16 @@ export default function DashboardPage() {
     }
   };
 
+  const hapusIDP = async (rowIndex: string) => {
+    if (confirm('Yakin ingin menghapus pengajuan IDP ini?')) {
+      try {
+        const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
+        if (res.ok) fetchData();
+        else alert('Gagal menghapus IDP');
+      } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); }
+    }
+  };
+
   const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
     if (confirm(`Yakin ingin mengubah status menjadi ${status}?`)) {
       try {
@@ -331,6 +341,7 @@ export default function DashboardPage() {
                         <th>Waktu Pelaksanaan</th>
                         <th>JP</th>
                         <th>Status</th>
+                        <th className="text-center">Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -351,7 +362,13 @@ export default function DashboardPage() {
                                idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua, Menunggu Admin</span> :
                                idp.status === 'Menunggu Persetujuan Ketua' ? <span className="badge bg-warning text-dark">Menunggu Persetujuan Ketua</span> :
                                idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
+                               idp.status === 'Selesai' ? <span className="badge bg-primary">Selesai (Bukti Terkirim)</span> :
                                <span className="badge bg-secondary">{idp.status}</span>}
+                            </td>
+                            <td className="text-center">
+                              <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIDP(idp._rowIndex)}>
+                                <i className="bi bi-trash"></i>
+                              </button>
                             </td>
                           </tr>
                         ))
