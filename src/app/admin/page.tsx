@@ -60,6 +60,10 @@ export default function AdminPage() {
       const jp = filteredSertifikasi?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
       return { ...p, jp, filteredSertifikasi };
     });
+    
+    // Sort by JP terbanyak
+    computed.sort((a, b) => b.jp - a.jp);
+    
     setPegawaiList(computed);
   }, [rawPegawaiList, tahunFilter]);
 
