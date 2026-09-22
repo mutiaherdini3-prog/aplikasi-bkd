@@ -1093,10 +1093,16 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Atasan Langsung (Approver IDP)</label>
-                      <select className="form-select" value={pegawaiForm.nip_atasan || ''} onChange={e => setPegawaiForm({...pegawaiForm, nip_atasan: e.target.value})}>
-                        <option value="">- Belum Ditentukan -</option>
+                      <input 
+                        list="atasanList" 
+                        className="form-control" 
+                        placeholder="Ketik Nama atau NIP..."
+                        value={pegawaiForm.nip_atasan || ''} 
+                        onChange={e => setPegawaiForm({...pegawaiForm, nip_atasan: e.target.value})} 
+                      />
+                      <datalist id="atasanList">
                         {semuaPegawai.filter(p => p.nip !== pegawaiForm.nip).map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
-                      </select>
+                      </datalist>
                     </div>
                   </div>
                 </div>
