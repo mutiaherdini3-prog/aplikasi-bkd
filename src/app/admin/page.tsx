@@ -23,6 +23,25 @@ export default function AdminPage() {
   const [tahunFilter, setTahunFilter] = useState<string>('all');
   const [rawPegawaiList, setRawPegawaiList] = useState<any[]>([]);
 
+  const fetchData = async () => {
+    try {
+      const userNip = localStorage.getItem('userNip') || '';
+      const res = await fetch(`/api/admin/data?nip=${userNip}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setRawPegawaiList(json.data);
+      }
+      
+      const resAll = await fetch(`/api/pegawai/all?nip=${userNip}`);
+      const jsonAll = await resAll.json();
+      if (jsonAll.success) {
+        setSemuaPegawai(jsonAll.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch data', err);
+    }
+  };
+
   useEffect(() => {
     const role = localStorage.getItem('userRole') || '';
     if (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat') {
@@ -30,25 +49,6 @@ export default function AdminPage() {
       return;
     }
     setUserRole(role);
-
-    const fetchData = async () => {
-      try {
-        const userNip = localStorage.getItem('userNip') || '';
-        const res = await fetch(`/api/admin/data?nip=${userNip}`);
-        const json = await res.json();
-        if (json.success && json.data) {
-          setRawPegawaiList(json.data);
-        }
-        
-        const resAll = await fetch(`/api/pegawai/all?nip=${userNip}`);
-        const jsonAll = await resAll.json();
-        if (jsonAll.success) {
-          setSemuaPegawai(jsonAll.data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch data', err);
-      }
-    };
     fetchData();
   }, [router]);
 
@@ -71,8 +71,11 @@ export default function AdminPage() {
     if (confirm('Yakin ingin menghapus pegawai ini beserta seluruh datanya?')) {
       try {
         const res = await fetch(`/api/pegawai?nip=${nip}`, { method: 'DELETE' });
-        if (res.ok) window.location.reload();
-        else alert('Gagal menghapus pegawai');
+        if (res.ok) {
+          fetchData();
+        } else {
+          alert('Gagal menghapus pegawai');
+        }
       } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
   };
@@ -119,8 +122,12 @@ export default function AdminPage() {
         body: JSON.stringify(dataToSave)
       });
       const json = await res.json();
-      if (json.success) window.location.reload();
-      else alert('Gagal menyimpan data pegawai: ' + (json.message || json.error));
+      if (json.success) {
+        fetchData();
+        setShowPegawaiModal(false);
+      } else {
+        alert('Gagal menyimpan data pegawai: ' + (json.message || json.error));
+      }
     } catch(e) {
       alert('Terjadi kesalahan');
     }
@@ -137,8 +144,10 @@ export default function AdminPage() {
           body: JSON.stringify(idpForm)
         });
         const json = await res.json();
-        if (json.success) window.location.reload();
-        else alert('Gagal mengedit IDP: ' + (json.message || json.error));
+        if (json.success) {
+          fetchData();
+          setShowIdpModal(false);
+        } else alert('Gagal mengedit IDP: ' + (json.message || json.error));
       } else {
         // Tambah IDP
         const res = await fetch(`/api/idp?nip=${idpForm.nip}`, {
@@ -147,8 +156,10 @@ export default function AdminPage() {
           body: JSON.stringify([idpForm]) // POST expects array
         });
         const json = await res.json();
-        if (json.success) window.location.reload();
-        else alert('Gagal menambah IDP: ' + (json.message || json.error));
+        if (json.success) {
+          fetchData();
+          setShowIdpModal(false);
+        } else alert('Gagal menambah IDP: ' + (json.message || json.error));
       }
     } catch(e) {
       alert('Terjadi kesalahan');
@@ -159,7 +170,7 @@ export default function AdminPage() {
     if (confirm('Yakin ingin menghapus pengajuan IDP ini?')) {
       try {
         const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) window.location.reload();
+        if (res.ok) fetchData();
         else alert('Gagal menghapus IDP');
       } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
@@ -169,7 +180,7 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(newStatus)}`, { method: 'PUT' });
       if (res.ok) {
-        window.location.reload();
+        fetchData();
       } else {
         alert('Gagal memperbarui status');
       }
