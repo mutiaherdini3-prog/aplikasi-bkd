@@ -15,6 +15,7 @@ export default function AdminPage() {
   const [showIdpModal, setShowIdpModal] = useState(false);
   const [idpForm, setIdpForm] = useState<any>({});
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState<string>('');
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
@@ -23,11 +24,12 @@ export default function AdminPage() {
   const [rawPegawaiList, setRawPegawaiList] = useState<any[]>([]);
 
   useEffect(() => {
-    const role = localStorage.getItem('userRole');
-    if (role !== 'admin') {
+    const role = localStorage.getItem('userRole') || '';
+    if (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat') {
       router.push('/login');
       return;
     }
+    setUserRole(role);
 
     const fetchData = async () => {
       try {
@@ -70,14 +72,46 @@ export default function AdminPage() {
     }
   };
 
+  const getGolonganOptions = () => {
+    if (pegawaiForm.status_pegawai === 'PNS') {
+      return [
+        "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I", 
+        "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I", 
+        "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I", 
+        "IV/a - Pembina", "IV/b - Pembina Tk. I", "IV/c - Pembina Utama Muda", "IV/d - Pembina Utama Madya", "IV/e - Pembina Utama"
+      ];
+    } else if (pegawaiForm.status_pegawai === 'PPPK') {
+      return ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII"].map(g => `Golongan ${g}`);
+    }
+    return [];
+  };
+
   const handleSavePegawai = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const dataToSave = { ...pegawaiForm };
+      
+      let valGolongan = '-';
+      let valPangkat = '-';
+      if (dataToSave.golonganPangkat && dataToSave.status_pegawai === 'PNS') {
+        const parts = dataToSave.golonganPangkat.split(' - ');
+        valGolongan = parts[0] || '-';
+        valPangkat = parts[1] || '-';
+      } else if (dataToSave.golonganPangkat && dataToSave.status_pegawai === 'PPPK') {
+        valGolongan = dataToSave.golonganPangkat;
+        valPangkat = 'Tidak Ada';
+      } else if (dataToSave.status_pegawai === 'PW') {
+        valGolongan = '-';
+        valPangkat = '-';
+      }
+      dataToSave.golongan = valGolongan;
+      dataToSave.pangkat = valPangkat;
+
       const method = pegawaiForm.isEdit ? 'PUT' : 'POST';
       const res = await fetch('/api/pegawai', {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pegawaiForm)
+        body: JSON.stringify(dataToSave)
       });
       const json = await res.json();
       if (json.success) window.location.reload();
@@ -142,6 +176,10 @@ export default function AdminPage() {
   const availableYears = Array.from(new Set(
     rawPegawaiList.flatMap(p => p.sertifikasi?.map((s: any) => s.tahun).filter(Boolean))
   )).sort().reverse();
+
+  const availableUnitKerja = Array.from(new Set(
+    semuaPegawai.map(p => p.unit_kerja).filter(Boolean)
+  )).sort();
 
   const lulus = pegawaiList.filter(p => p.jp >= 20).length;
   const belum = pegawaiList.length - lulus;
@@ -306,11 +344,13 @@ export default function AdminPage() {
           {/* Sidebar */}
           <div className="col-lg-2 d-none d-lg-block sidebar">
             <div className="sidebar-brand">
-              <i className="bi bi-shield-lock-fill text-info me-2"></i> Admin DIKLAT
+              <i className="bi bi-shield-lock-fill text-info me-2"></i> Admin SIPJP-BABAR
             </div>
             <ul className="sidebar-nav">
               <li><a onClick={() => setActiveTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
-              <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai</a></li>
+              {(userRole === 'super_admin' || userRole === 'admin') && (
+                <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai</a></li>
+              )}
               <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
               <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
               <li className="mt-5"><a onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-left"></i> Logout</a></li>
@@ -517,7 +557,13 @@ export default function AdminPage() {
                             <td className="text-center">
                               <button className="btn btn-sm btn-outline-info me-1" title="Lihat Profil" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}><i className="bi bi-eye"></i></button>
                               <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
-                                setPegawaiForm({ ...p, isEdit: true });
+                                setPegawaiForm({ 
+                                  ...p, 
+                                  isEdit: true,
+                                  golonganPangkat: (p.golongan && p.pangkat && p.pangkat !== 'Tidak Ada' && p.pangkat !== '-') 
+                                    ? `${p.golongan} - ${p.pangkat}` 
+                                    : (p.golongan || '')
+                                });
                                 setShowPegawaiModal(true);
                               }}><i className="bi bi-pencil"></i></button>
                               <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
@@ -763,20 +809,29 @@ export default function AdminPage() {
                     )}
                     <div className="col-md-6">
                       <label className="form-label">Status Pegawai</label>
-                      <select className="form-select" value={pegawaiForm.status_pegawai || ''} onChange={e => setPegawaiForm({...pegawaiForm, status_pegawai: e.target.value})}>
-                        <option value="">- Pilih -</option>
-                        <option value="PNS">PNS</option>
-                        <option value="P3K">P3K</option>
-                        <option value="PW">PW</option>
+                      <select className="form-select" required value={pegawaiForm.status_pegawai || ''} onChange={e => setPegawaiForm({...pegawaiForm, status_pegawai: e.target.value, golonganPangkat: ''})}>
+                        <option value="">- Pilih Status Pegawai -</option>
+                        <option value="PNS">PNS (Pegawai Negeri Sipil)</option>
+                        <option value="PPPK">PPPK (Pegawai Pemerintah dengan Perjanjian Kerja)</option>
+                        <option value="PW">PW (Pegawai Waktu Tertentu / Honorer)</option>
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label">Pangkat</label>
-                      <input type="text" className="form-control" value={pegawaiForm.pangkat || ''} onChange={e => setPegawaiForm({...pegawaiForm, pangkat: e.target.value})} />
+                      <label className="form-label">Golongan / Pangkat *</label>
+                      <select className="form-select" required={pegawaiForm.status_pegawai !== 'PW'} disabled={!pegawaiForm.status_pegawai || pegawaiForm.status_pegawai === 'PW'} value={pegawaiForm.golonganPangkat || ''} onChange={e => setPegawaiForm({...pegawaiForm, golonganPangkat: e.target.value})}>
+                        <option value="">- Pilih Golongan / Pangkat -</option>
+                        {getGolonganOptions().map((opt, i) => (
+                          <option key={i} value={opt}>{opt}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label">Golongan</label>
-                      <input type="text" className="form-control" value={pegawaiForm.golongan || ''} onChange={e => setPegawaiForm({...pegawaiForm, golongan: e.target.value})} />
+                      <label className="form-label">Jenis Kelamin *</label>
+                      <select className="form-select" required value={pegawaiForm.jenkel || ''} onChange={e => setPegawaiForm({...pegawaiForm, jenkel: e.target.value})}>
+                        <option value="">- Pilih Jenis Kelamin -</option>
+                        <option value="Laki-Laki">Laki-Laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                      </select>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Jabatan</label>
@@ -784,7 +839,16 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Unit Kerja</label>
-                      <input type="text" className="form-control" value={pegawaiForm.unit_kerja || ''} onChange={e => setPegawaiForm({...pegawaiForm, unit_kerja: e.target.value})} />
+                      <select 
+                        className="form-select" 
+                        value={pegawaiForm.unit_kerja || ''} 
+                        onChange={e => setPegawaiForm({...pegawaiForm, unit_kerja: e.target.value})}
+                      >
+                        <option value="">- Pilih Unit Kerja -</option>
+                        {availableUnitKerja.map((uk: any, idx) => (
+                          <option key={idx} value={uk}>{uk}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Status Aktif</label>
@@ -792,6 +856,21 @@ export default function AdminPage() {
                         <option value="Aktif">Aktif</option>
                         <option value="Tidak Aktif">Tidak Aktif</option>
                         <option value="Mutasi">Mutasi</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Hak Akses (Role)</label>
+                      <select className="form-select" value={pegawaiForm.role || 'pegawai'} onChange={e => setPegawaiForm({...pegawaiForm, role: e.target.value})}>
+                        <option value="pegawai">Pegawai Biasa</option>
+                        <option value="admin_diklat">Admin SIPJP-BABAR</option>
+                        <option value="super_admin">Super Admin</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Atasan Langsung (Approver IDP)</label>
+                      <select className="form-select" value={pegawaiForm.nip_atasan || ''} onChange={e => setPegawaiForm({...pegawaiForm, nip_atasan: e.target.value})}>
+                        <option value="">- Belum Ditentukan -</option>
+                        {semuaPegawai.filter(p => p.nip !== pegawaiForm.nip).map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
                       </select>
                     </div>
                   </div>

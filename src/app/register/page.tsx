@@ -24,7 +24,7 @@ export default function RegisterPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">
             Daftar Akun Pegawai
           </h1>
-          <p className="text-foreground/70">Bergabunglah dengan Sistem BKD</p>
+          <p className="text-foreground/70">Bergabunglah dengan SIPJP-BABAR</p>
         </div>
 
         <div className="glass-panel p-8">

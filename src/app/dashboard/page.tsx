@@ -126,7 +126,7 @@ export default function DashboardPage() {
       <nav className="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
         <div className="container">
           <a className="navbar-brand" href="#">
-            <i className="bi bi-shield-lock-fill me-2 text-info"></i> Portal Diklat
+            <i className="bi bi-shield-lock-fill me-2 text-info"></i> Portal SIPJP-BABAR
           </a>
           <div className="d-flex align-items-center">
             <span className="text-white-50 me-3"><i className="bi bi-clock me-1"></i> Terakhir login: Baru saja</span>

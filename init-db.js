@@ -53,12 +53,12 @@ async function main() {
   }
 
   // Populate pegawai headers & Admin user
-  const pegawaiHeaders = ["nip", "password", "nama", "status pegawai", "pangkat", "golongan ", "jankel", "jabatan", "unit kerja", "jumlah jp"];
-  const adminRow = ["admin", "admin123", "Administrator Sistem", "PNS", "Pembina", "IV/a", "Pria", "Administrator", "Badan Kepegawaian Daerah", "0"];
+  const pegawaiHeaders = ["nip", "password", "nama", "status pegawai", "pangkat", "golongan ", "jankel", "jabatan", "unit kerja", "jumlah jp", "status aktif", "foto profil", "role", "nip_atasan"];
+  const adminRow = ["admin", "admin123", "Administrator Sistem", "PNS", "Pembina", "IV/a", "Pria", "Administrator", "Badan Kepegawaian Daerah", "0", "Aktif", "", "super_admin", ""];
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: sheetId,
-    range: 'pegawai!A1:J2',
+    range: 'pegawai!A1:N2',
     valueInputOption: 'USER_ENTERED',
     requestBody: { values: [pegawaiHeaders, adminRow] }
   });

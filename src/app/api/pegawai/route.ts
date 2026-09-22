@@ -18,7 +18,7 @@ const getColumnName = (n: number) => {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif } = body;
+    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan } = body;
     
     if (!nip || !nama) return NextResponse.json({ success: false, message: 'NIP and Nama are required' }, { status: 400 });
 
@@ -75,6 +75,14 @@ export async function POST(request: Request) {
       // We don't update header row in sheet immediately, but it's fine since append will just add to column K
     }
     newRow[statusAktifIdx] = status_aktif || 'Aktif';
+
+    let roleIdx = pHeaders.indexOf('role');
+    if (roleIdx === -1) { roleIdx = pHeaders.length; pHeaders.push('role'); }
+    newRow[roleIdx] = role || 'pegawai';
+
+    let nipAtasanIdx = pHeaders.indexOf('nip_atasan');
+    if (nipAtasanIdx === -1) { nipAtasanIdx = pHeaders.length; pHeaders.push('nip_atasan'); }
+    newRow[nipAtasanIdx] = nip_atasan || '';
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
@@ -227,6 +235,8 @@ export async function GET(request: Request) {
             if (key === 'status aktif') key = 'status_aktif';
             pegawaiData[key] = pRows[i][idx] || '';
           });
+          if (!pegawaiData.role) pegawaiData.role = (pegawaiData.nip === 'admin') ? 'super_admin' : 'pegawai';
+          if (!pegawaiData.nip_atasan) pegawaiData.nip_atasan = '';
           break;
         }
       }
@@ -303,7 +313,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif } = body;
+    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan } = body;
     if (!nip) return NextResponse.json({ success: false }, { status: 400 });
 
     const sheets = getGoogleSheets();
@@ -359,8 +369,33 @@ export async function PUT(request: Request) {
       newRow[statusAktifIdx] = status_aktif;
     }
 
-    const foto_profil = body.foto_profil;
     let headersUpdated = false;
+
+    if (role !== undefined) {
+      let roleIdx = pHeaders.indexOf('role');
+      if (roleIdx === -1) {
+        roleIdx = pHeaders.length;
+        pHeaders.push('role');
+        pRows[0].push('role');
+        headersUpdated = true;
+      }
+      while (newRow.length <= roleIdx) newRow.push('');
+      newRow[roleIdx] = role;
+    }
+
+    if (nip_atasan !== undefined) {
+      let nipAtasanIdx = pHeaders.indexOf('nip_atasan');
+      if (nipAtasanIdx === -1) {
+        nipAtasanIdx = pHeaders.length;
+        pHeaders.push('nip_atasan');
+        pRows[0].push('nip_atasan');
+        headersUpdated = true;
+      }
+      while (newRow.length <= nipAtasanIdx) newRow.push('');
+      newRow[nipAtasanIdx] = nip_atasan;
+    }
+
+    const foto_profil = body.foto_profil;
 
     if (foto_profil !== undefined) {
       let fotoIdx = pHeaders.indexOf('foto profil');

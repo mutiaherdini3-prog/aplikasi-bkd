@@ -234,7 +234,7 @@ export default function SertifikasiPage() {
       `}} />
 
       <nav className="navbar-top d-flex justify-content-between align-items-center">
-        <div><span className="brand-text brand-my">DIKLAT</span><span className="brand-text text-secondary ms-2 fw-normal" style={{fontSize:'1.1rem'}}>Portal Layanan Kepegawaian</span></div>
+        <div><span className="brand-text brand-my">SIPJP-BABAR</span><span className="brand-text text-secondary ms-2 fw-normal" style={{fontSize:'1.1rem'}}>Portal Layanan Kepegawaian</span></div>
         <div className="d-flex align-items-center gap-4">
           <i className="bi bi-search text-muted fs-5"></i>
           <div className="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary border" style={{width:'40px', height:'40px'}}><i className="bi bi-person-fill"></i></div>

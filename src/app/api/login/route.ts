@@ -27,6 +27,11 @@ export async function POST(request: Request) {
       if (row[passIdx]?.trim() !== password.trim()) return NextResponse.json({ success: false, error: 'Wrong password' }, { status: 401 });
       const data: any = {};
       headers.forEach((h, i) => data[h] = row[i] || '');
+      
+      // Defaults for missing columns
+      if (!data['role']) data['role'] = (data.nip === 'admin') ? 'super_admin' : 'pegawai';
+      if (!data['nip_atasan']) data['nip_atasan'] = '';
+      
       return NextResponse.json({ success: true, data });
     }
     

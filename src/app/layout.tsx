@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sistem Kepegawaian (BKD)",
+  title: "SIPJP-BABAR",
   description: "Aplikasi Manajemen Data dan Sertifikasi Pegawai Premium",
 };
 
