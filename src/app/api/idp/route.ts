@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       item.jalur_pengembangan || '',
       item.penyelenggara || '',
       item.waktu_pelaksanaan_awal || '',
+      item.waktu_pelaksanaan_akhir || '',
       item.jp || '',
       item.anggaran || '',
       item.status || 'Menunggu Persetujuan Ketua',
