@@ -28,9 +28,10 @@ export default function LoginPage() {
 
       const data = result.data;
       localStorage.setItem('loggedInUser', data.nip);
-      localStorage.setItem('userRole', data.jabatan === 'Administrator' ? 'admin' : 'pegawai');
+      const assignedRole = data.role || (data.jabatan === 'Administrator' ? 'super_admin' : 'pegawai');
+      localStorage.setItem('userRole', assignedRole);
       
-      if (data.jabatan === 'Administrator') {
+      if (assignedRole === 'super_admin' || assignedRole === 'admin_diklat' || data.jabatan === 'Administrator') {
         router.push('/admin');
       } else {
         router.push('/dashboard');

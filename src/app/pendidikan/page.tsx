@@ -135,22 +135,12 @@ export default function PendidikanPage() {
                             <option value="S3">Strata 3 (S3)</option>
                           </select>
                         </div>
-                        <div className="col-md-8">
-                          <label className="form-label fw-medium small">Nama Institusi / Sekolah / Universitas *</label>
-                          <input type="text" className="form-control" placeholder="Contoh: Universitas Gadjah Mada" required value={p.institusi || ''} onChange={e => handleChange(p.id, 'institusi', e.target.value)} />
-                        </div>
+
                         <div className="col-md-6">
                           <label className="form-label fw-medium small">Fakultas / Program Studi / Jurusan</label>
                           <input type="text" className="form-control" placeholder="Contoh: Ilmu Komputer" value={p.jurusan || ''} onChange={e => handleChange(p.id, 'jurusan', e.target.value)} />
                         </div>
-                        <div className="col-md-6">
-                          <label className="form-label fw-medium small">Nomor Ijazah *</label>
-                          <input type="text" className="form-control" placeholder="Masukkan nomor ijazah lengkap" required value={p.no_ijazah || ''} onChange={e => handleChange(p.id, 'no_ijazah', e.target.value)} />
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label fw-medium small">Tahun Lulus *</label>
-                          <input type="number" className="form-control" placeholder="Contoh: 2018" required min="1950" max="2050" value={p.tahun_lulus || ''} onChange={e => handleChange(p.id, 'tahun_lulus', e.target.value)} />
-                        </div>
+
                       </div>
                     </div>
                   ))}

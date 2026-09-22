@@ -284,9 +284,7 @@ export default function DashboardPage() {
                       <tr>
                         <th>No</th>
                         <th>Tingkat</th>
-                        <th>Nama Institusi</th>
                         <th>Jurusan</th>
-                        <th>Tahun Lulus</th>
                         <th>Aksi</th>
                       </tr>
                     </thead>
@@ -300,9 +298,7 @@ export default function DashboardPage() {
                           <tr key={p._rowIndex || index}>
                             <td>{index + 1}</td>
                             <td className="fw-bold text-primary">{p.tingkat_pendidikan}</td>
-                            <td>{p.nama_institusi}</td>
                             <td>{p.jurusan || '-'}</td>
-                            <td><span className="badge bg-secondary rounded-pill">{p.tahun_lulus}</span></td>
                             <td>
                               <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPendidikan(p._rowIndex)}>
                                 <i className="bi bi-trash"></i>
