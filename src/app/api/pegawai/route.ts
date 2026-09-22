@@ -216,7 +216,7 @@ export async function GET(request: Request) {
     if (!nip) return NextResponse.json({ success: false, message: 'NIP required' }, { status: 400 });
 
     // Pegawai
-    let pegawaiData = null;
+    let pegawaiData: any = null;
     const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
     const pRows = pRes.data.values || [];
     const pHeaders = pRows[0]?.map(h => h.toLowerCase()) || [];
