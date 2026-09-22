@@ -13,6 +13,35 @@ export default function DashboardPage() {
   const [totalJP, setTotalJP] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const fetchData = async () => {
+    const nip = localStorage.getItem('loggedInUser');
+    if (!nip) return;
+    try {
+      const res = await fetch(`/api/pegawai?nip=${nip}`);
+      const result = await res.json();
+      
+      if (result.success && result.data) {
+        if (result.data.pegawai) setPegawai(result.data.pegawai);
+        if (result.data.sertifikasi) {
+          setSertifikasi(result.data.sertifikasi);
+          let sum = 0;
+          result.data.sertifikasi.forEach((s: any) => sum += (s.jumlah_jp || 0));
+          setTotalJP(sum);
+        }
+        if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
+        if (result.data.idp) setIdpList(result.data.idp);
+      }
+
+      const resBawahan = await fetch(`/api/pegawai?ketua_nip=${nip}`);
+      const resultBawahan = await resBawahan.json();
+      if (resultBawahan.success && resultBawahan.data) {
+        setIdpBawahan(resultBawahan.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch', error);
+    }
+  };
+
   useEffect(() => {
     const nip = localStorage.getItem('loggedInUser');
     if (!nip) {
@@ -24,32 +53,6 @@ export default function DashboardPage() {
       return;
     }
 
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`/api/pegawai?nip=${nip}`);
-        const result = await res.json();
-        
-        if (result.success && result.data) {
-          if (result.data.pegawai) setPegawai(result.data.pegawai);
-          if (result.data.sertifikasi) {
-            setSertifikasi(result.data.sertifikasi);
-            let sum = 0;
-            result.data.sertifikasi.forEach((s: any) => sum += (s.jumlah_jp || 0));
-            setTotalJP(sum);
-          }
-          if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
-          if (result.data.idp) setIdpList(result.data.idp);
-        }
-
-        const resBawahan = await fetch(`/api/pegawai?ketua_nip=${nip}`);
-        const resultBawahan = await resBawahan.json();
-        if (resultBawahan.success && resultBawahan.data) {
-          setIdpBawahan(resultBawahan.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch', error);
-      }
-    };
     fetchData();
   }, [router]);
 
@@ -63,7 +66,7 @@ export default function DashboardPage() {
     if (confirm('Yakin ingin menghapus sertifikat ini?')) {
       try {
         const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) window.location.reload();
+        if (res.ok) fetchData();
         else alert('Gagal menghapus sertifikat');
       } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
@@ -73,7 +76,7 @@ export default function DashboardPage() {
     if (confirm('Yakin ingin menghapus riwayat pendidikan ini?')) {
       try {
         const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) window.location.reload();
+        if (res.ok) fetchData();
         else alert('Gagal menghapus pendidikan');
       } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
     }
@@ -84,7 +87,7 @@ export default function DashboardPage() {
       try {
         const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(status)}`, { method: 'PUT' });
         if (res.ok) {
-          window.location.reload();
+          fetchData();
         } else {
           alert('Gagal memperbarui status');
         }

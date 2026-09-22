@@ -180,7 +180,7 @@ export default function SertifikasiPage() {
         return;
       }
 
-      router.push('/dashboard');
+      alert('Berhasil menyimpan data sertifikasi!');
     } catch (err) {
       alert('Gagal menyimpan');
     }
