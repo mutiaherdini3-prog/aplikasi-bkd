@@ -7,6 +7,7 @@ export default function IDPPage() {
   const router = useRouter();
   const [pegawai, setPegawai] = useState<any>(null);
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
+  const [isLoadingKetua, setIsLoadingKetua] = useState(true);
   const [selectedKetua, setSelectedKetua] = useState<{nip: string, nama: string} | null>(null);
   const [searchKetua, setSearchKetua] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -56,6 +57,8 @@ export default function IDPPage() {
         }
       } catch (err) {
         console.error('Failed to fetch data', err);
+      } finally {
+        setIsLoadingKetua(false);
       }
     };
     fetchData();
@@ -253,18 +256,24 @@ export default function IDPPage() {
                           />
                           {isDropdownOpen && searchKetua.length > 0 && (
                             <div className="dropdown-menu-custom">
-                              {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || p.nip.includes(searchKetua)).slice(0, 10).map(p => (
-                                <div key={p.nip} className="dropdown-item-custom" onClick={() => {
-                                  setSelectedKetua({ nip: p.nip, nama: p.nama });
-                                  setIsDropdownOpen(false);
-                                  setSearchKetua('');
-                                }}>
-                                  <div className="fw-bold">{p.nama}</div>
-                                  <div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {p.nip} {p.jabatan ? `- ${p.jabatan}` : ''}</div>
-                                </div>
-                              ))}
-                              {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || p.nip.includes(searchKetua)).length === 0 && (
-                                <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Ketua tidak ditemukan</div>
+                              {isLoadingKetua ? (
+                                <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Sedang memuat data ketua (harap tunggu beberapa detik)...</div>
+                              ) : (
+                                <>
+                                  {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua))).slice(0, 10).map(p => (
+                                    <div key={p.nip} className="dropdown-item-custom" onClick={() => {
+                                      setSelectedKetua({ nip: p.nip, nama: p.nama });
+                                      setIsDropdownOpen(false);
+                                      setSearchKetua('');
+                                    }}>
+                                      <div className="fw-bold">{p.nama}</div>
+                                      <div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {p.nip} {p.jabatan ? `- ${p.jabatan}` : ''}</div>
+                                    </div>
+                                  ))}
+                                  {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua))).length === 0 && (
+                                    <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Ketua tidak ditemukan</div>
+                                  )}
+                                </>
                               )}
                             </div>
                           )}
