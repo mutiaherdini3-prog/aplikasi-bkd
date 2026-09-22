@@ -109,7 +109,7 @@ export default function IDPPage() {
       
       const json = await res.json();
       if (json.success) {
-        alert('Berhasil menyimpan pengajuan IDP!');
+        router.push('/dashboard');
       } else {
         alert('Gagal menyimpan IDP: ' + (json.message || json.error));
       }

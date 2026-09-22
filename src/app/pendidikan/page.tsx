@@ -57,7 +57,7 @@ export default function PendidikanPage() {
           })
         });
       }
-      alert('Berhasil menyimpan data pendidikan!');
+      router.push('/dashboard');
     } catch (err) {
       alert('Gagal menyimpan');
     }

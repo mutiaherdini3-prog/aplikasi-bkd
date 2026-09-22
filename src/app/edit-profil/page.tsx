@@ -152,7 +152,7 @@ export default function EditProfilPage() {
         throw new Error(json.message || json.error || 'Gagal menyimpan data');
       }
       
-      alert('Berhasil menyimpan profil!');
+      router.push('/dashboard');
     } catch (err: any) {
       alert('Gagal menyimpan profil: ' + err.message);
     } finally {
