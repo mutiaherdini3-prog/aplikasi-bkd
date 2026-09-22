@@ -1130,20 +1130,35 @@ export default function AdminPage() {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label">Pegawai Pemilik IDP *</label>
-                      <select className="form-select" required value={idpForm.nip || ''} onChange={e => setIdpForm({...idpForm, nip: e.target.value})}>
-                        <option value="">- Pilih Pegawai -</option>
+                      <input 
+                        list="pemilikList"
+                        className="form-control" 
+                        required 
+                        placeholder="Ketik Nama atau NIP..."
+                        value={idpForm.nip || ''} 
+                        onChange={e => setIdpForm({...idpForm, nip: e.target.value})}
+                      />
+                      <datalist id="pemilikList">
                         {semuaPegawai.map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
-                      </select>
+                      </datalist>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Atasan / Ketua Penilai *</label>
-                      <select className="form-select" required value={idpForm.nip_ketua || ''} onChange={e => {
-                        const selected = semuaPegawai.find(p => p.nip === e.target.value);
-                        setIdpForm({...idpForm, nip_ketua: selected?.nip, nama_ketua: selected?.nama});
-                      }}>
-                        <option value="">- Pilih Atasan -</option>
+                      <input 
+                        list="ketuaList"
+                        className="form-control" 
+                        required 
+                        placeholder="Ketik Nama atau NIP..."
+                        value={idpForm.nip_ketua || ''} 
+                        onChange={e => {
+                          const val = e.target.value;
+                          const selected = semuaPegawai.find(p => p.nip === val);
+                          setIdpForm({...idpForm, nip_ketua: val, nama_ketua: selected ? selected.nama : ''});
+                        }}
+                      />
+                      <datalist id="ketuaList">
                         {semuaPegawai.filter(p => p.nip !== idpForm.nip).map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
-                      </select>
+                      </datalist>
                     </div>
                     <div className="col-md-12"><hr/></div>
                     <div className="col-md-6">
