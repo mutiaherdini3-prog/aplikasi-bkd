@@ -359,49 +359,51 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Approval IDP Bawahan */}
-                {idpBawahan.length > 0 && (
-                  <>
-                    <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
-                      <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan</h5>
-                    </div>
-                    
-                    <div className="table-responsive border rounded-3 bg-white mb-4 border-success">
-                      <table className="table table-hover mb-0" style={{ fontSize: '0.9rem' }}>
-                        <thead className="bg-success text-white">
-                          <tr>
-                            <th>No</th>
-                            <th>Nama Pegawai</th>
-                            <th>Pengembangan</th>
-                            <th>Pelaksanaan</th>
-                            <th>JP</th>
-                            <th className="text-center">Aksi (Ketua)</th>
+                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
+                  <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan</h5>
+                </div>
+                
+                <div className="table-responsive border rounded-3 bg-white mb-4 border-success">
+                  <table className="table table-hover mb-0" style={{ fontSize: '0.9rem' }}>
+                    <thead className="bg-success text-white">
+                      <tr>
+                        <th>No</th>
+                        <th>Nama Pegawai</th>
+                        <th>Pengembangan</th>
+                        <th>Pelaksanaan</th>
+                        <th>JP</th>
+                        <th className="text-center">Aksi (Ketua)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {idpBawahan.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center text-muted py-4">Belum ada pengajuan IDP dari bawahan yang perlu diproses.</td>
+                        </tr>
+                      ) : (
+                        idpBawahan.map((idp, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td><div className="fw-bold text-dark">{idp.nama_pegawai}</div><div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {idp.nip}</div></td>
+                            <td>{idp.jenis_pengembangan} <br/><span className="text-muted" style={{fontSize: '0.8rem'}}>{idp.jalur_pengembangan}</span></td>
+                            <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
+                            <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
+                            <td className="text-center">
+                              {idp.status === 'Menunggu Persetujuan Ketua' ? (
+                                <>
+                                  <button className="btn btn-sm btn-success me-1" title="Setujui IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Menunggu Persetujuan Admin')}><i className="bi bi-check-lg"></i> Setujui</button>
+                                  <button className="btn btn-sm btn-danger" title="Tolak IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i> Tolak</button>
+                                </>
+                              ) : (
+                                <span className={`badge ${idp.status === 'Ditolak' ? 'bg-danger' : 'bg-info'}`}>{idp.status === 'Ditolak' ? 'Ditolak' : 'Telah Disetujui'}</span>
+                              )}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {idpBawahan.map((idp, index) => (
-                            <tr key={index}>
-                              <td>{index + 1}</td>
-                              <td><div className="fw-bold text-dark">{idp.nama_pegawai}</div><div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {idp.nip}</div></td>
-                              <td>{idp.jenis_pengembangan} <br/><span className="text-muted" style={{fontSize: '0.8rem'}}>{idp.jalur_pengembangan}</span></td>
-                              <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
-                              <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
-                              <td className="text-center">
-                                {idp.status === 'Menunggu Persetujuan Ketua' ? (
-                                  <>
-                                    <button className="btn btn-sm btn-success me-1" title="Setujui IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Menunggu Persetujuan Admin')}><i className="bi bi-check-lg"></i> Setujui</button>
-                                    <button className="btn btn-sm btn-danger" title="Tolak IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i> Tolak</button>
-                                  </>
-                                ) : (
-                                  <span className={`badge ${idp.status === 'Ditolak' ? 'bg-danger' : 'bg-info'}`}>{idp.status === 'Ditolak' ? 'Ditolak' : 'Telah Disetujui'}</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
-                )}
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Sidebar Menu Interaktif */}
