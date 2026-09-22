@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [pendidikan, setPendidikan] = useState<any[]>([]);
   const [idpList, setIdpList] = useState<any[]>([]);
   const [idpBawahan, setIdpBawahan] = useState<any[]>([]);
+  const [isAtasan, setIsAtasan] = useState(false);
   const [totalJP, setTotalJP] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -30,6 +31,7 @@ export default function DashboardPage() {
         }
         if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
         if (result.data.idp) setIdpList(result.data.idp);
+        if (result.data.isAtasan) setIsAtasan(result.data.isAtasan);
       }
 
       const resBawahan = await fetch(`/api/pegawai?ketua_nip=${nip}`);
@@ -359,9 +361,11 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Approval IDP Bawahan */}
-                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
-                  <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan</h5>
-                </div>
+                {isAtasan && (
+                  <>
+                    <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
+                      <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan</h5>
+                    </div>
                 
                 <div className="table-responsive border rounded-3 bg-white mb-4 border-success">
                   <table className="table table-hover mb-0" style={{ fontSize: '0.9rem' }}>
@@ -404,6 +408,8 @@ export default function DashboardPage() {
                     </tbody>
                   </table>
                 </div>
+                </>
+              )}
               </div>
 
               {/* Sidebar Menu Interaktif */}

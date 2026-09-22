@@ -221,6 +221,8 @@ export async function GET(request: Request) {
     const pRows = pRes.data.values || [];
     const pHeaders = pRows[0]?.map(h => h.toLowerCase()) || [];
     const pNipIdx = pHeaders.indexOf('nip');
+    const nipAtasanIdx = pHeaders.indexOf('nip_atasan');
+    let isAtasan = false;
     if (pNipIdx !== -1) {
       for (let i=1; i<pRows.length; i++) {
         if (pRows[i][pNipIdx]?.trim() === nip.trim()) {
@@ -237,7 +239,9 @@ export async function GET(request: Request) {
           });
           if (!pegawaiData.role) pegawaiData.role = (pegawaiData.nip === 'admin') ? 'super_admin' : 'pegawai';
           if (!pegawaiData.nip_atasan) pegawaiData.nip_atasan = '';
-          break;
+        }
+        if (nipAtasanIdx !== -1 && pRows[i][nipAtasanIdx]?.trim() === nip.trim()) {
+          isAtasan = true;
         }
       }
     }
@@ -306,7 +310,10 @@ export async function GET(request: Request) {
       }
     } catch(e) {}
 
-    return NextResponse.json({ success: true, data: { pegawai: pegawaiData, sertifikasi: sertifikasiData, pendidikan: pendidikanData, idp: idpData }});
+    return NextResponse.json({ 
+      success: true, 
+      data: { pegawai: pegawaiData, isAtasan, sertifikasi: sertifikasiData, pendidikan: pendidikanData, idp: idpData } 
+    });
   } catch (e: any) { return NextResponse.json({ success: false }, { status: 500 }); }
 }
 
