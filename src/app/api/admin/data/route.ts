@@ -3,14 +3,37 @@ import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const reqNip = searchParams.get('nip');
+
     const sheets = getGoogleSheets();
     
     // Fetch Pegawai
     const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
     const pRows = pRes.data.values || [];
     if (pRows.length === 0) return NextResponse.json({ success: true, data: [] });
+
+    const headers = pRows[0].map((h: string) => h.trim().toLowerCase());
+    const nipIdx = headers.indexOf('nip');
+    const namaIdx = headers.indexOf('nama');
+    const statusIdx = headers.indexOf('status pegawai');
+    const pangkatIdx = headers.indexOf('pangkat');
+    const jabatanIdx = headers.indexOf('jabatan');
+    const unitKerjaIdx = headers.indexOf('unit kerja');
+    const roleIdx = headers.indexOf('role');
+
+    // Determine admin's role and unit_kerja
+    let adminRole = 'super_admin';
+    let adminUnitKerja = '';
+    if (reqNip && reqNip !== 'admin') {
+      const adminRow = pRows.find((row: any) => row[nipIdx]?.toString().trim() === reqNip.trim());
+      if (adminRow) {
+        adminRole = roleIdx !== -1 ? (adminRow[roleIdx] || 'pegawai') : 'pegawai';
+        adminUnitKerja = adminRow[unitKerjaIdx] || '';
+      }
+    }
 
     // Fetch Sertifikasi
     let allSertifikasi: any[] = [];
@@ -47,18 +70,17 @@ export async function GET() {
       }
     } catch(e) {}
 
-    const headers = pRows[0].map((h: string) => h.trim().toLowerCase());
-    const nipIdx = headers.indexOf('nip');
-    const namaIdx = headers.indexOf('nama');
-    const statusIdx = headers.indexOf('status pegawai');
-    const pangkatIdx = headers.indexOf('pangkat');
-    const jabatanIdx = headers.indexOf('jabatan');
-    const unitKerjaIdx = headers.indexOf('unit kerja');
-
     const result = [];
     for (let i = 1; i < pRows.length; i++) {
       const row = pRows[i];
       if (!row[nipIdx] || row[nipIdx] === 'admin') continue;
+
+      const currentUnitKerja = row[unitKerjaIdx] || '';
+      
+      // Filter for admin_diklat
+      if (adminRole === 'admin_diklat') {
+        if (currentUnitKerja !== adminUnitKerja) continue;
+      }
 
       const currentNip = row[nipIdx]?.toString().trim() || '';
 

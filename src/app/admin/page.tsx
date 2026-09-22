@@ -33,13 +33,14 @@ export default function AdminPage() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/admin/data');
+        const userNip = localStorage.getItem('userNip') || '';
+        const res = await fetch(`/api/admin/data?nip=${userNip}`);
         const json = await res.json();
         if (json.success && json.data) {
           setRawPegawaiList(json.data);
         }
         
-        const resAll = await fetch('/api/pegawai/all');
+        const resAll = await fetch(`/api/pegawai/all?nip=${userNip}`);
         const jsonAll = await resAll.json();
         if (jsonAll.success) {
           setSemuaPegawai(jsonAll.data);
