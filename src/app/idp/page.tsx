@@ -22,7 +22,7 @@ export default function IDPPage() {
     waktu_pelaksanaan_akhir: '',
     jp: '',
     anggaran: '',
-    status: 'Menunggu Persetujuan'
+    status: 'Menunggu Persetujuan Ketua'
   }]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,7 +68,7 @@ export default function IDPPage() {
     setIdps(prev => [...prev, { 
       id: Date.now(), 
       jenis_kompetensi: '', jenis_pengembangan: '', jalur_pengembangan: '', penyelenggara: '',
-      waktu_pelaksanaan_awal: '', waktu_pelaksanaan_akhir: '', jp: '', anggaran: '', status: 'Menunggu Persetujuan'
+      waktu_pelaksanaan_awal: '', waktu_pelaksanaan_akhir: '', jp: '', anggaran: '', status: 'Menunggu Persetujuan Ketua'
     }]);
   };
 
@@ -338,7 +338,7 @@ export default function IDPPage() {
                       </div>
                       <div className="col-md-6 d-none">
                         <label className="form-label">Status</label>
-                        <input type="text" className="form-control" value="Menunggu Persetujuan" readOnly />
+                        <input type="text" className="form-control" value="Menunggu Persetujuan Ketua" readOnly />
                       </div>
                     </div>
                   </div>
