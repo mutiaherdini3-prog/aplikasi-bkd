@@ -44,8 +44,15 @@ export default function IDPPage() {
         const resAll = await fetch('/api/pegawai/all');
         const resultAll = await resAll.json();
         if (resultAll.success) {
-          // Exclude self from ketua options
-          setSemuaPegawai(resultAll.data.filter((p: any) => p.nip !== nip));
+          const others = resultAll.data.filter((p: any) => p.nip !== nip);
+          setSemuaPegawai(others);
+          
+          if (result.data?.pegawai?.nip_atasan) {
+            const atasan = others.find((p: any) => p.nip === result.data.pegawai.nip_atasan);
+            if (atasan) {
+              setSelectedKetua({ nip: atasan.nip, nama: atasan.nama });
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to fetch data', err);
