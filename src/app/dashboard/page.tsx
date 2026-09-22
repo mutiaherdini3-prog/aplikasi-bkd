@@ -65,33 +65,27 @@ export default function DashboardPage() {
   };
 
   const hapusSertifikasi = async (rowIndex: string) => {
-    if (confirm('Yakin ingin menghapus sertifikat ini?')) {
-      try {
-        const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) fetchData();
-        else alert('Gagal menghapus sertifikat');
-      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
-    }
+    try {
+      const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
+      if (res.ok) fetchData();
+      else alert('Gagal menghapus sertifikat');
+    } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
   };
 
   const hapusPendidikan = async (rowIndex: string) => {
-    if (confirm('Yakin ingin menghapus riwayat pendidikan ini?')) {
-      try {
-        const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) fetchData();
-        else alert('Gagal menghapus pendidikan');
-      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
-    }
+    try {
+      const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
+      if (res.ok) fetchData();
+      else alert('Gagal menghapus pendidikan');
+    } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
   };
 
   const hapusIDP = async (rowIndex: string) => {
-    if (confirm('Yakin ingin menghapus pengajuan IDP ini?')) {
-      try {
-        const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) fetchData();
-        else alert('Gagal menghapus IDP');
-      } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); }
-    }
+    try {
+      const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
+      if (res.ok) fetchData();
+      else alert('Gagal menghapus IDP');
+    } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); }
   };
 
   const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
