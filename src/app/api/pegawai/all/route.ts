@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { getCachedSheetData } from '@/lib/google';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +8,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const reqNip = searchParams.get('nip');
 
-    const sheets = getGoogleSheets();
-    
     // Fetch Pegawai
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
-    const pRows = pRes.data.values || [];
+    const pRows = await getCachedSheetData('pegawai!A:Z');
     if (pRows.length === 0) return NextResponse.json({ success: true, data: [] });
 
     const headers = pRows[0].map((h: string) => h.trim().toLowerCase());

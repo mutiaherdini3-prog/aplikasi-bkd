@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { revalidateTag } from 'next/cache';
 
 // Helper for generating column letters (A, B, ..., Z, AA, AB, ...)
 const getColumnName = (n: number) => {
@@ -18,8 +19,7 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
   // 1. Get sertifikasi data
   let sertRows = preSertRows;
   if (!sertRows) {
-    const sertRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
-    sertRows = sertRes.data.values || [];
+    sertRows = await getCachedSheetData('sertifikasi!A:Z');
   }
   if (!sertRows || sertRows.length === 0) return;
   const sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase().replace(/_/g, ' '));
@@ -46,8 +46,7 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
   // 2. Get pegawai data
   let pegRows = prePegRows;
   if (!pegRows) {
-    const pegRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
-    pegRows = pegRes.data.values || [];
+    pegRows = await getCachedSheetData('pegawai!A:ZZ');
   }
   if (!pegRows || pegRows.length === 0) return;
   
@@ -141,14 +140,10 @@ export async function DELETE(request: Request) {
     const rowIdx = parseInt(rowIndex, 10) - 1;
 
     // We can fetch the deleted row AND pegawai in parallel to save time, but it's okay for DELETE to be slightly slower.
-    const [headerRes, rowRes] = await Promise.all([
-      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!1:1' }),
-      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: `sertifikasi!A${rowIdx + 1}:Z${rowIdx + 1}` })
-    ]);
-    
-    const headers = headerRes.data.values?.[0]?.map((h:string)=>h.trim().toLowerCase().replace(/_/g, ' ')) || [];
+    const allSertRows = await getCachedSheetData('sertifikasi!A:Z');
+    const headers = allSertRows[0]?.map((h:string)=>h.trim().toLowerCase().replace(/_/g, ' ')) || [];
     const nipIdx = headers.indexOf('nip');
-    const deletedRow = rowRes.data.values?.[0];
+    const deletedRow = allSertRows[rowIdx];
     const nip = (deletedRow && nipIdx !== -1) ? deletedRow[nipIdx] : null;
 
     // Delete row
@@ -162,6 +157,7 @@ export async function DELETE(request: Request) {
         await updatePegawaiSertifikasi(nip, sheets);
     }
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) { return NextResponse.json({ success: false, error: e.message }, { status: 500 }); }
 }
@@ -176,13 +172,13 @@ export async function POST(request: Request) {
     const sheets = getGoogleSheets();
     
     // 1. Fetch sertifikasi and pegawai in parallel to save huge amounts of time
-    const [sertRes, pegRes] = await Promise.all([
-      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' }),
-      sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' })
-    ]);
-
-    const sertRows = sertRes.data.values || [];
-    const pegRows = pegRes.data.values || [];
+    // But since they are cached, we can just call them
+    const sertRowsBase = await getCachedSheetData('sertifikasi!A:Z');
+    const pegRowsBase = await getCachedSheetData('pegawai!A:ZZ');
+    
+    // Create shallow copies so we can mutate them locally
+    const sertRows = [...sertRowsBase];
+    const pegRows = [...pegRowsBase];
     
     let sertHeaders: string[] = [];
     if (sertRows.length > 0) {
@@ -265,6 +261,7 @@ export async function POST(request: Request) {
 
     await Promise.all(promises);
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     console.error(e);

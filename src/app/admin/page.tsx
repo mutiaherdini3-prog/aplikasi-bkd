@@ -22,6 +22,31 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'PNS' | 'PPPK' | 'PW'>('all');
   const [tahunFilter, setTahunFilter] = useState<string>('all');
   const [rawPegawaiList, setRawPegawaiList] = useState<any[]>([]);
+  const [currentPagePegawai, setCurrentPagePegawai] = useState(1);
+  const [currentPageSert, setCurrentPageSert] = useState(1);
+  const [currentPageIdp, setCurrentPageIdp] = useState(1);
+  const ITEMS_PER_PAGE = 50;
+
+  // Reset pagination on filter change
+  useEffect(() => {
+    setCurrentPagePegawai(1);
+    setCurrentPageSert(1);
+    setCurrentPageIdp(1);
+  }, [filterMode, statusFilter, tahunFilter]);
+
+  // Pagination UI Component
+  const PaginationControls = ({ currentPage, setCurrentPage, totalItems }: { currentPage: number, setCurrentPage: (p: number) => void, totalItems: number }) => {
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    if (totalPages <= 1) return null;
+    return (
+      <div className="d-flex justify-content-center align-items-center mt-3 gap-2">
+        <button className="btn btn-outline-secondary btn-sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>Prev</button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button className="btn btn-outline-secondary btn-sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
+      </div>
+    );
+  };
+
 
   const fetchData = async () => {
     try {
@@ -525,6 +550,7 @@ export default function AdminPage() {
                         </tbody>
                       </table>
                     </div>
+                    <PaginationControls currentPage={currentPagePegawai} setCurrentPage={setCurrentPagePegawai} totalItems={pegawaiList.length} />
                   </div>
                 </div>
               )}
@@ -565,9 +591,9 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pegawaiList.map((p, index) => (
+                        {pegawaiList.slice((currentPagePegawai - 1) * ITEMS_PER_PAGE, currentPagePegawai * ITEMS_PER_PAGE).map((p, index) => (
                           <tr key={index}>
-                            <td>{index + 1}</td>
+                            <td>{(currentPagePegawai - 1) * ITEMS_PER_PAGE + index + 1}</td>
                             <td>{p.nip}</td>
                             <td className="fw-bold">{p.nama || '-'}</td>
                             <td>{p.status_aktif || 'Aktif'}</td>
@@ -615,36 +641,57 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pegawaiList.flatMap((p) => {
-                          if (!p.sertifikasi || p.sertifikasi.length === 0) {
-                            return [(
-                              <tr key={p.nip}>
-                                <td>{sertifCounter++}</td>
-                                <td className="fw-bold">{p.nama}</td>
-                                <td className="text-muted fst-italic" colSpan={3}>Belum ada data sertifikasi</td>
-                                <td><span className="badge bg-info rounded-pill">0 JP</span></td>
-                                <td></td>
-                              </tr>
-                            )];
-                          }
-                          return p.sertifikasi.map((s: any) => (
-                            <tr key={s.id}>
-                              <td>{sertifCounter++}</td>
-                              <td className="fw-bold">{p.nama}</td>
-                              <td className="text-primary fw-bold">{s.nama_kursus || s.jenis_sertifikasi || '-'}</td>
-                              <td>{s.institusi_penyelenggara || '-'}</td>
-                              <td>{s.nomor_sertifikasi || '-'}</td>
-                              <td>{s.tanggal_sertifikasi || '-'}</td>
-                              <td><span className="badge bg-info rounded-pill">{s.jumlah_jp || 0} JP</span></td>
-                              <td className="text-center">
-                                {s.link_sertifikat ? <button onClick={() => handleLihatDokumen(s.link_sertifikat)} className="btn btn-sm btn-outline-primary"><i className="bi bi-file-earmark-text"></i> Lihat</button> : '-'}
-                              </td>
-                            </tr>
-                          ));
-                        })}
+                        {(
+                          (() => {
+                            const sertItems = pegawaiList.flatMap((p) => {
+                              if (!p.sertifikasi || p.sertifikasi.length === 0) return [{ nip: p.nip, nama: p.nama, isEmpty: true }];
+                              return p.sertifikasi.map((s: any) => ({ nip: p.nip, nama: p.nama, isEmpty: false, data: s }));
+                            });
+                            
+                            const paginatedSert = sertItems.slice((currentPageSert - 1) * ITEMS_PER_PAGE, currentPageSert * ITEMS_PER_PAGE);
+                            
+                            return (
+                              <>
+                                {paginatedSert.map((item: any, idx: number) => {
+                                  const displayNo = (currentPageSert - 1) * ITEMS_PER_PAGE + idx + 1;
+                                  if (item.isEmpty) {
+                                    return (
+                                      <tr key={item.nip + "-empty"}>
+                                        <td>{displayNo}</td>
+                                        <td className="fw-bold">{item.nama}</td>
+                                        <td className="text-muted fst-italic" colSpan={3}>Belum ada data sertifikasi</td>
+                                        <td><span className="badge bg-info rounded-pill">0 JP</span></td>
+                                        <td></td>
+                                      </tr>
+                                    );
+                                  }
+                                  const s = item.data;
+                                  return (
+                                    <tr key={s.id || item.nip + "-" + idx}>
+                                      <td>{displayNo}</td>
+                                      <td className="fw-bold">{item.nama}</td>
+                                      <td className="text-primary fw-bold">{s.nama_kursus || s.jenis_sertifikasi || '-'}</td>
+                                      <td>{s.institusi_penyelenggara || '-'}</td>
+                                      <td>{s.nomor_sertifikasi || '-'}</td>
+                                      <td>{s.tanggal_sertifikasi || '-'}</td>
+                                      <td><span className="badge bg-info rounded-pill">{s.jumlah_jp || 0} JP</span></td>
+                                      <td className="text-center">
+                                        {s.link_sertifikat ? <button onClick={() => handleLihatDokumen(s.link_sertifikat)} className="btn btn-sm btn-outline-primary"><i className="bi bi-file-earmark-text"></i> Lihat</button> : '-'}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </>
+                            );
+                          })()
+                        )}
                       </tbody>
                     </table>
                   </div>
+                  {(() => {
+                    const sertItemsLength = pegawaiList.reduce((acc, p) => acc + (!p.sertifikasi || p.sertifikasi.length === 0 ? 1 : p.sertifikasi.length), 0);
+                    return <PaginationControls currentPage={currentPageSert} setCurrentPage={setCurrentPageSert} totalItems={sertItemsLength} />;
+                  })()}
                 </div>
               )}
 
@@ -680,45 +727,61 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pegawaiList.flatMap((p) => {
-                          if (!p.idp || p.idp.length === 0) {
-                            return [];
-                          }
-                          return p.idp.map((idp: any) => (
-                            <tr key={idp._rowIndex}>
-                              <td>{idpCounter++}</td>
-                              <td className="fw-bold">{p.nama}<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>{p.nip}</span></td>
-                              <td>{idp.jenis_kompetensi}</td>
-                              <td>{idp.jenis_pengembangan}<br/><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
-                              <td>{idp.penyelenggara}</td>
-                              <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
-                              <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
-                              <td>
-                                {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
-                                 idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
-                                 idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua</span> :
-                                 <span className="badge bg-warning text-dark">Menunggu Ketua</span>}
-                              </td>
-                              <td className="text-center">
-                                {idp.status === 'Menunggu Persetujuan Admin' ? (
-                                  <>
-                                    <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
-                                    <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
-                                  </>
-                                ) : (
-                                  <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
-                                )}
-                              </td>
-                              <td className="text-center">
-                                <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
-                                  setIdpForm({ ...idp, nip: p.nip, isEdit: true });
-                                  setShowIdpModal(true);
-                                }}><i className="bi bi-pencil"></i></button>
-                                <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex)}><i className="bi bi-trash"></i></button>
-                              </td>
-                            </tr>
-                          ));
-                        })}
+                        {(
+                          (() => {
+                            const idpItems = pegawaiList.flatMap((p) => {
+                              if (!p.idp || p.idp.length === 0) return [];
+                              return p.idp.map((idp: any) => ({ p, idp }));
+                            });
+                            
+                            if (idpItems.length === 0) return null;
+                            
+                            const paginatedIdp = idpItems.slice((currentPageIdp - 1) * ITEMS_PER_PAGE, currentPageIdp * ITEMS_PER_PAGE);
+                            return (
+                              <>
+                                {paginatedIdp.map((item: any, idx: number) => {
+                                  const displayNo = (currentPageIdp - 1) * ITEMS_PER_PAGE + idx + 1;
+                                  const p = item.p;
+                                  const idp = item.idp;
+                                  return (
+                                    <tr key={idp._rowIndex || item.p.nip + "-" + idx}>
+                                      <td>{displayNo}</td>
+                                      <td className="fw-bold">{p.nama}<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>{p.nip}</span></td>
+                                      <td>{idp.jenis_kompetensi}</td>
+                                      <td>{idp.jenis_pengembangan}<br/><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
+                                      <td>{idp.penyelenggara}</td>
+                                      <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
+                                      <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
+                                      <td>
+                                        {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
+                                         idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
+                                         idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua</span> :
+                                         <span className="badge bg-warning text-dark">Menunggu Ketua</span>}
+                                      </td>
+                                      <td className="text-center">
+                                        {idp.status === 'Menunggu Persetujuan Admin' ? (
+                                          <>
+                                            <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
+                                            <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
+                                          </>
+                                        ) : (
+                                          <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
+                                        )}
+                                      </td>
+                                      <td className="text-center">
+                                        <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
+                                          setIdpForm({ ...idp, nip: p.nip, isEdit: true });
+                                          setShowIdpModal(true);
+                                        }}><i className="bi bi-pencil"></i></button>
+                                        <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex)}><i className="bi bi-trash"></i></button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </>
+                            );
+                          })()
+                        )}
                         
                         {/* Jika kosong semua */}
                         {pegawaiList.flatMap(p => p.idp || []).length === 0 && (
@@ -729,6 +792,10 @@ export default function AdminPage() {
                       </tbody>
                     </table>
                   </div>
+                  {(() => {
+                    const idpItemsLength = pegawaiList.reduce((acc, p) => acc + (p.idp ? p.idp.length : 0), 0);
+                    return <PaginationControls currentPage={currentPageIdp} setCurrentPage={setCurrentPageIdp} totalItems={idpItemsLength} />;
+                  })()}
                 </div>
               )}
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +25,7 @@ export async function POST(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
-    const pRows = pRes.data.values || [];
+    const pRows = await getCachedSheetData('pegawai!A:Z');
     
     let pHeaders = [];
     if (pRows.length > 0) {
@@ -91,6 +91,7 @@ export async function POST(request: Request) {
       requestBody: { values: [newRow] }
     });
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
@@ -108,8 +109,7 @@ export async function DELETE(request: Request) {
     
     // 1. Delete from pegawai sheet
     const pSheet = sheetInfo.data.sheets?.find(s => s.properties?.title === 'pegawai');
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
-    const pRows = pRes.data.values || [];
+    const pRows = await getCachedSheetData('pegawai!A:Z');
     const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
     const nipIdx = pHeaders.indexOf('nip');
     
@@ -134,8 +134,7 @@ export async function DELETE(request: Request) {
     // Instead, we clear the rows so they are ignored, which is much safer and simpler.
     // Actually, let's just clear the rows in sertifikasi and pendidikan that match this NIP.
     const clearRelatedRows = async (sheetName: string) => {
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: `${sheetName}!A:Z` });
-      const rows = res.data.values || [];
+      const rows = await getCachedSheetData(`${sheetName}!A:Z`);
       const nipColIdx = rows[0]?.map((h: string) => h.toLowerCase()).indexOf('nip') ?? -1;
       
       if (nipColIdx !== -1) {
@@ -154,6 +153,7 @@ export async function DELETE(request: Request) {
     await clearRelatedRows('sertifikasi');
     await clearRelatedRows('pendidikan');
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) { return NextResponse.json({ success: false, error: e.message }, { status: 500 }); }
 }
@@ -172,9 +172,8 @@ export async function GET(request: Request) {
       // Hanya fetch IDP bawahan untuk ketua ini
       let idpBawahan: any[] = [];
       try {
-        const iRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'idp!A:Z' });
-        const iRows = iRes.data.values || [];
-        const iHeaders = iRows[0]?.map(h => h.toLowerCase()) || [];
+        const iRows = await getCachedSheetData('idp!A:Z');
+        const iHeaders = iRows[0]?.map((h: string) => h.toLowerCase()) || [];
         const ketuaNipIdx = iHeaders.indexOf('nip_ketua');
         
         if (ketuaNipIdx !== -1) {
@@ -190,8 +189,7 @@ export async function GET(request: Request) {
         }
         
         // Populate nama pegawai for each IDP
-        const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
-        const pRows = pRes.data.values || [];
+        const pRows = await getCachedSheetData('pegawai!A:Z');
         const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
         const pNipIdx = pHeaders.indexOf('nip');
         const pNamaIdx = pHeaders.indexOf('nama');
@@ -217,9 +215,8 @@ export async function GET(request: Request) {
 
     // Pegawai
     let pegawaiData: any = null;
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
-    const pRows = pRes.data.values || [];
-    const pHeaders = pRows[0]?.map(h => h.toLowerCase()) || [];
+    const pRows = await getCachedSheetData('pegawai!A:ZZ');
+    const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
     const pNipIdx = pHeaders.indexOf('nip');
     const nipAtasanIdx = pHeaders.indexOf('nip_atasan');
     let isAtasan = false;
@@ -246,12 +243,27 @@ export async function GET(request: Request) {
       }
     }
 
+    if (!isAtasan) {
+      try {
+        const iRows = await getCachedSheetData('idp!A:Z');
+        const iHeaders = iRows[0]?.map((h: string) => h.toLowerCase()) || [];
+        const ketuaNipIdx = iHeaders.indexOf('nip_ketua');
+        if (ketuaNipIdx !== -1) {
+          for (let i = 1; i < iRows.length; i++) {
+            if (iRows[i][ketuaNipIdx]?.trim() === nip.trim()) {
+              isAtasan = true;
+              break;
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
     // Sertifikasi
     let sertifikasiData: any[] = [];
     try {
-      const sRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
-      const sRows = sRes.data.values || [];
-      const sHeaders = sRows[0]?.map(h => h.toLowerCase()) || [];
+      const sRows = await getCachedSheetData('sertifikasi!A:Z');
+      const sHeaders = sRows[0]?.map((h: string) => h.toLowerCase()) || [];
       const sNipIdx = sHeaders.indexOf('nip');
       if (sNipIdx !== -1) {
         for (let i=1; i<sRows.length; i++) {
@@ -271,9 +283,8 @@ export async function GET(request: Request) {
     // Pendidikan
     let pendidikanData: any[] = [];
     try {
-      const eRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pendidikan!A:Z' });
-      const eRows = eRes.data.values || [];
-      const eHeaders = eRows[0]?.map(h => h.toLowerCase()) || [];
+      const eRows = await getCachedSheetData('pendidikan!A:Z');
+      const eHeaders = eRows[0]?.map((h: string) => h.toLowerCase()) || [];
       const eNipIdx = eHeaders.indexOf('nip');
       if (eNipIdx !== -1) {
         for (let i=1; i<eRows.length; i++) {
@@ -292,9 +303,8 @@ export async function GET(request: Request) {
     // IDP
     let idpData: any[] = [];
     try {
-      const iRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'idp!A:Z' });
-      const iRows = iRes.data.values || [];
-      const iHeaders = iRows[0]?.map(h => h.toLowerCase()) || [];
+      const iRows = await getCachedSheetData('idp!A:Z');
+      const iHeaders = iRows[0]?.map((h: string) => h.toLowerCase()) || [];
       const iNipIdx = iHeaders.indexOf('nip');
       if (iNipIdx !== -1) {
         for (let i=1; i<iRows.length; i++) {
@@ -325,8 +335,7 @@ export async function PUT(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:ZZ' });
-    const pRows = pRes.data.values || [];
+    const pRows = await getCachedSheetData('pegawai!A:ZZ');
     if (pRows.length === 0) return NextResponse.json({ success: false, message: 'Sheet empty' }, { status: 404 });
     
     const pHeaders = pRows[0].map((h: string) => h.toLowerCase());
@@ -437,6 +446,7 @@ export async function PUT(request: Request) {
       }
     });
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });

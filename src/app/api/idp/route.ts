@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
       item.anggaran || '',
       item.status || 'Menunggu Persetujuan Ketua',
       item.nip_ketua || '',
-      item.nama_ketua || ''
+      item.nama_ketua || '',
+      item.alasan_tolak || ''
     ]);
 
     await sheets.spreadsheets.values.append({
@@ -37,6 +39,7 @@ export async function POST(request: Request) {
       requestBody: { values: rows }
     });
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
@@ -62,7 +65,7 @@ export async function PUT(request: Request) {
 
     if (updateData && Object.keys(updateData).length > 0) {
       // Full row update
-      const { nip, jenis_kompetensi, jenis_pengembangan, jalur_pengembangan, penyelenggara, waktu_pelaksanaan_awal, waktu_pelaksanaan_akhir, jp, anggaran, status: newStatus, nip_ketua, nama_ketua } = updateData;
+      const { nip, jenis_kompetensi, jenis_pengembangan, jalur_pengembangan, penyelenggara, waktu_pelaksanaan_awal, waktu_pelaksanaan_akhir, jp, anggaran, status: newStatus, nip_ketua, nama_ketua, alasan_tolak } = updateData;
       
       const newRow = [
         nip || '',
@@ -76,7 +79,8 @@ export async function PUT(request: Request) {
         anggaran || '',
         newStatus || 'Menunggu Persetujuan Ketua',
         nip_ketua || '',
-        nama_ketua || ''
+        nama_ketua || '',
+        alasan_tolak || ''
       ];
 
       await sheets.spreadsheets.values.update({
@@ -86,17 +90,25 @@ export async function PUT(request: Request) {
         requestBody: { values: [newRow] }
       });
     } else if (status) {
-      // Only status update (J column)
+      // Only status update (J column) and alasan tolak (M column)
+      const alasan = searchParams.get('alasan') || '';
       await sheets.spreadsheets.values.update({
         spreadsheetId: GOOGLE_SHEET_ID,
         range: `idp!J${rowIndex}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[status]] }
       });
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: `idp!M${rowIndex}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [[alasan]] }
+      });
     } else {
       return NextResponse.json({ success: false, message: 'No update data provided' }, { status: 400 });
     }
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
@@ -139,6 +151,7 @@ export async function DELETE(request: Request) {
       });
     }
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });

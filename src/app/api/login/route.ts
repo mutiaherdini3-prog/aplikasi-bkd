@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { revalidateTag } from 'next/cache';
 
 export async function POST(request: Request) {
   try {
@@ -7,8 +8,7 @@ export async function POST(request: Request) {
     if (!nip || !password) return NextResponse.json({ success: false }, { status: 400 });
 
     const sheets = getGoogleSheets();
-    const res = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
-    const rows = res.data.values;
+    const rows = await getCachedSheetData('pegawai!A:Z');
     if (!rows || rows.length === 0) return NextResponse.json({ success: false }, { status: 404 });
 
     const headers = rows[0].map(h => h.toLowerCase());
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
         spreadsheetId: GOOGLE_SHEET_ID, range: `pegawai!${col}${rowIndex + 1}`, valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[password.trim()]] }
       });
+      revalidateTag('google-sheets', { expire: 0 });
       return NextResponse.json({ success: true });
     }
     return NextResponse.json({ success: false });

@@ -91,17 +91,24 @@ export default function DashboardPage() {
   };
 
   const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
-    if (confirm(`Yakin ingin mengubah status menjadi ${status}?`)) {
-      try {
-        const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(status)}`, { method: 'PUT' });
-        if (res.ok) {
-          fetchData();
-        } else {
-          alert('Gagal memperbarui status');
-        }
-      } catch (err) {
-        alert('Terjadi kesalahan saat memperbarui status');
+    let alasan = '';
+    if (status === 'Ditolak') {
+      const input = prompt('Silakan masukkan alasan penolakan:');
+      if (input === null) return; // User cancelled
+      alasan = input;
+    } else {
+      if (!confirm('Yakin ingin menyetujui pengajuan IDP ini?')) return;
+    }
+    
+    try {
+      const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(status)}&alasan=${encodeURIComponent(alasan)}`, { method: 'PUT' });
+      if (res.ok) {
+        fetchData();
+      } else {
+        alert('Gagal memperbarui status');
       }
+    } catch (err) {
+      alert('Terjadi kesalahan saat memperbarui status');
     }
   };
 
@@ -357,7 +364,7 @@ export default function DashboardPage() {
                               {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui Final</span> :
                                idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua, Menunggu Admin</span> :
                                idp.status === 'Menunggu Persetujuan Ketua' ? <span className="badge bg-warning text-dark">Menunggu Persetujuan Ketua</span> :
-                               idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
+                               idp.status === 'Ditolak' ? <div><span className="badge bg-danger">Ditolak</span><div className="text-muted mt-1" style={{fontSize: '0.75rem', maxWidth:'150px'}}>{idp.alasan_tolak ? `Alasan: ${idp.alasan_tolak}` : ''}</div></div> :
                                idp.status === 'Selesai' ? <span className="badge bg-primary">Selesai (Bukti Terkirim)</span> :
                                <span className="badge bg-secondary">{idp.status}</span>}
                             </td>

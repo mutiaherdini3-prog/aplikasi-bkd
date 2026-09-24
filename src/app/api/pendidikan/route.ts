@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { revalidateTag } from 'next/cache';
 
 export async function DELETE(request: Request) {
   try {
@@ -17,6 +18,7 @@ export async function DELETE(request: Request) {
         spreadsheetId: GOOGLE_SHEET_ID,
         requestBody: { requests: [{ deleteDimension: { range: { sheetId: targetSheet.properties?.sheetId, dimension: 'ROWS', startIndex: rowIdx, endIndex: rowIdx + 1 } } }] }
     });
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) { return NextResponse.json({ success: false }, { status: 500 }); }
 }
@@ -27,8 +29,8 @@ export async function POST(request: Request) {
     const sheets = getGoogleSheets();
     
     // Fetch headers first to know column order
-    const sRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pendidikan!A1:Z1' });
-    const sHeaders = sRes.data.values?.[0] || [];
+    const sRows = await getCachedSheetData('pendidikan!A:Z');
+    const sHeaders = sRows[0] || [];
     
     // Construct new row matching header order
     const newRow = sHeaders.map((h: string) => {
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
       }
     });
 
+    revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });

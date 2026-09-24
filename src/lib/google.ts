@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { unstable_cache } from 'next/cache';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/drive.file',
@@ -35,3 +36,13 @@ export const getGoogleSheets = () => google.sheets({ version: 'v4', auth: getAut
 
 export const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!;
 export const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID!;
+
+export const getCachedSheetData = unstable_cache(
+  async (range: string) => {
+    const sheets = getGoogleSheets();
+    const res = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range });
+    return res.data.values || [];
+  },
+  ['google-sheets-data'],
+  { tags: ['google-sheets'], revalidate: 300 } // Cache for 5 minutes
+);

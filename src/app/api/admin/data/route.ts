@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID } from '@/lib/google';
+import { getCachedSheetData } from '@/lib/google';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +8,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const reqNip = searchParams.get('nip');
 
-    const sheets = getGoogleSheets();
-    
     // Fetch Pegawai
-    const pRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'pegawai!A:Z' });
-    const pRows = pRes.data.values || [];
+    const pRows = await getCachedSheetData('pegawai!A:Z');
     if (pRows.length === 0) return NextResponse.json({ success: true, data: [] });
 
     const headers = pRows[0].map((h: string) => h.trim().toLowerCase());
@@ -38,8 +35,7 @@ export async function GET(request: Request) {
     // Fetch Sertifikasi
     let allSertifikasi: any[] = [];
     try {
-      const sRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'sertifikasi!A:Z' });
-      const sRows = sRes.data.values || [];
+      const sRows = await getCachedSheetData('sertifikasi!A:Z');
       if (sRows.length > 0) {
         const sHeaders = sRows[0].map((h: string) => h.toLowerCase());
         for (let i = 1; i < sRows.length; i++) {
@@ -56,8 +52,7 @@ export async function GET(request: Request) {
     // Fetch IDP
     let allIdp: any[] = [];
     try {
-      const iRes = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range: 'idp!A:Z' });
-      const iRows = iRes.data.values || [];
+      const iRows = await getCachedSheetData('idp!A:Z');
       if (iRows.length > 0) {
         const iHeaders = iRows[0].map((h: string) => h.toLowerCase());
         for (let i = 1; i < iRows.length; i++) {
