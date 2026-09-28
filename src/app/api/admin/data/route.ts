@@ -17,6 +17,14 @@ export async function GET(request: Request) {
     const namaIdx = headers.indexOf('nama');
     const statusIdx = headers.indexOf('status pegawai');
     const pangkatIdx = headers.indexOf('pangkat');
+    const golonganIdx = headers.indexOf('golongan ');
+    if (golonganIdx === -1) {
+      // In case of typo in sheet
+      headers.indexOf('golongan');
+    }
+    const realGolonganIdx = headers.indexOf('golongan ') !== -1 ? headers.indexOf('golongan ') : headers.indexOf('golongan');
+    const jenkelIdx = headers.indexOf('jankel') !== -1 ? headers.indexOf('jankel') : headers.indexOf('jenis kelamin');
+    const statusAktifIdx = headers.indexOf('status aktif');
     const jabatanIdx = headers.indexOf('jabatan');
     const unitKerjaIdx = headers.indexOf('unit kerja');
     const roleIdx = headers.indexOf('role');
@@ -84,6 +92,9 @@ export async function GET(request: Request) {
         nama: row[namaIdx] || '',
         status_pegawai: row[statusIdx] || '',
         pangkat: row[pangkatIdx] || '',
+        golongan: realGolonganIdx !== -1 ? (row[realGolonganIdx] || '') : '',
+        jenkel: jenkelIdx !== -1 ? (row[jenkelIdx] || '') : '',
+        status_aktif: statusAktifIdx !== -1 ? (row[statusAktifIdx] || 'Aktif') : 'Aktif',
         jabatan: row[jabatanIdx] || '',
         unit_kerja: row[unitKerjaIdx] || '',
         sertifikasi: allSertifikasi.filter(s => s.nip?.toString().trim() === currentNip),

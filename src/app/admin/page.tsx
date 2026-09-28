@@ -1250,19 +1250,7 @@ export default function AdminPage() {
                         <option value="super_admin">Super Admin</option>
                       </select>
                     </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Atasan Langsung (Approver IDP)</label>
-                      <input 
-                        list="atasanList" 
-                        className="form-control" 
-                        placeholder="Ketik Nama atau NIP..."
-                        value={pegawaiForm.nip_atasan || ''} 
-                        onChange={e => setPegawaiForm({...pegawaiForm, nip_atasan: e.target.value})} 
-                      />
-                      <datalist id="atasanList">
-                        {semuaPegawai.filter(p => p.nip !== pegawaiForm.nip).map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
-                      </datalist>
-                    </div>
+
                   </div>
                 </div>
                 <div className="modal-footer border-0 bg-light">
