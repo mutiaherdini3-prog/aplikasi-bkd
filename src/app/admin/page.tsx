@@ -610,7 +610,7 @@ export default function AdminPage() {
                         />
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                       </div>
-                      {userRole === 'super_admin' && (
+                      {(userRole === 'super_admin' || userRole === 'admin') && (
                         <button className="btn btn-sm btn-primary" onClick={() => {
                           setPegawaiForm({ isEdit: false, password: 'password123', status_aktif: 'Aktif', jp: 0 });
                           setShowPegawaiModal(true);
@@ -675,7 +675,7 @@ export default function AdminPage() {
                             </td>
                             <td className="text-center">
                               <button className="btn btn-sm btn-outline-info me-1" title="Lihat Profil" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}><i className="bi bi-eye"></i></button>
-                              {userRole === 'super_admin' && (
+                              {(userRole === 'super_admin' || userRole === 'admin') && (
                                 <>
                                   <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
                                     const jenkelOptions = ['Laki-Laki', 'Perempuan'];
