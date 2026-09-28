@@ -705,8 +705,22 @@ export default function AdminPage() {
                                     // Safely build golonganPangkat
                                     let builtGolongan = '';
                                     if (p.golongan && p.golongan !== '-') {
-                                      if (p.pangkat && p.pangkat !== 'Tidak Ada' && p.pangkat !== '-') {
-                                        builtGolongan = `${p.golongan.trim()} - ${p.pangkat.trim()}`;
+                                      const pGolonganTrimmed = p.golongan.trim().toLowerCase();
+                                      if (matchedStatusPegawai === 'PNS') {
+                                        const pnsOptions = [
+                                          "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I", 
+                                          "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I", 
+                                          "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I", 
+                                          "IV/a - Pembina", "IV/b - Pembina Tk. I", "IV/c - Pembina Utama Muda", "IV/d - Pembina Utama Madya", "IV/e - Pembina Utama"
+                                        ];
+                                        const matched = pnsOptions.find(o => o.toLowerCase().startsWith(pGolonganTrimmed));
+                                        if (matched) builtGolongan = matched;
+                                        else builtGolongan = p.golongan.trim() + (p.pangkat && p.pangkat !== '-' && p.pangkat !== 'Tidak Ada' ? ` - ${p.pangkat.trim()}` : '');
+                                      } else if (matchedStatusPegawai === 'PPPK') {
+                                        const pppkOptions = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII"].map(g => `Golongan ${g}`);
+                                        const matched = pppkOptions.find(o => o.toLowerCase() === pGolonganTrimmed || o.toLowerCase().replace('golongan ', '') === pGolonganTrimmed.replace('golongan ', ''));
+                                        if (matched) builtGolongan = matched;
+                                        else builtGolongan = p.golongan.trim();
                                       } else {
                                         builtGolongan = p.golongan.trim();
                                       }
