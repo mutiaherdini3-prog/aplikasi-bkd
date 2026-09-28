@@ -611,7 +611,7 @@ export default function AdminPage() {
                       </div>
                       {(userRole === 'super_admin' || userRole === 'admin') && (
                         <button className="btn btn-sm btn-primary" onClick={() => {
-                          setPegawaiForm({ isEdit: false, password: 'password123', status_aktif: 'Aktif', jp: 0 });
+                          setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0 });
                           setShowPegawaiModal(true);
                         }}>
                           <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
