@@ -652,7 +652,7 @@ export default function AdminPage() {
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
                             <td className="text-center">
-                              {userRole === 'super_admin' ? (
+                              {(userRole === 'super_admin' || userRole === 'admin') ? (
                                 <button 
                                   className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' ? 'btn-success' : 'btn-outline-secondary'}`}
                                   onClick={() => {
