@@ -697,14 +697,28 @@ export default function AdminPage() {
                                       if (found) matchedUnitKerja = found;
                                     }
 
+                                    let matchedStatusPegawai = p.status_pegawai || '';
+                                    if (matchedStatusPegawai.includes('PNS')) matchedStatusPegawai = 'PNS';
+                                    else if (matchedStatusPegawai.includes('PPPK') || matchedStatusPegawai.includes('P3K')) matchedStatusPegawai = 'PPPK';
+                                    else if (matchedStatusPegawai.includes('PW')) matchedStatusPegawai = 'PW';
+
+                                    // Safely build golonganPangkat
+                                    let builtGolongan = '';
+                                    if (p.golongan && p.golongan !== '-') {
+                                      if (p.pangkat && p.pangkat !== 'Tidak Ada' && p.pangkat !== '-') {
+                                        builtGolongan = `${p.golongan.trim()} - ${p.pangkat.trim()}`;
+                                      } else {
+                                        builtGolongan = p.golongan.trim();
+                                      }
+                                    }
+
                                     setPegawaiForm({ 
                                       ...p, 
+                                      status_pegawai: matchedStatusPegawai,
                                       jenkel: matchedJenkel,
                                       unit_kerja: matchedUnitKerja,
                                       isEdit: true,
-                                      golonganPangkat: (p.golongan && p.pangkat && p.pangkat !== 'Tidak Ada' && p.pangkat !== '-') 
-                                        ? `${p.golongan} - ${p.pangkat}` 
-                                        : (p.golongan || '')
+                                      golonganPangkat: builtGolongan
                                     });
                                     setShowPegawaiModal(true);
                                   }}><i className="bi bi-pencil"></i></button>
