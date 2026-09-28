@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       
       // Filter for admin_diklat and admin
       if (adminRole === 'admin_diklat' || adminRole === 'admin') {
-        if (currentUnitKerja !== adminUnitKerja) continue;
+        if (currentUnitKerja.trim().toLowerCase() !== adminUnitKerja.trim().toLowerCase()) continue;
       }
 
       const currentNip = row[nipIdx]?.toString().trim() || '';
