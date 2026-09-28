@@ -52,10 +52,9 @@ export default function AdminPage() {
   const fetchData = async () => {
     try {
       const userNip = localStorage.getItem('loggedInUser') || '';
-      
       const [resData, resAll] = await Promise.all([
-        fetch(`/api/admin/data?nip=${userNip}`),
-        fetch(`/api/pegawai/all?nip=${userNip}`)
+        fetch(`/api/admin/data?nip=${userNip}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetch(`/api/pegawai/all?nip=${userNip}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
       ]);
       
       const json = await resData.json();

@@ -500,8 +500,7 @@ export async function PUT(request: Request) {
         data: batchRequests
       }
     });
-
-    revalidateTag('google-sheets', { expire: 0 });
+    revalidateTag('google-sheets');
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
