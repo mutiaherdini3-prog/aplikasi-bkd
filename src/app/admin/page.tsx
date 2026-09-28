@@ -27,6 +27,50 @@ export default function AdminPage() {
   const [currentPageIdp, setCurrentPageIdp] = useState(1);
   const ITEMS_PER_PAGE = 50;
 
+  const ALLOWED_ADMIN_NAMES = [
+    "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
+    "Thanthowi", "Aidin Setiawan Putera", "Indra Cahaya", "Fachriansyah",
+    "Drs. Muhammad Soleh", "Miwani", "Aidi", "Farouk Yohansyah", "Novianto",
+    "Teni Wahyuni", "Azmal AZ", "Muhammad Sapi'i Rangkuti", "Achmad Nursyandi",
+    "Bertha", "Hendra Jaya", "Muhammad Kaidi", "Sarbudiono", "Yudi Hermanto",
+    "Dessy Sarilena Oktavia", "Ferdinan T", "Sanudin", "Joko Riswanto",
+    "Sri Mulyono Basuki", "Bastomi", "Harfiyan", "Sari Dwi Estari",
+    "Mustika Sari", "Ashan", "Rino Rizandi", "Winda", "Novaroly",
+    "Des Kurniawan", "Dekky Edward", "Muhammad Putra Kusuma", "Yulista",
+    "Amini", "Kamso", "Indra Saputra", "Sholihin", "Halimah", "Isfani",
+    "Ema Ratna Gustina", "Kerynna Meithesya", "Heroe Yoewono", "Yuliyen Maizar",
+    "Herlina", "Windy Arti Pratiwi", "Nora Ambarsari", "Fitri Milvayanti",
+    "Avan Yuandi", "Zahroni", "Maria Fuji Lestari", "Riko Agus Tridoyo",
+    "Ety Melyanti", "Ahmad Taufik", "Heriansyah", "Andrie Fitrayadi",
+    "Rita Andriani", "Dessy Susanty", "M. Irsal", "Bustanil Arifin", "Waldi",
+    "Edi Irawan", "Damhuri", "Meidiar", "M. Akib", "Andriansyah", "Amanda",
+    "Imam Wasana Putra", "Thomas Edison Regan", "Ir. Surya Mardiansyah",
+    "Heriyandi", "Hafsah", "Uli Nuha", "Meidiyan", "Juswardi",
+    "Muhammad Ferhad Irvan", "Erza Fistiawan", "Wiratmo", "Dody Sihono",
+    "Imam Dwi Feryanto", "Armizi", "Havita Dwi Anggasari", "Agus Setyadi",
+    "Sufidra", "Muhammad Amrullah", "Henry Firsanto", "Sandy Wijaya",
+    "Andi Hamzah", "Eka Octawianto", "Amar Sopi", "Hidayat",
+    "Undat P. Sihombing", "Anita", "Muhammad Satriansyah", "Mailan",
+    "Henky Wibawa", "Diah Sapitri", "Siemens Siloys", "Arni",
+    "Agung Ariwibowo", "Aryanto", "Benhard Batubara", "Pebri Harto",
+    "dr. Ratnosoppi", "Nurmala Anggraini", "Ns.Muria Idriakasih",
+    "Linda Yunita", "A'ad Tirta Fujaka", "Wahyudi Saputra", "Rini Indra Sari",
+    "Muhammad Fakhri", "Nurherodiyah", "Rohardi", "Ferri Ardami", "Idwin",
+    "Rina Mulyanti", "Bambang Yusdianto", "Zulkarnain", "Sapki Bahresi",
+    "Asrin Utiarahman", "Syahrul Effendi", "Jayu Noriska", "Herman Siswadi",
+    "Novi Eva Yanti", "Siska Silviana", "dr. Rudi Faizul Badri",
+    "Ns. Sri Hartati", "Arsul Sani"
+  ];
+
+  const isAllowedForAdmin = (nama: string) => {
+    if (!nama) return false;
+    const normalizedNama = nama.toLowerCase().replace(/[,.]/g, '');
+    return ALLOWED_ADMIN_NAMES.some(allowed => {
+      const normAllowed = allowed.toLowerCase().replace(/[,.]/g, '');
+      return normalizedNama.includes(normAllowed) || normAllowed.includes(normalizedNama);
+    });
+  };
+
   // Reset pagination on filter change
   useEffect(() => {
     setCurrentPagePegawai(1);
@@ -156,6 +200,25 @@ export default function AdminPage() {
         setShowPegawaiModal(false);
       } else {
         alert('Gagal menyimpan data pegawai: ' + (json.message || json.error));
+      }
+    } catch(e) {
+      alert('Terjadi kesalahan');
+    }
+  };
+
+  const toggleAdminRole = async (pegawai: any) => {
+    try {
+      const newRole = pegawai.role === 'admin' ? 'pegawai' : 'admin';
+      const res = await fetch('/api/pegawai', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nip: pegawai.nip, role: newRole })
+      });
+      const json = await res.json();
+      if (json.success) {
+        fetchData();
+      } else {
+        alert('Gagal mengupdate akses');
       }
     } catch(e) {
       alert('Terjadi kesalahan');
@@ -561,12 +624,14 @@ export default function AdminPage() {
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
                     <div className="d-flex gap-2">
-                      <button className="btn btn-sm btn-primary" onClick={() => {
-                        setPegawaiForm({ isEdit: false, password: 'password123', status_aktif: 'Aktif', jp: 0 });
-                        setShowPegawaiModal(true);
-                      }}>
-                        <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
-                      </button>
+                      {userRole === 'super_admin' && (
+                        <button className="btn btn-sm btn-primary" onClick={() => {
+                          setPegawaiForm({ isEdit: false, password: 'password123', status_aktif: 'Aktif', jp: 0 });
+                          setShowPegawaiModal(true);
+                        }}>
+                          <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
+                        </button>
+                      )}
                       <button 
                         className="btn btn-sm btn-success"
                         onClick={exportToExcel}
@@ -587,6 +652,7 @@ export default function AdminPage() {
                           <th>Jabatan</th>
                           <th>Unit Kerja</th>
                           <th className="text-center">Total JP</th>
+                          <th className="text-center" style={{ width: '130px' }}>Approval IDP</th>
                           <th className="text-center">Aksi</th>
                         </tr>
                       </thead>
@@ -601,18 +667,41 @@ export default function AdminPage() {
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
                             <td className="text-center">
+                              {isAllowedForAdmin(p.nama) ? (
+                                <button 
+                                  className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' ? 'btn-success' : 'btn-outline-secondary'}`}
+                                  onClick={() => {
+                                    if (p.role === 'super_admin') {
+                                      alert('Tidak dapat mengubah akses Super Admin');
+                                      return;
+                                    }
+                                    toggleAdminRole(p);
+                                  }}
+                                  title={p.role === 'admin' ? 'Cabut Izin Approval IDP' : 'Berikan Izin Approval IDP'}
+                                >
+                                  {p.role === 'admin' || p.role === 'super_admin' ? <><i className="bi bi-check-circle-fill"></i> Aktif</> : 'Nonaktif'}
+                                </button>
+                              ) : (
+                                <span className="text-muted" style={{fontSize: '0.8rem'}}>-</span>
+                              )}
+                            </td>
+                            <td className="text-center">
                               <button className="btn btn-sm btn-outline-info me-1" title="Lihat Profil" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}><i className="bi bi-eye"></i></button>
-                              <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
-                                setPegawaiForm({ 
-                                  ...p, 
-                                  isEdit: true,
-                                  golonganPangkat: (p.golongan && p.pangkat && p.pangkat !== 'Tidak Ada' && p.pangkat !== '-') 
-                                    ? `${p.golongan} - ${p.pangkat}` 
-                                    : (p.golongan || '')
-                                });
-                                setShowPegawaiModal(true);
-                              }}><i className="bi bi-pencil"></i></button>
-                              <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
+                              {userRole === 'super_admin' && (
+                                <>
+                                  <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
+                                    setPegawaiForm({ 
+                                      ...p, 
+                                      isEdit: true,
+                                      golonganPangkat: (p.golongan && p.pangkat && p.pangkat !== 'Tidak Ada' && p.pangkat !== '-') 
+                                        ? `${p.golongan} - ${p.pangkat}` 
+                                        : (p.golongan || '')
+                                    });
+                                    setShowPegawaiModal(true);
+                                  }}><i className="bi bi-pencil"></i></button>
+                                  <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -759,7 +848,7 @@ export default function AdminPage() {
                                          <span className="badge bg-warning text-dark">Menunggu Ketua</span>}
                                       </td>
                                       <td className="text-center">
-                                        {idp.status === 'Menunggu Persetujuan Admin' ? (
+                                        {idp.status !== 'Disetujui' && idp.status !== 'Ditolak' ? (
                                           <>
                                             <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
                                             <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>

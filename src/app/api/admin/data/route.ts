@@ -72,8 +72,8 @@ export async function GET(request: Request) {
 
       const currentUnitKerja = row[unitKerjaIdx] || '';
       
-      // Filter for admin_diklat
-      if (adminRole === 'admin_diklat') {
+      // Filter for admin_diklat and admin
+      if (adminRole === 'admin_diklat' || adminRole === 'admin') {
         if (currentUnitKerja !== adminUnitKerja) continue;
       }
 
@@ -87,7 +87,8 @@ export async function GET(request: Request) {
         jabatan: row[jabatanIdx] || '',
         unit_kerja: row[unitKerjaIdx] || '',
         sertifikasi: allSertifikasi.filter(s => s.nip?.toString().trim() === currentNip),
-        idp: allIdp.filter(idp => idp.nip?.toString().trim() === currentNip)
+        idp: allIdp.filter(idp => idp.nip?.toString().trim() === currentNip),
+        role: roleIdx !== -1 ? (row[roleIdx] || 'pegawai') : 'pegawai'
       };
 
       // Hitung JP dinamis dari sertifikasi aktual
