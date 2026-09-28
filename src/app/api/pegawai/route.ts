@@ -25,11 +25,11 @@ export async function POST(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    const pRows = await getCachedSheetData('pegawai!A:Z');
+    const pRows = await getCachedSheetData('pegawai!A:ZZ');
     
     let pHeaders = [];
     if (pRows.length > 0) {
-      pHeaders = pRows[0].map((h: string) => h.toLowerCase());
+      pHeaders = pRows[0].map((h: string) => h.toLowerCase().trim());
     } else {
       pHeaders = ['nip', 'password', 'nama', 'status pegawai', 'pangkat', 'golongan ', 'jankel', 'jabatan', 'unit kerja', 'jumlah jp', 'status aktif'];
       await sheets.spreadsheets.values.update({
@@ -393,7 +393,7 @@ export async function PUT(request: Request) {
     const pRows = await getCachedSheetData('pegawai!A:ZZ');
     if (pRows.length === 0) return NextResponse.json({ success: false, message: 'Sheet empty' }, { status: 404 });
     
-    const pHeaders = pRows[0].map((h: string) => h.toLowerCase());
+    const pHeaders = pRows[0].map((h: string) => h.toLowerCase().trim());
     const pNipIdx = pHeaders.indexOf('nip');
     if (pNipIdx === -1) return NextResponse.json({ success: false, message: 'No NIP column' }, { status: 500 });
     

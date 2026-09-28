@@ -8,10 +8,10 @@ export async function POST(request: Request) {
     if (!nip || !password) return NextResponse.json({ success: false }, { status: 400 });
 
     const sheets = getGoogleSheets();
-    const rows = await getCachedSheetData('pegawai!A:Z');
+    const rows = await getCachedSheetData('pegawai!A:ZZ');
     if (!rows || rows.length === 0) return NextResponse.json({ success: false }, { status: 404 });
 
-    const headers = rows[0].map(h => h.toLowerCase());
+    const headers = rows[0].map((h: string) => h.toLowerCase().trim());
     const nipIdx = headers.indexOf('nip');
     const passIdx = headers.indexOf('password');
 
