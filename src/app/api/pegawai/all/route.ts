@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const reqNip = searchParams.get('nip');
 
     // Fetch Pegawai
-    const pRows = await getCachedSheetData('pegawai!A:Z');
+    const pRows = await getCachedSheetData('pegawai!A:ZZ');
     if (pRows.length === 0) return NextResponse.json({ success: true, data: [] });
 
     const ALLOWED_ADMIN_NAMES = [
@@ -62,7 +62,8 @@ export async function GET(request: Request) {
     const jabatanIdx = headers.indexOf('jabatan');
     const statusAktifIdx = headers.indexOf('status aktif');
     const unitKerjaIdx = headers.indexOf('unit kerja');
-    const roleIdx = headers.indexOf('role');
+    let roleIdx = headers.indexOf('role');
+    if (roleIdx === -1) roleIdx = headers.indexOf('hak akses');
 
     if (nipIdx === -1 || namaIdx === -1) {
       return NextResponse.json({ success: false, message: 'Invalid sheet format' }, { status: 500 });
