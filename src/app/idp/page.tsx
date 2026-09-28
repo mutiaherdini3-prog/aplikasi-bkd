@@ -306,9 +306,8 @@ export default function IDPPage() {
                                 <>
                                   {semuaPegawai.filter(p => {
                                     const isManager = isAllowedForAdmin(p.nama);
-                                    const isSameOpd = p.unit_kerja === pegawai?.unit_kerja;
                                     const matchSearch = p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua));
-                                    return isManager && matchSearch && isSameOpd;
+                                    return isManager && matchSearch;
                                   }).slice(0, 50).map(p => (
                                     <div key={p.nip} className="dropdown-item-custom" onClick={() => {
                                       setSelectedKetua({ nip: p.nip, nama: p.nama });
@@ -321,11 +320,10 @@ export default function IDPPage() {
                                   ))}
                                   {semuaPegawai.filter(p => {
                                     const isManager = isAllowedForAdmin(p.nama);
-                                    const isSameOpd = p.unit_kerja === pegawai?.unit_kerja;
                                     const matchSearch = p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua));
-                                    return isManager && matchSearch && isSameOpd;
+                                    return isManager && matchSearch;
                                   }).length === 0 && (
-                                    <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Pejabat (Atasan) di Unit Kerja Anda tidak ditemukan.</div>
+                                    <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Pejabat (Atasan) tidak ditemukan.</div>
                                   )}
                                 </>
                               )}
