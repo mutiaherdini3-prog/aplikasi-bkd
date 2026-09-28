@@ -27,50 +27,6 @@ export default function AdminPage() {
   const [currentPageIdp, setCurrentPageIdp] = useState(1);
   const ITEMS_PER_PAGE = 50;
 
-  const ALLOWED_ADMIN_NAMES = [
-    "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
-    "Thanthowi", "Aidin Setiawan Putera", "Indra Cahaya", "Fachriansyah",
-    "Drs. Muhammad Soleh", "Miwani", "Aidi", "Farouk Yohansyah", "Novianto",
-    "Teni Wahyuni", "Azmal AZ", "Muhammad Sapi'i Rangkuti", "Achmad Nursyandi",
-    "Bertha", "Hendra Jaya", "Muhammad Kaidi", "Sarbudiono", "Yudi Hermanto",
-    "Dessy Sarilena Oktavia", "Ferdinan T", "Sanudin", "Joko Riswanto",
-    "Sri Mulyono Basuki", "Bastomi", "Harfiyan", "Sari Dwi Estari",
-    "Mustika Sari", "Ashan", "Rino Rizandi", "Winda", "Novaroly",
-    "Des Kurniawan", "Dekky Edward", "Muhammad Putra Kusuma", "Yulista",
-    "Amini", "Kamso", "Indra Saputra", "Sholihin", "Halimah", "Isfani",
-    "Ema Ratna Gustina", "Kerynna Meithesya", "Heroe Yoewono", "Yuliyen Maizar",
-    "Herlina", "Windy Arti Pratiwi", "Nora Ambarsari", "Fitri Milvayanti",
-    "Avan Yuandi", "Zahroni", "Maria Fuji Lestari", "Riko Agus Tridoyo",
-    "Ety Melyanti", "Ahmad Taufik", "Heriansyah", "Andrie Fitrayadi",
-    "Rita Andriani", "Dessy Susanty", "M. Irsal", "Bustanil Arifin", "Waldi",
-    "Edi Irawan", "Damhuri", "Meidiar", "M. Akib", "Andriansyah", "Amanda",
-    "Imam Wasana Putra", "Thomas Edison Regan", "Ir. Surya Mardiansyah",
-    "Heriyandi", "Hafsah", "Uli Nuha", "Meidiyan", "Juswardi",
-    "Muhammad Ferhad Irvan", "Erza Fistiawan", "Wiratmo", "Dody Sihono",
-    "Imam Dwi Feryanto", "Armizi", "Havita Dwi Anggasari", "Agus Setyadi",
-    "Sufidra", "Muhammad Amrullah", "Henry Firsanto", "Sandy Wijaya",
-    "Andi Hamzah", "Eka Octawianto", "Amar Sopi", "Hidayat",
-    "Undat P. Sihombing", "Anita", "Muhammad Satriansyah", "Mailan",
-    "Henky Wibawa", "Diah Sapitri", "Siemens Siloys", "Arni",
-    "Agung Ariwibowo", "Aryanto", "Benhard Batubara", "Pebri Harto",
-    "dr. Ratnosoppi", "Nurmala Anggraini", "Ns.Muria Idriakasih",
-    "Linda Yunita", "A'ad Tirta Fujaka", "Wahyudi Saputra", "Rini Indra Sari",
-    "Muhammad Fakhri", "Nurherodiyah", "Rohardi", "Ferri Ardami", "Idwin",
-    "Rina Mulyanti", "Bambang Yusdianto", "Zulkarnain", "Sapki Bahresi",
-    "Asrin Utiarahman", "Syahrul Effendi", "Jayu Noriska", "Herman Siswadi",
-    "Novi Eva Yanti", "Siska Silviana", "dr. Rudi Faizul Badri",
-    "Ns. Sri Hartati", "Arsul Sani"
-  ];
-
-  const isAllowedForAdmin = (nama: string) => {
-    if (!nama) return false;
-    const normalizedNama = nama.toLowerCase().replace(/[,.\s]/g, '');
-    return ALLOWED_ADMIN_NAMES.some(allowed => {
-      const normAllowed = allowed.toLowerCase().replace(/[,.\s]/g, '');
-      return normalizedNama.includes(normAllowed);
-    });
-  };
-
   // Reset pagination on filter change
   useEffect(() => {
     setCurrentPagePegawai(1);
@@ -667,7 +623,7 @@ export default function AdminPage() {
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
                             <td className="text-center">
-                              {isAllowedForAdmin(p.nama) ? (
+                              {userRole === 'super_admin' ? (
                                 <button 
                                   className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' ? 'btn-success' : 'btn-outline-secondary'}`}
                                   onClick={() => {
@@ -682,7 +638,9 @@ export default function AdminPage() {
                                   {p.role === 'admin' || p.role === 'super_admin' ? <><i className="bi bi-check-circle-fill"></i> Aktif</> : 'Nonaktif'}
                                 </button>
                               ) : (
-                                <span className="text-muted" style={{fontSize: '0.8rem'}}>-</span>
+                                <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' ? 'bg-success' : 'bg-secondary'}`}>
+                                  {p.role === 'admin' || p.role === 'super_admin' ? 'Admin' : '-'}
+                                </span>
                               )}
                             </td>
                             <td className="text-center">

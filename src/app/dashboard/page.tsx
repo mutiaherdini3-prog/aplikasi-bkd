@@ -14,49 +14,6 @@ export default function DashboardPage() {
   const [totalJP, setTotalJP] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const ALLOWED_ADMIN_NAMES = [
-    "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
-    "Thanthowi", "Aidin Setiawan Putera", "Indra Cahaya", "Fachriansyah",
-    "Drs. Muhammad Soleh", "Miwani", "Aidi", "Farouk Yohansyah", "Novianto",
-    "Teni Wahyuni", "Azmal AZ", "Muhammad Sapi'i Rangkuti", "Achmad Nursyandi",
-    "Bertha", "Hendra Jaya", "Muhammad Kaidi", "Sarbudiono", "Yudi Hermanto",
-    "Dessy Sarilena Oktavia", "Ferdinan T", "Sanudin", "Joko Riswanto",
-    "Sri Mulyono Basuki", "Bastomi", "Harfiyan", "Sari Dwi Estari",
-    "Mustika Sari", "Ashan", "Rino Rizandi", "Winda", "Novaroly",
-    "Des Kurniawan", "Dekky Edward", "Muhammad Putra Kusuma", "Yulista",
-    "Amini", "Kamso", "Indra Saputra", "Sholihin", "Halimah", "Isfani",
-    "Ema Ratna Gustina", "Kerynna Meithesya", "Heroe Yoewono", "Yuliyen Maizar",
-    "Herlina", "Windy Arti Pratiwi", "Nora Ambarsari", "Fitri Milvayanti",
-    "Avan Yuandi", "Zahroni", "Maria Fuji Lestari", "Riko Agus Tridoyo",
-    "Ety Melyanti", "Ahmad Taufik", "Heriansyah", "Andrie Fitrayadi",
-    "Rita Andriani", "Dessy Susanty", "M. Irsal", "Bustanil Arifin", "Waldi",
-    "Edi Irawan", "Damhuri", "Meidiar", "M. Akib", "Andriansyah", "Amanda",
-    "Imam Wasana Putra", "Thomas Edison Regan", "Ir. Surya Mardiansyah",
-    "Heriyandi", "Hafsah", "Uli Nuha", "Meidiyan", "Juswardi",
-    "Muhammad Ferhad Irvan", "Erza Fistiawan", "Wiratmo", "Dody Sihono",
-    "Imam Dwi Feryanto", "Armizi", "Havita Dwi Anggasari", "Agus Setyadi",
-    "Sufidra", "Muhammad Amrullah", "Henry Firsanto", "Sandy Wijaya",
-    "Andi Hamzah", "Eka Octawianto", "Amar Sopi", "Hidayat",
-    "Undat P. Sihombing", "Anita", "Muhammad Satriansyah", "Mailan",
-    "Henky Wibawa", "Diah Sapitri", "Siemens Siloys", "Arni",
-    "Agung Ariwibowo", "Aryanto", "Benhard Batubara", "Pebri Harto",
-    "dr. Ratnosoppi", "Nurmala Anggraini", "Ns.Muria Idriakasih",
-    "Linda Yunita", "A'ad Tirta Fujaka", "Wahyudi Saputra", "Rini Indra Sari",
-    "Muhammad Fakhri", "Nurherodiyah", "Rohardi", "Ferri Ardami", "Idwin",
-    "Rina Mulyanti", "Bambang Yusdianto", "Zulkarnain", "Sapki Bahresi",
-    "Asrin Utiarahman", "Syahrul Effendi", "Jayu Noriska", "Herman Siswadi",
-    "Novi Eva Yanti", "Siska Silviana", "dr. Rudi Faizul Badri",
-    "Ns. Sri Hartati", "Arsul Sani"
-  ];
-
-  const isAllowedForAdmin = (nama: string) => {
-    if (!nama) return false;
-    const normalizedNama = nama.toLowerCase().replace(/[,.\s]/g, '');
-    return ALLOWED_ADMIN_NAMES.some(allowed => {
-      const normAllowed = allowed.toLowerCase().replace(/[,.\s]/g, '');
-      return normalizedNama.includes(normAllowed);
-    });
-  };
 
   const fetchData = async () => {
     const nip = localStorage.getItem('loggedInUser');
@@ -78,12 +35,9 @@ export default function DashboardPage() {
         }
         if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
         if (result.data.idp) setIdpList(result.data.idp);
-        
-        // Hanya atasan (sesuai list nama) yang boleh melihat menu persetujuan IDP bawahan
-        if (result.data.isAtasan && isAllowedForAdmin(result.data.pegawai?.nama)) {
-          setIsAtasan(true);
-        } else if (isAllowedForAdmin(result.data.pegawai?.nama)) {
-          // Jika tidak terdeteksi sebagai atasan di API tapi ada di list, tetap anggap atasan
+        // Atasan adalah yang terdeteksi di API atau memiliki role admin
+        const role = result.data.pegawai?.role;
+        if (result.data.isAtasan || role === 'admin' || role === 'admin_diklat' || role === 'super_admin') {
           setIsAtasan(true);
         } else {
           setIsAtasan(false);
@@ -468,7 +422,7 @@ export default function DashboardPage() {
                             <td className="text-center">
                               {idp.status === 'Menunggu Persetujuan Ketua' ? (
                                 <>
-                                  <button className="btn btn-sm btn-success me-1" title="Setujui IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Menunggu Persetujuan Admin')}><i className="bi bi-check-lg"></i> Setujui</button>
+                                  <button className="btn btn-sm btn-success me-1" title="Setujui IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i> Setujui</button>
                                   <button className="btn btn-sm btn-danger" title="Tolak IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i> Tolak</button>
                                 </>
                               ) : (

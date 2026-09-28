@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       if (!row[nipIdx] || row[nipIdx] === 'admin') continue;
       
       const currentUnitKerja = row[unitKerjaIdx] || '';
-      if (adminRole === 'admin_diklat' && currentUnitKerja !== adminUnitKerja) continue;
+      if ((adminRole === 'admin_diklat' || adminRole === 'admin') && currentUnitKerja !== adminUnitKerja) continue;
 
       const statusAktif = statusAktifIdx !== -1 ? (row[statusAktifIdx] || 'Aktif') : 'Aktif';
       
@@ -52,7 +52,8 @@ export async function GET(request: Request) {
         nip: row[nipIdx]?.toString().trim() || '',
         nama: row[namaIdx] || '',
         jabatan: jabatanIdx !== -1 ? (row[jabatanIdx] || '') : '',
-        unit_kerja: currentUnitKerja
+        unit_kerja: currentUnitKerja,
+        role: roleIdx !== -1 ? (row[roleIdx] || 'pegawai') : 'pegawai'
       });
     }
 
