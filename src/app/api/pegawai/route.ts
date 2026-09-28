@@ -444,6 +444,7 @@ export async function PUT(request: Request) {
 
     if (role !== undefined) {
       let roleIdx = pHeaders.indexOf('role');
+      if (roleIdx === -1) roleIdx = pHeaders.indexOf('hak akses');
       if (roleIdx === -1) {
         roleIdx = pHeaders.length;
         pHeaders.push('role');
