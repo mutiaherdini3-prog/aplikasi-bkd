@@ -460,6 +460,14 @@ export default function DashboardPage() {
                   <div className="menu-title">Individual Development Plan (IDP)</div>
                   <div className="menu-desc">Penyusunan rencana pengembangan kompetensi individu.</div>
                 </a>
+
+                {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin') && (
+                  <a onClick={() => router.push('/admin')} className="menu-card mb-3 text-decoration-none" style={{ borderColor: '#86efac' }}>
+                    <div className="menu-icon" style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}><i className="bi bi-shield-lock-fill"></i></div>
+                    <div className="menu-title text-success">Panel Admin</div>
+                    <div className="menu-desc">Kelola master data pegawai dan persetujuan.</div>
+                  </a>
+                )}
               </div>
             </div>
           </div>
