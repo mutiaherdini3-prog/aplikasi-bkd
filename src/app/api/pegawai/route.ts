@@ -363,12 +363,34 @@ export async function GET(request: Request) {
             const row: any = { _rowIndex: i + 1 };
             eHeaders.forEach((h, idx) => {
               row[h] = eRows[i][idx] || '';
+              // Also map to tingkat_pendidikan to match dashboard
+              if (h === 'tingkat pendidikan' || h === 'tingkat') {
+                row.tingkat_pendidikan = eRows[i][idx] || '';
+              }
             });
             pendidikanData.push(row);
           }
         }
       }
     } catch(e) {}
+
+    // Inject education data from pegawai sheet if exists
+    if (pegawaiData['tingkat pendidikan'] || pegawaiData['jurusan'] || pegawaiData['sekolah']) {
+      const exists = pendidikanData.some(p => 
+        (p.tingkat === pegawaiData['tingkat pendidikan'] || p['tingkat pendidikan'] === pegawaiData['tingkat pendidikan'] || p.tingkat_pendidikan === pegawaiData['tingkat pendidikan']) &&
+        p.jurusan === pegawaiData['jurusan']
+      );
+      if (!exists) {
+        pendidikanData.unshift({
+          tingkat_pendidikan: pegawaiData['tingkat pendidikan'] || '-',
+          tingkat: pegawaiData['tingkat pendidikan'] || '-',
+          'tingkat pendidikan': pegawaiData['tingkat pendidikan'] || '-',
+          jurusan: pegawaiData['jurusan'] || '-',
+          sekolah: pegawaiData['sekolah'] || '-',
+          _rowIndex: 'pegawai_sheet'
+        });
+      }
+    }
 
     // IDP
     let idpData: any[] = [];

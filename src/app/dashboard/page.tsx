@@ -82,6 +82,11 @@ export default function DashboardPage() {
   };
 
   const hapusPendidikan = async (rowIndex: string) => {
+    if (rowIndex === 'pegawai_sheet') {
+      alert('Pendidikan dasar ini diisi oleh Admin dan tidak dapat dihapus dari sini.');
+      return;
+    }
+    if (!confirm('Yakin ingin menghapus riwayat pendidikan ini?')) return;
     try {
       const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
       if (res.ok) fetchData();
