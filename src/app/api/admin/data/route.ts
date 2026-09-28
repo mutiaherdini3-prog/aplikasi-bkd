@@ -79,7 +79,10 @@ export async function GET(request: Request) {
     if (reqNip && reqNip !== 'admin') {
       const adminRow = pRows.find((row: any) => row[nipIdx]?.toString().trim() === reqNip.trim());
       if (adminRow) {
-        adminRole = roleIdx !== -1 ? (adminRow[roleIdx] || 'pegawai') : 'pegawai';
+        adminRole = roleIdx !== -1 && adminRow[roleIdx] && adminRow[roleIdx].trim() !== '' ? adminRow[roleIdx].trim() : 'pegawai';
+        if (adminRole === 'pegawai' && isLegacyAdmin(adminRow[namaIdx] || '')) {
+          adminRole = 'admin';
+        }
         adminUnitKerja = adminRow[unitKerjaIdx] || '';
       }
     }
