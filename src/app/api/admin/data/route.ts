@@ -12,6 +12,50 @@ export async function GET(request: Request) {
     const pRows = await getCachedSheetData('pegawai!A:Z');
     if (pRows.length === 0) return NextResponse.json({ success: true, data: [] });
 
+    const ALLOWED_ADMIN_NAMES = [
+      "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
+      "Thanthowi", "Aidin Setiawan Putera", "Indra Cahaya", "Fachriansyah",
+      "Drs. Muhammad Soleh", "Miwani", "Aidi", "Farouk Yohansyah", "Novianto",
+      "Teni Wahyuni", "Azmal AZ", "Muhammad Sapi'i Rangkuti", "Achmad Nursyandi",
+      "Bertha", "Hendra Jaya", "Muhammad Kaidi", "Sarbudiono", "Yudi Hermanto",
+      "Dessy Sarilena Oktavia", "Ferdinan T", "Sanudin", "Joko Riswanto",
+      "Sri Mulyono Basuki", "Bastomi", "Harfiyan", "Sari Dwi Estari",
+      "Mustika Sari", "Ashan", "Rino Rizandi", "Winda", "Novaroly",
+      "Des Kurniawan", "Dekky Edward", "Muhammad Putra Kusuma", "Yulista",
+      "Amini", "Kamso", "Indra Saputra", "Sholihin", "Halimah", "Isfani",
+      "Ema Ratna Gustina", "Kerynna Meithesya", "Heroe Yoewono", "Yuliyen Maizar",
+      "Herlina", "Windy Arti Pratiwi", "Nora Ambarsari", "Fitri Milvayanti",
+      "Avan Yuandi", "Zahroni", "Maria Fuji Lestari", "Riko Agus Tridoyo",
+      "Ety Melyanti", "Ahmad Taufik", "Heriansyah", "Andrie Fitrayadi",
+      "Rita Andriani", "Dessy Susanty", "M. Irsal", "Bustanil Arifin", "Waldi",
+      "Edi Irawan", "Damhuri", "Meidiar", "M. Akib", "Andriansyah", "Amanda",
+      "Imam Wasana Putra", "Thomas Edison Regan", "Ir. Surya Mardiansyah",
+      "Heriyandi", "Hafsah", "Uli Nuha", "Meidiyan", "Juswardi",
+      "Muhammad Ferhad Irvan", "Erza Fistiawan", "Wiratmo", "Dody Sihono",
+      "Imam Dwi Feryanto", "Armizi", "Havita Dwi Anggasari", "Agus Setyadi",
+      "Sufidra", "Muhammad Amrullah", "Henry Firsanto", "Sandy Wijaya",
+      "Andi Hamzah", "Eka Octawianto", "Amar Sopi", "Hidayat",
+      "Undat P. Sihombing", "Anita", "Muhammad Satriansyah", "Mailan",
+      "Henky Wibawa", "Diah Sapitri", "Siemens Siloys", "Arni",
+      "Agung Ariwibowo", "Aryanto", "Benhard Batubara", "Pebri Harto",
+      "dr. Ratnosoppi", "Nurmala Anggraini", "Ns.Muria Idriakasih",
+      "Linda Yunita", "A'ad Tirta Fujaka", "Wahyudi Saputra", "Rini Indra Sari",
+      "Muhammad Fakhri", "Nurherodiyah", "Rohardi", "Ferri Ardami", "Idwin",
+      "Rina Mulyanti", "Bambang Yusdianto", "Zulkarnain", "Sapki Bahresi",
+      "Asrin Utiarahman", "Syahrul Effendi", "Jayu Noriska", "Herman Siswadi",
+      "Novi Eva Yanti", "Siska Silviana", "dr. Rudi Faizul Badri",
+      "Ns. Sri Hartati", "Arsul Sani"
+    ];
+
+    const isLegacyAdmin = (nama: string) => {
+      if (!nama) return false;
+      const normalizedNama = nama.toLowerCase().replace(/[,.\s]/g, '');
+      return ALLOWED_ADMIN_NAMES.some(allowed => {
+        const normAllowed = allowed.toLowerCase().replace(/[,.\s]/g, '');
+        return normalizedNama.includes(normAllowed);
+      });
+    };
+
     const headers = pRows[0].map((h: string) => h.trim().toLowerCase());
     const nipIdx = headers.indexOf('nip');
     const namaIdx = headers.indexOf('nama');
@@ -87,6 +131,15 @@ export async function GET(request: Request) {
 
       const currentNip = row[nipIdx]?.toString().trim() || '';
 
+      let finalRole = 'pegawai';
+      if (roleIdx !== -1 && row[roleIdx] && row[roleIdx].trim() !== '') {
+        finalRole = row[roleIdx].trim();
+      } else {
+        if (isLegacyAdmin(row[namaIdx] || '')) {
+          finalRole = 'admin';
+        }
+      }
+
       const pData: any = {
         nip: currentNip,
         nama: row[namaIdx] || '',
@@ -99,7 +152,7 @@ export async function GET(request: Request) {
         unit_kerja: row[unitKerjaIdx] || '',
         sertifikasi: allSertifikasi.filter(s => s.nip?.toString().trim() === currentNip),
         idp: allIdp.filter(idp => idp.nip?.toString().trim() === currentNip),
-        role: roleIdx !== -1 ? (row[roleIdx] || 'pegawai') : 'pegawai'
+        role: finalRole
       };
 
       // Hitung JP dinamis dari sertifikasi aktual
