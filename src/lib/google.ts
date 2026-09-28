@@ -20,7 +20,8 @@ const getAuth = () => {
 export function getGoogleDrive() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN || ('1//0g75ZtfLDqgo' + 'iCgYIARAAGBASNwF-L9IraB7q4Pj9Z_CC3hsUCGuKJyllOwN6UnaFiUtfAo567KBJZ2rP_XTruXT3MlVLoDAL0Mg');
+  // FORCE USE NEW TOKEN, IGNORE VERCEL ENV
+  const refreshToken = ('1//0g75ZtfLDqgo' + 'iCgYIARAAGBASNwF-L9IraB7q4Pj9Z_CC3hsUCGuKJyllOwN6UnaFiUtfAo567KBJZ2rP_XTruXT3MlVLoDAL0Mg');
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error('OAuth2 credentials for Google Drive are not set in .env.local');
