@@ -668,8 +668,8 @@ export default function AdminPage() {
                                   {p.role === 'admin' || p.role === 'super_admin' ? <><i className="bi bi-check-circle-fill"></i> Aktif</> : 'Nonaktif'}
                                 </button>
                               ) : (
-                                <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' || p.role === 'admin_diklat' ? 'bg-success' : 'bg-secondary'}`}>
-                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin (Atasan)' : p.role === 'admin_diklat' ? 'Admin SIPJP BABAR' : '-'}
+                                <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' ? 'bg-success' : 'bg-secondary'}`}>
+                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin' : '-'}
                                 </span>
                               )}
                             </td>
@@ -1267,8 +1267,7 @@ export default function AdminPage() {
                       <label className="form-label">Hak Akses (Role)</label>
                       <select className="form-select" value={pegawaiForm.role || 'pegawai'} onChange={e => setPegawaiForm({...pegawaiForm, role: e.target.value})}>
                         <option value="pegawai">Pegawai Biasa</option>
-                        <option value="admin">Admin (Atasan)</option>
-                        <option value="admin_diklat">Admin SIPJP-BABAR</option>
+                        <option value="admin">Admin</option>
                         <option value="super_admin">Super Admin</option>
                       </select>
                     </div>

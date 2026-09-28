@@ -287,6 +287,9 @@ export async function GET(request: Request) {
               pegawaiData.role = 'pegawai';
             }
           }
+          if (pegawaiData.role === 'admin_diklat') {
+            pegawaiData.role = 'admin';
+          }
           if (!pegawaiData.nip_atasan) pegawaiData.nip_atasan = '';
         }
         if (nipAtasanIdx !== -1 && pRows[i][nipAtasanIdx]?.trim() === nip.trim()) {

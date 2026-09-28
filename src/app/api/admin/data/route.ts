@@ -137,6 +137,7 @@ export async function GET(request: Request) {
       let finalRole = 'pegawai';
       if (roleIdx !== -1 && row[roleIdx] && row[roleIdx].trim() !== '') {
         finalRole = row[roleIdx].trim();
+        if (finalRole === 'admin_diklat') finalRole = 'admin';
       } else {
         if (isLegacyAdmin(row[namaIdx] || '')) {
           finalRole = 'admin';

@@ -78,6 +78,9 @@ export async function POST(request: Request) {
         else if (isLegacyAdmin(data.nama || '')) data['role'] = 'admin';
         else data['role'] = 'pegawai';
       }
+      if (data['role'] === 'admin_diklat') {
+        data['role'] = 'admin';
+      }
       if (!data['nip_atasan']) data['nip_atasan'] = '';
       
       return NextResponse.json({ success: true, data });
