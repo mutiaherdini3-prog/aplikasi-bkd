@@ -697,7 +697,7 @@ export default function AdminPage() {
                     </table>
                   </div>
                 </div>
-              )}
+              );})}
 
               {/* REKAP SERTIFIKASI TAB */}
               {activeTab === 'view-sertifikasi' && (
