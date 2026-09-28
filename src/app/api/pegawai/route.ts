@@ -465,6 +465,8 @@ export async function PUT(request: Request) {
     updateField('jabatan', jabatan);
     updateField('unit kerja', unit_kerja);
     
+    let headersUpdated = false;
+
     // Dynamic append helper for PUT
     const appendFieldPut = (field: string, value: string) => {
       if (value === undefined) return;
@@ -494,8 +496,6 @@ export async function PUT(request: Request) {
       while (newRow.length <= statusAktifIdx) newRow.push('');
       newRow[statusAktifIdx] = status_aktif;
     }
-
-    let headersUpdated = false;
 
     if (role !== undefined) {
       let roleIdx = pHeaders.indexOf('role');
