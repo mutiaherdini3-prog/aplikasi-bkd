@@ -72,6 +72,11 @@ export async function POST(request: Request) {
         });
       };
 
+      // Also support 'hak akses' column
+      if (!data['role'] && data['hak akses']) {
+        data['role'] = data['hak akses'];
+      }
+
       // Defaults for missing columns
       if (!data['role']) {
         if (data.nip === 'admin') data['role'] = 'super_admin';
