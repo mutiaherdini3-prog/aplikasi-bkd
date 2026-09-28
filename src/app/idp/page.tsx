@@ -11,6 +11,50 @@ export default function IDPPage() {
   const [selectedKetua, setSelectedKetua] = useState<{nip: string, nama: string} | null>(null);
   const [searchKetua, setSearchKetua] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const ALLOWED_ADMIN_NAMES = [
+    "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
+    "Thanthowi", "Aidin Setiawan Putera", "Indra Cahaya", "Fachriansyah",
+    "Drs. Muhammad Soleh", "Miwani", "Aidi", "Farouk Yohansyah", "Novianto",
+    "Teni Wahyuni", "Azmal AZ", "Muhammad Sapi'i Rangkuti", "Achmad Nursyandi",
+    "Bertha", "Hendra Jaya", "Muhammad Kaidi", "Sarbudiono", "Yudi Hermanto",
+    "Dessy Sarilena Oktavia", "Ferdinan T", "Sanudin", "Joko Riswanto",
+    "Sri Mulyono Basuki", "Bastomi", "Harfiyan", "Sari Dwi Estari",
+    "Mustika Sari", "Ashan", "Rino Rizandi", "Winda", "Novaroly",
+    "Des Kurniawan", "Dekky Edward", "Muhammad Putra Kusuma", "Yulista",
+    "Amini", "Kamso", "Indra Saputra", "Sholihin", "Halimah", "Isfani",
+    "Ema Ratna Gustina", "Kerynna Meithesya", "Heroe Yoewono", "Yuliyen Maizar",
+    "Herlina", "Windy Arti Pratiwi", "Nora Ambarsari", "Fitri Milvayanti",
+    "Avan Yuandi", "Zahroni", "Maria Fuji Lestari", "Riko Agus Tridoyo",
+    "Ety Melyanti", "Ahmad Taufik", "Heriansyah", "Andrie Fitrayadi",
+    "Rita Andriani", "Dessy Susanty", "M. Irsal", "Bustanil Arifin", "Waldi",
+    "Edi Irawan", "Damhuri", "Meidiar", "M. Akib", "Andriansyah", "Amanda",
+    "Imam Wasana Putra", "Thomas Edison Regan", "Ir. Surya Mardiansyah",
+    "Heriyandi", "Hafsah", "Uli Nuha", "Meidiyan", "Juswardi",
+    "Muhammad Ferhad Irvan", "Erza Fistiawan", "Wiratmo", "Dody Sihono",
+    "Imam Dwi Feryanto", "Armizi", "Havita Dwi Anggasari", "Agus Setyadi",
+    "Sufidra", "Muhammad Amrullah", "Henry Firsanto", "Sandy Wijaya",
+    "Andi Hamzah", "Eka Octawianto", "Amar Sopi", "Hidayat",
+    "Undat P. Sihombing", "Anita", "Muhammad Satriansyah", "Mailan",
+    "Henky Wibawa", "Diah Sapitri", "Siemens Siloys", "Arni",
+    "Agung Ariwibowo", "Aryanto", "Benhard Batubara", "Pebri Harto",
+    "dr. Ratnosoppi", "Nurmala Anggraini", "Ns.Muria Idriakasih",
+    "Linda Yunita", "A'ad Tirta Fujaka", "Wahyudi Saputra", "Rini Indra Sari",
+    "Muhammad Fakhri", "Nurherodiyah", "Rohardi", "Ferri Ardami", "Idwin",
+    "Rina Mulyanti", "Bambang Yusdianto", "Zulkarnain", "Sapki Bahresi",
+    "Asrin Utiarahman", "Syahrul Effendi", "Jayu Noriska", "Herman Siswadi",
+    "Novi Eva Yanti", "Siska Silviana", "dr. Rudi Faizul Badri",
+    "Ns. Sri Hartati", "Arsul Sani"
+  ];
+
+  const isAllowedForAdmin = (nama: string) => {
+    if (!nama) return false;
+    const normalizedNama = nama.toLowerCase().replace(/[,.\s]/g, '');
+    return ALLOWED_ADMIN_NAMES.some(allowed => {
+      const normAllowed = allowed.toLowerCase().replace(/[,.\s]/g, '');
+      return normalizedNama.includes(normAllowed);
+    });
+  };
   
   const [idps, setIdps] = useState<any[]>([{ 
     id: 1, 
@@ -254,13 +298,18 @@ export default function IDPPage() {
                             onChange={(e) => { setSearchKetua(e.target.value); setIsDropdownOpen(true); }}
                             onFocus={() => setIsDropdownOpen(true)}
                           />
-                          {isDropdownOpen && searchKetua.length > 0 && (
+                          {isDropdownOpen && (
                             <div className="dropdown-menu-custom">
                               {isLoadingKetua ? (
                                 <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Sedang memuat data ketua (harap tunggu beberapa detik)...</div>
                               ) : (
                                 <>
-                                  {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua))).slice(0, 10).map(p => (
+                                  {semuaPegawai.filter(p => {
+                                    const isManager = isAllowedForAdmin(p.nama);
+                                    const isSameOpd = p.unit_kerja === pegawai?.unit_kerja;
+                                    const matchSearch = p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua));
+                                    return isManager && matchSearch && isSameOpd;
+                                  }).slice(0, 50).map(p => (
                                     <div key={p.nip} className="dropdown-item-custom" onClick={() => {
                                       setSelectedKetua({ nip: p.nip, nama: p.nama });
                                       setIsDropdownOpen(false);
@@ -270,8 +319,13 @@ export default function IDPPage() {
                                       <div className="text-muted" style={{fontSize: '0.75rem'}}>NIP. {p.nip} {p.jabatan ? `- ${p.jabatan}` : ''}</div>
                                     </div>
                                   ))}
-                                  {semuaPegawai.filter(p => p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua))).length === 0 && (
-                                    <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Ketua tidak ditemukan</div>
+                                  {semuaPegawai.filter(p => {
+                                    const isManager = isAllowedForAdmin(p.nama);
+                                    const isSameOpd = p.unit_kerja === pegawai?.unit_kerja;
+                                    const matchSearch = p.nama.toLowerCase().includes(searchKetua.toLowerCase()) || (p.nip && p.nip.includes(searchKetua));
+                                    return isManager && matchSearch && isSameOpd;
+                                  }).length === 0 && (
+                                    <div className="p-2 text-muted text-center" style={{fontSize: '0.85rem'}}>Pejabat (Atasan) di Unit Kerja Anda tidak ditemukan.</div>
                                   )}
                                 </>
                               )}
@@ -351,6 +405,10 @@ export default function IDPPage() {
                 <div className="form-check mt-3" style={{fontSize: '0.85rem'}}>
                   <input className="form-check-input" type="checkbox" id="checkSetuju" required checked={agree} onChange={e => setAgree(e.target.checked)} />
                   <label className="form-check-label text-muted" htmlFor="checkSetuju">Saya menyatakan data Rencana IDP yang diisi benar dan dapat dipertanggungjawabkan.</label>
+                </div>
+                
+                <div className="alert alert-info mt-3" style={{fontSize: '0.85rem', padding: '10px 15px'}}>
+                  <i className="bi bi-info-circle-fill me-2"></i> <strong>Catatan:</strong> Pelatihan yang diajukan boleh lebih dari 1 dan dapat disetujui lebih dari 1, namun <strong>harus relevan dengan jabatan</strong> saat pengajuan.
                 </div>
 
                 <div className="text-end mt-4 pt-3 border-top">
