@@ -84,12 +84,16 @@ export async function POST(request: Request) {
     if (nipAtasanIdx === -1) { nipAtasanIdx = pHeaders.length; pHeaders.push('nip_atasan'); }
     newRow[nipAtasanIdx] = nip_atasan || '';
 
+    let headersUpdated = false;
+
     // Custom append field helper for POST
     const appendField = (field: string, value: string) => {
       let idx = pHeaders.indexOf(field);
       if (idx === -1) {
         idx = pHeaders.length;
         pHeaders.push(field);
+        // We only have the pHeaders array for the first row, so we just track it
+        headersUpdated = true;
       }
       while (newRow.length <= idx) newRow.push('');
       newRow[idx] = value || '';
@@ -98,6 +102,26 @@ export async function POST(request: Request) {
     if (tingkat_pendidikan !== undefined) appendField('tingkat pendidikan', tingkat_pendidikan);
     if (jurusan !== undefined) appendField('jurusan', jurusan);
     if (sekolah !== undefined) appendField('sekolah', sekolah);
+
+    if (headersUpdated) {
+      const getColumnName = (n: number) => {
+        let ordA = 'A'.charCodeAt(0);
+        let ordZ = 'Z'.charCodeAt(0);
+        let len = ordZ - ordA + 1;
+        let s = "";
+        while (n >= 0) {
+          s = String.fromCharCode(n % len + ordA) + s;
+          n = Math.floor(n / len) - 1;
+        }
+        return s;
+      };
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: `pegawai!A1:${getColumnName(pHeaders.length - 1)}1`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [pHeaders] }
+      });
+    }
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
