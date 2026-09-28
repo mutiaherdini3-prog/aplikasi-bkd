@@ -681,7 +681,7 @@ export default function AdminPage() {
                                     const jenkelOptions = ['Laki-Laki', 'Perempuan'];
                                     let matchedJenkel = p.jenkel || '';
                                     if (p.jenkel) {
-                                      const found = jenkelOptions.find(o => o.toLowerCase() === p.jenkel.toLowerCase());
+                                      const found = jenkelOptions.find(o => o.toLowerCase() === p.jenkel.trim().toLowerCase());
                                       if (found) matchedJenkel = found;
                                     }
 
@@ -693,7 +693,7 @@ export default function AdminPage() {
                                     
                                     let matchedUnitKerja = p.unit_kerja || '';
                                     if (p.unit_kerja) {
-                                      const found = unitKerjaOptions.find(o => o.toLowerCase() === p.unit_kerja.toLowerCase());
+                                      const found = unitKerjaOptions.find(o => o.toLowerCase() === p.unit_kerja.trim().toLowerCase());
                                       if (found) matchedUnitKerja = found;
                                     }
 

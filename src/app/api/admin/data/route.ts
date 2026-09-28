@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       headers.indexOf('golongan');
     }
     const realGolonganIdx = headers.indexOf('golongan ') !== -1 ? headers.indexOf('golongan ') : headers.indexOf('golongan');
-    const jenkelIdx = headers.indexOf('jankel') !== -1 ? headers.indexOf('jankel') : headers.indexOf('jenis kelamin');
+    const jenkelIdx = [headers.indexOf('jankel'), headers.indexOf('jenis kelamin'), headers.indexOf('jenkel')].find(i => i !== -1) ?? -1;
     const statusAktifIdx = headers.indexOf('status aktif');
     const jabatanIdx = headers.indexOf('jabatan');
     const unitKerjaIdx = headers.indexOf('unit kerja');

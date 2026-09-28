@@ -271,7 +271,7 @@ export async function GET(request: Request) {
           pHeaders.forEach((h, idx) => {
             let key = h;
             if (key === 'status pegawai') key = 'status_pegawai';
-            if (key === 'jankel') key = 'jenkel';
+            if (key === 'jankel' || key === 'jenis kelamin') key = 'jenkel';
             if (key === 'unit kerja') key = 'unit_kerja';
             if (key === 'golongan ') key = 'golongan';
             if (key === 'foto profil') key = 'foto_profil';
