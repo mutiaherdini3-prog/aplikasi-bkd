@@ -64,10 +64,10 @@ export default function AdminPage() {
 
   const isAllowedForAdmin = (nama: string) => {
     if (!nama) return false;
-    const normalizedNama = nama.toLowerCase().replace(/[,.]/g, '');
+    const normalizedNama = nama.toLowerCase().replace(/[,.\s]/g, '');
     return ALLOWED_ADMIN_NAMES.some(allowed => {
-      const normAllowed = allowed.toLowerCase().replace(/[,.]/g, '');
-      return normalizedNama.includes(normAllowed) || normAllowed.includes(normalizedNama);
+      const normAllowed = allowed.toLowerCase().replace(/[,.\s]/g, '');
+      return normalizedNama.includes(normAllowed);
     });
   };
 
