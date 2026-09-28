@@ -51,7 +51,7 @@ export default function AdminPage() {
 
   const fetchData = async () => {
     try {
-      const userNip = localStorage.getItem('userNip') || '';
+      const userNip = localStorage.getItem('loggedInUser') || '';
       
       const [resData, resAll] = await Promise.all([
         fetch(`/api/admin/data?nip=${userNip}`),
