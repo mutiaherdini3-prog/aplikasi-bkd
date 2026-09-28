@@ -33,14 +33,29 @@ export async function POST(request: Request) {
     const sHeaders = sRows[0] || [];
     
     // Construct new row matching header order
-    const newRow = sHeaders.map((h: string) => {
-      const key = h.toLowerCase();
-      return body[key] !== undefined ? body[key] : '';
+    const newRow = new Array(sHeaders.length).fill('');
+    
+    // Fill existing columns
+    sHeaders.forEach((h: string, idx: number) => {
+      const key = h.toLowerCase().trim();
+      if (body[key] !== undefined) {
+        newRow[idx] = body[key];
+      }
+    });
+
+    // Check if body has keys not in headers
+    Object.keys(body).forEach(key => {
+      if (key === 'action') return;
+      const headerExists = sHeaders.some((h: string) => h.toLowerCase().trim() === key.toLowerCase().trim());
+      if (!headerExists) {
+        sHeaders.push(key);
+        newRow.push(body[key]);
+      }
     });
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'pendidikan!A:Z',
+      range: 'pendidikan!A:ZZ',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [newRow]

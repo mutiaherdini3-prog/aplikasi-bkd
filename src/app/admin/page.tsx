@@ -1299,6 +1299,32 @@ export default function AdminPage() {
                       </select>
                     </div>
 
+                    <div className="col-12 mt-4 pt-3 border-top">
+                      <h6 className="fw-bold text-primary mb-3">Informasi Pendidikan Dasar</h6>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Tingkat Pendidikan</label>
+                      <select className="form-select" value={pegawaiForm.tingkat_pendidikan || ''} onChange={e => setPegawaiForm({...pegawaiForm, tingkat_pendidikan: e.target.value})}>
+                        <option value="">- Pilih Tingkat -</option>
+                        <option value="SD">SD / Sederajat</option>
+                        <option value="SMP">SMP / Sederajat</option>
+                        <option value="SMA">SMA / Sederajat</option>
+                        <option value="D3">Diploma III (D3)</option>
+                        <option value="D4">Diploma IV (D4)</option>
+                        <option value="S1">Strata 1 (S1)</option>
+                        <option value="S2">Strata 2 (S2)</option>
+                        <option value="S3">Strata 3 (S3)</option>
+                      </select>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Fakultas / Program Studi / Jurusan</label>
+                      <input type="text" className="form-control" value={pegawaiForm.jurusan || ''} onChange={e => setPegawaiForm({...pegawaiForm, jurusan: e.target.value})} placeholder="Cth: Ilmu Hukum" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Nama Sekolah / Universitas</label>
+                      <input type="text" className="form-control" value={pegawaiForm.sekolah || ''} onChange={e => setPegawaiForm({...pegawaiForm, sekolah: e.target.value})} placeholder="Cth: Universitas Terbuka" />
+                    </div>
+
                   </div>
                 </div>
                 <div className="modal-footer border-0 bg-light">

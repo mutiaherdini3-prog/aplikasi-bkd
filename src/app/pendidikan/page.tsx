@@ -136,9 +136,14 @@ export default function PendidikanPage() {
                           </select>
                         </div>
 
-                        <div className="col-md-6">
+                        <div className="col-md-4">
                           <label className="form-label fw-medium small">Fakultas / Program Studi / Jurusan</label>
                           <input type="text" className="form-control" placeholder="Contoh: Ilmu Komputer" value={p.jurusan || ''} onChange={e => handleChange(p.id, 'jurusan', e.target.value)} />
+                        </div>
+
+                        <div className="col-md-4">
+                          <label className="form-label fw-medium small">Nama Sekolah / Universitas</label>
+                          <input type="text" className="form-control" placeholder="Contoh: Universitas Terbuka" value={p.sekolah || ''} onChange={e => handleChange(p.id, 'sekolah', e.target.value)} />
                         </div>
 
                       </div>

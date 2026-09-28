@@ -19,7 +19,7 @@ const getColumnName = (n: number) => {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan } = body;
+    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan, tingkat_pendidikan, jurusan, sekolah } = body;
     
     if (!nip || !nama) return NextResponse.json({ success: false, message: 'NIP and Nama are required' }, { status: 400 });
 
@@ -83,6 +83,21 @@ export async function POST(request: Request) {
     let nipAtasanIdx = pHeaders.indexOf('nip_atasan');
     if (nipAtasanIdx === -1) { nipAtasanIdx = pHeaders.length; pHeaders.push('nip_atasan'); }
     newRow[nipAtasanIdx] = nip_atasan || '';
+
+    // Custom append field helper for POST
+    const appendField = (field: string, value: string) => {
+      let idx = pHeaders.indexOf(field);
+      if (idx === -1) {
+        idx = pHeaders.length;
+        pHeaders.push(field);
+      }
+      while (newRow.length <= idx) newRow.push('');
+      newRow[idx] = value || '';
+    };
+
+    if (tingkat_pendidikan !== undefined) appendField('tingkat pendidikan', tingkat_pendidikan);
+    if (jurusan !== undefined) appendField('jurusan', jurusan);
+    if (sekolah !== undefined) appendField('sekolah', sekolah);
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
@@ -385,7 +400,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan } = body;
+    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan, tingkat_pendidikan, jurusan, sekolah } = body;
     if (!nip) return NextResponse.json({ success: false }, { status: 400 });
 
     const sheets = getGoogleSheets();
@@ -427,6 +442,24 @@ export async function PUT(request: Request) {
     updateField('jankel', jenkel);
     updateField('jabatan', jabatan);
     updateField('unit kerja', unit_kerja);
+    
+    // Dynamic append helper for PUT
+    const appendFieldPut = (field: string, value: string) => {
+      if (value === undefined) return;
+      let idx = pHeaders.indexOf(field);
+      if (idx === -1) {
+        idx = pHeaders.length;
+        pHeaders.push(field);
+        pRows[0].push(field);
+        headersUpdated = true;
+      }
+      while (newRow.length <= idx) newRow.push('');
+      newRow[idx] = value;
+    };
+
+    appendFieldPut('tingkat pendidikan', tingkat_pendidikan);
+    appendFieldPut('jurusan', jurusan);
+    appendFieldPut('sekolah', sekolah);
     
     // Status Aktif
     if (status_aktif !== undefined) {
