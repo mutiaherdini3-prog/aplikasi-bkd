@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [idpForm, setIdpForm] = useState<any>({});
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
   const [userRole, setUserRole] = useState<string>('');
+  const [searchPegawai, setSearchPegawai] = useState('');
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
@@ -32,7 +33,7 @@ export default function AdminPage() {
     setCurrentPagePegawai(1);
     setCurrentPageSert(1);
     setCurrentPageIdp(1);
-  }, [filterMode, statusFilter, tahunFilter]);
+  }, [filterMode, statusFilter, tahunFilter, searchPegawai]);
 
   // Pagination UI Component
   const PaginationControls = ({ currentPage, setCurrentPage, totalItems }: { currentPage: number, setCurrentPage: (p: number) => void, totalItems: number }) => {
@@ -569,17 +570,46 @@ export default function AdminPage() {
                         </tbody>
                       </table>
                     </div>
-                    <PaginationControls currentPage={currentPagePegawai} setCurrentPage={setCurrentPagePegawai} totalItems={pegawaiList.length} />
+                    <PaginationControls currentPage={currentPagePegawai} setCurrentPage={setCurrentPagePegawai} totalItems={pegawaiList.filter(p => {
+                              if (filterMode === 'lulus' && p.jp < 20) return false;
+                              if (filterMode === 'belum' && p.jp >= 20) return false;
+                              
+                              if (statusFilter !== 'all') {
+                                const statusPeg = p.status_pegawai || '';
+                                if (statusFilter === 'PNS' && !statusPeg.includes('PNS')) return false;
+                                if (statusFilter === 'PPPK' && !(statusPeg.includes('P3K') || statusPeg.includes('PPPK'))) return false;
+                                if (statusFilter === 'PW' && !(statusPeg.includes('PW') || (!statusPeg.includes('PNS') && !statusPeg.includes('P3K') && !statusPeg.includes('PPPK')))) return false;
+                              }
+                              return true;
+                    }).length} />
                   </div>
                 </div>
               )}
 
               {/* DATA PEGAWAI TAB */}
-              {activeTab === 'view-pegawai' && (
+              {activeTab === 'view-pegawai' && (() => {
+                const filteredPegawaiList = pegawaiList.filter(p => {
+                  if (!searchPegawai) return true;
+                  const query = searchPegawai.toLowerCase();
+                  return (p.nama && p.nama.toLowerCase().includes(query)) || 
+                         (p.nip && p.nip.toLowerCase().includes(query));
+                });
+                
+                return (
                 <div className="table-card">
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
                     <div className="d-flex gap-2">
+                      <div className="position-relative">
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm pe-4" 
+                          placeholder="Cari Nama / NIP..." 
+                          value={searchPegawai}
+                          onChange={e => setSearchPegawai(e.target.value)}
+                        />
+                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                      </div>
                       {userRole === 'super_admin' && (
                         <button className="btn btn-sm btn-primary" onClick={() => {
                           setPegawaiForm({ isEdit: false, password: 'password123', status_aktif: 'Aktif', jp: 0 });
@@ -613,7 +643,7 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pegawaiList.slice((currentPagePegawai - 1) * ITEMS_PER_PAGE, currentPagePegawai * ITEMS_PER_PAGE).map((p, index) => (
+                        {filteredPegawaiList.slice((currentPagePegawai - 1) * ITEMS_PER_PAGE, currentPagePegawai * ITEMS_PER_PAGE).map((p, index) => (
                           <tr key={index}>
                             <td>{(currentPagePegawai - 1) * ITEMS_PER_PAGE + index + 1}</td>
                             <td>{p.nip}</td>
