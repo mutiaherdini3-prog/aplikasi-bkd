@@ -669,7 +669,7 @@ export default function AdminPage() {
                                 </button>
                               ) : (
                                 <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' ? 'bg-success' : 'bg-secondary'}`}>
-                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin' : '-'}
+                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin' : 'Pegawai Biasa'}
                                 </span>
                               )}
                             </td>
