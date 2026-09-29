@@ -305,119 +305,15 @@ export default function AdminPage() {
     return '';
   };
 
-  const exportToExcel = () => {
-    const filteredByMode = pegawaiList.filter(p => {
-      if (filterMode === 'lulus') return checkLulusJP(p);
-      if (filterMode === 'belum') return !checkLulusJP(p);
-      return true;
-    });
-    const finalFiltered = filteredByMode.filter(p => {
-      if (statusFilter === 'all') return true;
-      if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
-      return p.status_pegawai === statusFilter;
-    });
-
-    const maxCerts = Math.max(0, ...finalFiltered.map(p => {
+  const generateExcelSheet = (pegawaiData: any[], sheetName: string, workbook: any, statusKelulusanLabel?: string) => {
+    if (pegawaiData.length === 0) return;
+    
+    const maxCerts = Math.max(0, ...pegawaiData.map(p => {
       const certs = p.filteredSertifikasi || p.sertifikasi || [];
       return certs.length;
     }));
 
-    const excelData = finalFiltered.map((p, index) => {
-      const baseRow: any = {
-        "No": index + 1,
-        "NIP": p.nip,
-        "Nama Pegawai": p.nama,
-        "Jenis Kelamin": p.jenis_kelamin,
-        "Status Pegawai": p.status_pegawai,
-        "Pangkat/Golongan": p.pangkat,
-        "Jabatan": p.jabatan,
-        "Unit Kerja": p.unit_kerja,
-        "Total JP": p.jp,
-        "Status Kelulusan": checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI",
-      };
-
-      const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      for (let i = 0; i < maxCerts; i++) {
-        if (i < certs.length) {
-          const s = certs[i];
-          baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
-          baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
-          baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
-          baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
-          baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
-          
-          let linkUrl = s.link_sertifikat || 'Tidak ada link';
-          
-          // Bersihkan rumus =HYPERLINK lama jika ada agar tidak error di Excel
-          if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
-            const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
-            if (match && match[1]) {
-              linkUrl = match[1];
-            }
-          }
-
-          // Jika URL berupa relative /uploads, ubah jadi absolut
-          if (linkUrl.startsWith('/uploads')) {
-            linkUrl = `${window.location.origin}${linkUrl}`;
-          }
-
-          // Bungkus dengan /view agar link dari Excel membuka custom viewer (ada tombol Kembalinya)
-          // KECUALI untuk link Google Drive agar langsung membuka Drive asli.
-          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
-            linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
-          }
-
-          baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
-        } else {
-          baseRow[`Nama Sertifikat ${i + 1}`] = '-';
-          baseRow[`Jenis Kursus ${i + 1}`] = '-';
-          baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
-          baseRow[`Penanda Tangan ${i + 1}`] = '-';
-          baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
-          baseRow[`Link Sertifikat ${i + 1}`] = '-';
-        }
-      }
-
-      return baseRow;
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-
-    // Ubah teks URL menjadi clickable link di Excel
-    for (const cellAddress in worksheet) {
-      if (!cellAddress.startsWith('!')) {
-        const cell = worksheet[cellAddress];
-        if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
-          const url = cell.v;
-          // Menggunakan link native Excel agar otomatis berwarna biru
-          worksheet[cellAddress] = {
-            t: 's',
-            v: "Lihat Dokumen",
-            l: { Target: url }
-          };
-        }
-      }
-    }
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pegawai");
-    XLSX.writeFile(workbook, `Laporan_Sertifikasi_Pegawai_${tahunFilter}.xlsx`);
-  };
-
-  const exportToExcelMemenuhi = () => {
-    const finalFiltered = pegawaiList.filter(p => {
-      if (!checkLulusJP(p)) return false;
-      if (statusFilter === 'all') return true;
-      if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
-      return p.status_pegawai === statusFilter;
-    });
-
-    const maxCerts = Math.max(0, ...finalFiltered.map(p => {
-      const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      return certs.length;
-    }));
-
-    const excelData = finalFiltered.map((p, index) => {
+    const excelData = pegawaiData.map((p, index) => {
       const baseRow: any = {
         "No": index + 1,
         "NIP": p.nip,
@@ -429,7 +325,7 @@ export default function AdminPage() {
         "Unit Kerja": p.unit_kerja,
         "Total JP": p.jp,
         "Target JP": getTargetJP(p),
-        "Status Kelulusan": "MEMENUHI",
+        "Status Kelulusan": statusKelulusanLabel || (checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI"),
       };
 
       const certs = p.filteredSertifikasi || p.sertifikasi || [];
@@ -472,83 +368,48 @@ export default function AdminPage() {
         }
       }
     }
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Memenuhi JP");
-    XLSX.writeFile(workbook, `Laporan_Sertifikasi_MemenuhiJP_${tahunFilter}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   };
 
-  const exportToExcelBelumMemenuhi = () => {
-    const finalFiltered = pegawaiList.filter(p => {
-      if (checkLulusJP(p)) return false;
+  const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum') => {
+    let baseList = pegawaiList;
+    if (mode === 'lulus') baseList = pegawaiList.filter(p => checkLulusJP(p));
+    if (mode === 'belum') baseList = pegawaiList.filter(p => !checkLulusJP(p));
+
+    const finalFiltered = baseList.filter(p => {
       if (statusFilter === 'all') return true;
       if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
       return p.status_pegawai === statusFilter;
     });
 
-    const maxCerts = Math.max(0, ...finalFiltered.map(p => {
-      const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      return certs.length;
-    }));
-
-    const excelData = finalFiltered.map((p, index) => {
-      const baseRow: any = {
-        "No": index + 1,
-        "NIP": p.nip,
-        "Nama Pegawai": p.nama,
-        "Jenis Kelamin": p.jenis_kelamin,
-        "Status Pegawai": p.status_pegawai,
-        "Pangkat/Golongan": p.pangkat,
-        "Jabatan": p.jabatan,
-        "Unit Kerja": p.unit_kerja,
-        "Total JP": p.jp,
-        "Target JP": getTargetJP(p),
-        "Status Kelulusan": "BELUM MEMENUHI",
-      };
-
-      const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      for (let i = 0; i < maxCerts; i++) {
-        if (i < certs.length) {
-          const s = certs[i];
-          baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
-          baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
-          baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
-          baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
-          baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
-          let linkUrl = s.link_sertifikat || 'Tidak ada link';
-          if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
-            const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
-            if (match && match[1]) linkUrl = match[1];
-          }
-          if (linkUrl.startsWith('/uploads')) linkUrl = `${window.location.origin}${linkUrl}`;
-          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
-            linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
-          }
-          baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
-        } else {
-          baseRow[`Nama Sertifikat ${i + 1}`] = '-';
-          baseRow[`Jenis Kursus ${i + 1}`] = '-';
-          baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
-          baseRow[`Penanda Tangan ${i + 1}`] = '-';
-          baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
-          baseRow[`Link Sertifikat ${i + 1}`] = '-';
-        }
-      }
-      return baseRow;
+    const pnsData = finalFiltered.filter(p => (p.status_pegawai || '').toUpperCase().includes('PNS'));
+    const pppkData = finalFiltered.filter(p => {
+      const s = (p.status_pegawai || '').toUpperCase();
+      return s.includes('P3K') || s.includes('PPPK');
+    });
+    const pwData = finalFiltered.filter(p => {
+      const s = (p.status_pegawai || '').toUpperCase();
+      return !s.includes('PNS') && !s.includes('P3K') && !s.includes('PPPK');
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    for (const cellAddress in worksheet) {
-      if (!cellAddress.startsWith('!')) {
-        const cell = worksheet[cellAddress];
-        if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
-          worksheet[cellAddress] = { t: 's', v: "Lihat Dokumen", l: { Target: cell.v } };
-        }
-      }
-    }
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Belum Memenuhi JP");
-    XLSX.writeFile(workbook, `Laporan_Sertifikasi_BelumMemenuhiJP_${tahunFilter}.xlsx`);
+    const statusLabel = mode === 'lulus' ? "MEMENUHI" : mode === 'belum' ? "BELUM MEMENUHI" : undefined;
+    
+    if (pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel);
+    if (pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel);
+    if (pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel);
+    
+    if (pnsData.length === 0 && pppkData.length === 0 && pwData.length === 0) {
+      alert('Tidak ada data untuk di-export');
+      return;
+    }
+
+    XLSX.writeFile(workbook, `Laporan_Sertifikasi_${title}_${tahunFilter}.xlsx`);
   };
+
+  const exportToExcel = () => handleExport("Pegawai", "all");
+  const exportToExcelMemenuhi = () => handleExport("MemenuhiJP", "lulus");
+  const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum");
 
   return (
     <>
