@@ -614,8 +614,8 @@ export default function AdminPage() {
               {activeTab === 'view-dashboard' && (
                 <div>
                   <div className="row mb-4">
-                    <div className="col-md-3 mb-3">
-                      <div className={`stat-card ${filterMode === 'all' ? 'active-filter' : ''}`} onClick={() => setFilterMode('all')} title="Klik untuk melihat semua pegawai" style={{ height: '100%' }}>
+                    <div className="col-md-4 mb-3">
+                      <div className={`stat-card ${filterMode === 'all' && statusFilter === 'all' ? 'active-filter' : ''}`} onClick={() => { setFilterMode('all'); setStatusFilter('all'); }} title="Klik untuk melihat semua pegawai" style={{ height: '100%' }}>
                         <div className="stat-icon bg-primary bg-opacity-10 text-primary"><i className="bi bi-people-fill"></i></div>
                         <div className="stat-content">
                           <h3>{pegawaiList.length}</h3>
@@ -623,30 +623,49 @@ export default function AdminPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-3 mb-3">
-                      <div className="stat-card" title="ASN yang sudah mengikuti pengembangan kompetensi setidaknya 1 kali" style={{ height: '100%' }}>
+                    <div className="col-md-4 mb-3">
+                      <div className={`stat-card ${filterMode === 'lulus' && statusFilter === 'PNS' ? 'active-filter' : ''}`} onClick={() => { setFilterMode('lulus'); setStatusFilter('PNS'); }} title="Klik untuk memfilter PNS yang sudah memenuhi (20 JP)" style={{ height: '100%' }}>
+                        <div className="stat-icon bg-success bg-opacity-10 text-success"><i className="bi bi-check-circle-fill"></i></div>
+                        <div className="stat-content">
+                          <h3>{lulusPNS}</h3>
+                          <p>PNS Memenuhi (20 JP)</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <div className={`stat-card ${filterMode === 'lulus' && statusFilter === 'PPPK' ? 'active-filter' : ''}`} onClick={() => { setFilterMode('lulus'); setStatusFilter('PPPK'); }} title="Klik untuk memfilter PPPK yang sudah memenuhi (24 JP)" style={{ height: '100%' }}>
+                        <div className="stat-icon bg-success bg-opacity-10 text-success"><i className="bi bi-check-circle-fill"></i></div>
+                        <div className="stat-content">
+                          <h3>{lulusPPPK}</h3>
+                          <p>PPPK Memenuhi (24 JP)</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="col-md-4 mb-3">
+                      <div className="stat-card" title="ASN yang sudah mengikuti pengembangan kompetensi setidaknya 1 kali" style={{ height: '100%', cursor: 'default' }}>
                         <div className="stat-icon bg-info bg-opacity-10 text-info"><i className="bi bi-person-workspace"></i></div>
                         <div className="stat-content">
                           <h3>{sudahPengembangan}</h3>
-                          <p>Telah Mengikuti Pengembangan Kompetensi</p>
+                          <p>Mengikuti Pengembangan Kompetensi</p>
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-3 mb-3">
-                      <div className={`stat-card ${filterMode === 'lulus' ? 'active-filter' : ''}`} onClick={() => setFilterMode('lulus')} title="Klik untuk memfilter yang sudah memenuhi" style={{ height: '100%' }}>
-                        <div className="stat-icon bg-success bg-opacity-10 text-success"><i className="bi bi-check-circle-fill"></i></div>
-                        <div className="stat-content">
-                          <h3 className="mb-1">{lulus} <span style={{fontSize: '0.9rem', color: '#6c757d', fontWeight: 'normal'}}>({lulusPNS} PNS, {lulusPPPK} PPPK)</span></h3>
-                          <p>Memenuhi Kewajiban JP</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-3 mb-3">
-                      <div className={`stat-card ${filterMode === 'belum' ? 'active-filter' : ''}`} onClick={() => setFilterMode('belum')} title="Klik untuk memfilter yang belum memenuhi" style={{ height: '100%' }}>
+                    <div className="col-md-4 mb-3">
+                      <div className={`stat-card ${filterMode === 'belum' && statusFilter === 'PNS' ? 'active-filter' : ''}`} onClick={() => { setFilterMode('belum'); setStatusFilter('PNS'); }} title="Klik untuk memfilter PNS yang belum memenuhi" style={{ height: '100%' }}>
                         <div className="stat-icon bg-warning bg-opacity-10 text-warning"><i className="bi bi-exclamation-triangle-fill"></i></div>
                         <div className="stat-content">
-                          <h3 className="mb-1">{belum} <span style={{fontSize: '0.9rem', color: '#6c757d', fontWeight: 'normal'}}>({belumPNS} PNS, {belumPPPK} PPPK)</span></h3>
-                          <p>Belum Memenuhi Kewajiban</p>
+                          <h3>{belumPNS}</h3>
+                          <p>PNS Belum Memenuhi</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <div className={`stat-card ${filterMode === 'belum' && statusFilter === 'PPPK' ? 'active-filter' : ''}`} onClick={() => { setFilterMode('belum'); setStatusFilter('PPPK'); }} title="Klik untuk memfilter PPPK yang belum memenuhi" style={{ height: '100%' }}>
+                        <div className="stat-icon bg-warning bg-opacity-10 text-warning"><i className="bi bi-exclamation-triangle-fill"></i></div>
+                        <div className="stat-content">
+                          <h3>{belumPPPK}</h3>
+                          <p>PPPK Belum Memenuhi</p>
                         </div>
                       </div>
                     </div>
