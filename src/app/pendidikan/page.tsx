@@ -49,11 +49,7 @@ export default function PendidikanPage() {
           body: JSON.stringify({
             nip: pegawai.nip,
             tingkat_pendidikan: p.tingkat,
-            nama_institusi: p.institusi,
-            jurusan: p.jurusan || '',
-            tahun_lulus: p.tahun_lulus,
-            nomor_ijazah: p.no_ijazah || '',
-            link_ijazah: ''
+            jurusan: p.jurusan || ''
           })
         });
       }
@@ -121,7 +117,7 @@ export default function PendidikanPage() {
                         )}
                       </div>
                       <div className="row g-3">
-                        <div className="col-md-4">
+                        <div className="col-md-6">
                           <label className="form-label fw-medium small">Tingkat Pendidikan *</label>
                           <select className="form-select" required value={p.tingkat || ''} onChange={e => handleChange(p.id, 'tingkat', e.target.value)}>
                             <option value="">- Pilih Tingkat -</option>
@@ -136,16 +132,10 @@ export default function PendidikanPage() {
                           </select>
                         </div>
 
-                        <div className="col-md-4">
+                        <div className="col-md-6">
                           <label className="form-label fw-medium small">Fakultas / Program Studi / Jurusan</label>
-                          <input type="text" className="form-control" placeholder="Contoh: Ilmu Komputer" value={p.jurusan || ''} onChange={e => handleChange(p.id, 'jurusan', e.target.value)} />
+                          <input type="text" className="form-control" placeholder="Contoh: S1 Pendidikan Biologi Tahun 1992" value={p.jurusan || ''} onChange={e => handleChange(p.id, 'jurusan', e.target.value)} />
                         </div>
-
-                        <div className="col-md-4">
-                          <label className="form-label fw-medium small">Nama Sekolah / Universitas</label>
-                          <input type="text" className="form-control" placeholder="Contoh: Universitas Terbuka" value={p.sekolah || ''} onChange={e => handleChange(p.id, 'sekolah', e.target.value)} />
-                        </div>
-
                       </div>
                     </div>
                   ))}
