@@ -201,6 +201,7 @@ export default function DashboardPage() {
                     <i className="bi bi-exclamation-circle-fill me-1"></i> Profil Belum Lengkap
                   </span>
                 )}
+              </div>
             </div>
 
             <div className="row mt-5">
