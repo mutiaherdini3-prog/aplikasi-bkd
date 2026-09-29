@@ -315,13 +315,12 @@ export default function DashboardPage() {
                         <th>No</th>
                         <th>Tingkat</th>
                         <th>Jurusan</th>
-                        <th>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {pendidikan.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="text-center text-muted py-4">Belum ada data riwayat pendidikan.</td>
+                          <td colSpan={3} className="text-center text-muted py-4">Belum ada data riwayat pendidikan.</td>
                         </tr>
                       ) : (
                         pendidikan.map((p, index) => (
@@ -329,11 +328,6 @@ export default function DashboardPage() {
                             <td>{index + 1}</td>
                             <td className="fw-bold text-primary">{p.tingkat_pendidikan}</td>
                             <td>{p.jurusan || '-'}</td>
-                            <td>
-                              <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPendidikan(p._rowIndex)}>
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </td>
                           </tr>
                         ))
                       )}
