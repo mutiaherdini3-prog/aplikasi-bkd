@@ -201,12 +201,6 @@ export default function DashboardPage() {
                     <i className="bi bi-exclamation-circle-fill me-1"></i> Profil Belum Lengkap
                   </span>
                 )}
-              </div>
-              <div>
-                <a onClick={() => router.push('/edit-profil')} className="btn btn-primary rounded-pill px-4 shadow-sm text-white" style={{cursor:'pointer'}}>
-                  <i className="bi bi-pencil-square me-2"></i>Lengkapi Profil
-                </a>
-              </div>
             </div>
 
             <div className="row mt-5">
