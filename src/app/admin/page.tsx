@@ -247,8 +247,34 @@ export default function AdminPage() {
     semuaPegawai.map(p => p.unit_kerja).filter(Boolean)
   )).sort();
 
-  const lulus = pegawaiList.filter(p => p.jp >= 20).length;
+  const checkLulusJP = (p: any) => {
+    const status = (p.status_pegawai || '').toUpperCase();
+    const isP3K = status.includes('P3K') || status.includes('PPPK');
+    return isP3K ? p.jp >= 24 : p.jp >= 20;
+  };
+
+  const getTargetJP = (p: any) => {
+    const status = (p.status_pegawai || '').toUpperCase();
+    const isP3K = status.includes('P3K') || status.includes('PPPK');
+    return isP3K ? 24 : 20;
+  };
+
+  const lulus = pegawaiList.filter(p => checkLulusJP(p)).length;
   const belum = pegawaiList.length - lulus;
+
+  const sudahPengembangan = pegawaiList.filter(p => p.jp > 0).length;
+  const pnsList = pegawaiList.filter(p => {
+    const s = (p.status_pegawai || '').toUpperCase();
+    return s.includes('PNS');
+  });
+  const pppkList = pegawaiList.filter(p => {
+    const s = (p.status_pegawai || '').toUpperCase();
+    return s.includes('P3K') || s.includes('PPPK');
+  });
+  const lulusPNS = pnsList.filter(p => checkLulusJP(p)).length;
+  const lulusPPPK = pppkList.filter(p => checkLulusJP(p)).length;
+  const belumPNS = pnsList.length - lulusPNS;
+  const belumPPPK = pppkList.length - lulusPPPK;
   let sertifCounter = 1;
   let idpCounter = 1;
 
@@ -281,8 +307,8 @@ export default function AdminPage() {
 
   const exportToExcel = () => {
     const filteredByMode = pegawaiList.filter(p => {
-      if (filterMode === 'lulus') return p.jp >= 20;
-      if (filterMode === 'belum') return p.jp < 20;
+      if (filterMode === 'lulus') return checkLulusJP(p);
+      if (filterMode === 'belum') return !checkLulusJP(p);
       return true;
     });
     const finalFiltered = filteredByMode.filter(p => {
@@ -307,7 +333,7 @@ export default function AdminPage() {
         "Jabatan": p.jabatan,
         "Unit Kerja": p.unit_kerja,
         "Total JP": p.jp,
-        "Status Kelulusan": p.jp >= 20 ? "MEMENUHI" : "BELUM MEMENUHI",
+        "Status Kelulusan": checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI",
       };
 
       const certs = p.filteredSertifikasi || p.sertifikasi || [];
@@ -378,6 +404,152 @@ export default function AdminPage() {
     XLSX.writeFile(workbook, `Laporan_Sertifikasi_Pegawai_${tahunFilter}.xlsx`);
   };
 
+  const exportToExcelMemenuhi = () => {
+    const finalFiltered = pegawaiList.filter(p => {
+      if (!checkLulusJP(p)) return false;
+      if (statusFilter === 'all') return true;
+      if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
+      return p.status_pegawai === statusFilter;
+    });
+
+    const maxCerts = Math.max(0, ...finalFiltered.map(p => {
+      const certs = p.filteredSertifikasi || p.sertifikasi || [];
+      return certs.length;
+    }));
+
+    const excelData = finalFiltered.map((p, index) => {
+      const baseRow: any = {
+        "No": index + 1,
+        "NIP": p.nip,
+        "Nama Pegawai": p.nama,
+        "Jenis Kelamin": p.jenis_kelamin,
+        "Status Pegawai": p.status_pegawai,
+        "Pangkat/Golongan": p.pangkat,
+        "Jabatan": p.jabatan,
+        "Unit Kerja": p.unit_kerja,
+        "Total JP": p.jp,
+        "Target JP": getTargetJP(p),
+        "Status Kelulusan": "MEMENUHI",
+      };
+
+      const certs = p.filteredSertifikasi || p.sertifikasi || [];
+      for (let i = 0; i < maxCerts; i++) {
+        if (i < certs.length) {
+          const s = certs[i];
+          baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
+          baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
+          baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
+          baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
+          baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
+          let linkUrl = s.link_sertifikat || 'Tidak ada link';
+          if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
+            const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
+            if (match && match[1]) linkUrl = match[1];
+          }
+          if (linkUrl.startsWith('/uploads')) linkUrl = `${window.location.origin}${linkUrl}`;
+          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
+            linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
+          }
+          baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
+        } else {
+          baseRow[`Nama Sertifikat ${i + 1}`] = '-';
+          baseRow[`Jenis Kursus ${i + 1}`] = '-';
+          baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
+          baseRow[`Penanda Tangan ${i + 1}`] = '-';
+          baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
+          baseRow[`Link Sertifikat ${i + 1}`] = '-';
+        }
+      }
+      return baseRow;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    for (const cellAddress in worksheet) {
+      if (!cellAddress.startsWith('!')) {
+        const cell = worksheet[cellAddress];
+        if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
+          worksheet[cellAddress] = { t: 's', v: "Lihat Dokumen", l: { Target: cell.v } };
+        }
+      }
+    }
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Memenuhi JP");
+    XLSX.writeFile(workbook, `Laporan_Sertifikasi_MemenuhiJP_${tahunFilter}.xlsx`);
+  };
+
+  const exportToExcelBelumMemenuhi = () => {
+    const finalFiltered = pegawaiList.filter(p => {
+      if (checkLulusJP(p)) return false;
+      if (statusFilter === 'all') return true;
+      if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
+      return p.status_pegawai === statusFilter;
+    });
+
+    const maxCerts = Math.max(0, ...finalFiltered.map(p => {
+      const certs = p.filteredSertifikasi || p.sertifikasi || [];
+      return certs.length;
+    }));
+
+    const excelData = finalFiltered.map((p, index) => {
+      const baseRow: any = {
+        "No": index + 1,
+        "NIP": p.nip,
+        "Nama Pegawai": p.nama,
+        "Jenis Kelamin": p.jenis_kelamin,
+        "Status Pegawai": p.status_pegawai,
+        "Pangkat/Golongan": p.pangkat,
+        "Jabatan": p.jabatan,
+        "Unit Kerja": p.unit_kerja,
+        "Total JP": p.jp,
+        "Target JP": getTargetJP(p),
+        "Status Kelulusan": "BELUM MEMENUHI",
+      };
+
+      const certs = p.filteredSertifikasi || p.sertifikasi || [];
+      for (let i = 0; i < maxCerts; i++) {
+        if (i < certs.length) {
+          const s = certs[i];
+          baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
+          baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
+          baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
+          baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
+          baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
+          let linkUrl = s.link_sertifikat || 'Tidak ada link';
+          if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
+            const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
+            if (match && match[1]) linkUrl = match[1];
+          }
+          if (linkUrl.startsWith('/uploads')) linkUrl = `${window.location.origin}${linkUrl}`;
+          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
+            linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
+          }
+          baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
+        } else {
+          baseRow[`Nama Sertifikat ${i + 1}`] = '-';
+          baseRow[`Jenis Kursus ${i + 1}`] = '-';
+          baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
+          baseRow[`Penanda Tangan ${i + 1}`] = '-';
+          baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
+          baseRow[`Link Sertifikat ${i + 1}`] = '-';
+        }
+      }
+      return baseRow;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    for (const cellAddress in worksheet) {
+      if (!cellAddress.startsWith('!')) {
+        const cell = worksheet[cellAddress];
+        if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
+          worksheet[cellAddress] = { t: 's', v: "Lihat Dokumen", l: { Target: cell.v } };
+        }
+      }
+    }
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Belum Memenuhi JP");
+    XLSX.writeFile(workbook, `Laporan_Sertifikasi_BelumMemenuhiJP_${tahunFilter}.xlsx`);
+  };
+
   return (
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -441,30 +613,39 @@ export default function AdminPage() {
               {/* DASHBOARD TAB */}
               {activeTab === 'view-dashboard' && (
                 <div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <div className={`stat-card ${filterMode === 'all' ? 'active-filter' : ''}`} onClick={() => setFilterMode('all')} title="Klik untuk melihat semua pegawai">
+                  <div className="row mb-4">
+                    <div className="col-md-3 mb-3">
+                      <div className={`stat-card ${filterMode === 'all' ? 'active-filter' : ''}`} onClick={() => setFilterMode('all')} title="Klik untuk melihat semua pegawai" style={{ height: '100%' }}>
                         <div className="stat-icon bg-primary bg-opacity-10 text-primary"><i className="bi bi-people-fill"></i></div>
                         <div className="stat-content">
                           <h3>{pegawaiList.length}</h3>
-                          <p>Total Pegawai Terdaftar</p>
+                          <p>Total Pegawai</p>
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-4">
-                      <div className={`stat-card ${filterMode === 'lulus' ? 'active-filter' : ''}`} onClick={() => setFilterMode('lulus')} title="Klik untuk memfilter yang sudah memenuhi">
+                    <div className="col-md-3 mb-3">
+                      <div className="stat-card" title="ASN yang sudah mengikuti pengembangan kompetensi setidaknya 1 kali" style={{ height: '100%' }}>
+                        <div className="stat-icon bg-info bg-opacity-10 text-info"><i className="bi bi-person-workspace"></i></div>
+                        <div className="stat-content">
+                          <h3>{sudahPengembangan}</h3>
+                          <p>Telah Mengikuti Pengembangan Kompetensi</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className={`stat-card ${filterMode === 'lulus' ? 'active-filter' : ''}`} onClick={() => setFilterMode('lulus')} title="Klik untuk memfilter yang sudah memenuhi" style={{ height: '100%' }}>
                         <div className="stat-icon bg-success bg-opacity-10 text-success"><i className="bi bi-check-circle-fill"></i></div>
                         <div className="stat-content">
-                          <h3>{lulus}</h3>
-                          <p>Memenuhi 20 JP / Tahun</p>
+                          <h3 className="mb-1">{lulus} <span style={{fontSize: '0.9rem', color: '#6c757d', fontWeight: 'normal'}}>({lulusPNS} PNS, {lulusPPPK} PPPK)</span></h3>
+                          <p>Memenuhi Kewajiban JP</p>
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-4">
-                      <div className={`stat-card ${filterMode === 'belum' ? 'active-filter' : ''}`} onClick={() => setFilterMode('belum')} title="Klik untuk memfilter yang belum memenuhi">
+                    <div className="col-md-3 mb-3">
+                      <div className={`stat-card ${filterMode === 'belum' ? 'active-filter' : ''}`} onClick={() => setFilterMode('belum')} title="Klik untuk memfilter yang belum memenuhi" style={{ height: '100%' }}>
                         <div className="stat-icon bg-warning bg-opacity-10 text-warning"><i className="bi bi-exclamation-triangle-fill"></i></div>
                         <div className="stat-content">
-                          <h3>{belum}</h3>
+                          <h3 className="mb-1">{belum} <span style={{fontSize: '0.9rem', color: '#6c757d', fontWeight: 'normal'}}>({belumPNS} PNS, {belumPPPK} PPPK)</span></h3>
                           <p>Belum Memenuhi Kewajiban</p>
                         </div>
                       </div>
@@ -487,6 +668,20 @@ export default function AdminPage() {
                           title="Unduh laporan dalam format Excel"
                         >
                           <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                        </button>
+                        <button 
+                          className="btn btn-sm btn-success"
+                          onClick={exportToExcelMemenuhi}
+                          title="Unduh laporan yang memenuhi JP ke Excel"
+                        >
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Memenuhi JP
+                        </button>
+                        <button 
+                          className="btn btn-sm btn-warning"
+                          onClick={exportToExcelBelumMemenuhi}
+                          title="Unduh laporan yang belum memenuhi JP ke Excel"
+                        >
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Belum Memenuhi JP
                         </button>
                         <select 
                           className="form-select form-select-sm"
@@ -529,8 +724,8 @@ export default function AdminPage() {
                         <tbody>
                           {pegawaiList
                             .filter(p => {
-                              if (filterMode === 'lulus' && p.jp < 20) return false;
-                              if (filterMode === 'belum' && p.jp >= 20) return false;
+                              if (filterMode === 'lulus' && !checkLulusJP(p)) return false;
+                              if (filterMode === 'belum' && checkLulusJP(p)) return false;
                               
                               if (statusFilter !== 'all') {
                                 const statusPeg = (p.status_pegawai || '').toUpperCase();
@@ -554,13 +749,13 @@ export default function AdminPage() {
                               </td>
                               <td style={{ fontSize: '0.9rem' }}>{p.unit_kerja || '-'}</td>
                               <td className="text-center">
-                                <span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'} fs-5`}>{p.jp}</span><br/>
-                                <span className="text-muted" style={{ fontSize: '0.75rem' }}>Jam Pelajaran</span>
+                                <span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'} fs-5`}>{p.jp}</span><br/>
+                                <span className="text-muted" style={{ fontSize: '0.75rem' }}>Jam Pelajaran (Target: {getTargetJP(p)})</span>
                               </td>
                               <td className="text-center">
-                                {p.jp >= 20 
-                                  ? <span className="badge-status status-ok"><i className="bi bi-check-circle-fill me-1"></i> Memenuhi Syarat</span>
-                                  : <span className="badge-status status-warn"><i className="bi bi-exclamation-circle-fill me-1"></i> Belum Memenuhi</span>
+                                {checkLulusJP(p) 
+                                  ? <span className="badge-status status-ok"><i className="bi bi-check-circle-fill me-1"></i> Memenuhi Syarat ({getTargetJP(p)} JP)</span>
+                                  : <span className="badge-status status-warn"><i className="bi bi-exclamation-circle-fill me-1"></i> Belum Memenuhi ({getTargetJP(p)} JP)</span>
                                 }
                               </td>
                               <td className="text-center">
@@ -572,8 +767,8 @@ export default function AdminPage() {
                       </table>
                     </div>
                     <PaginationControls currentPage={currentPagePegawai} setCurrentPage={setCurrentPagePegawai} totalItems={pegawaiList.filter(p => {
-                              if (filterMode === 'lulus' && p.jp < 20) return false;
-                              if (filterMode === 'belum' && p.jp >= 20) return false;
+                              if (filterMode === 'lulus' && !checkLulusJP(p)) return false;
+                              if (filterMode === 'belum' && checkLulusJP(p)) return false;
                               
                               if (statusFilter !== 'all') {
                                 const statusPeg = p.status_pegawai || '';
@@ -652,7 +847,7 @@ export default function AdminPage() {
                             <td>{p.status_aktif || 'Aktif'}</td>
                             <td>{p.jabatan || '-'}</td>
                             <td>{p.unit_kerja || '-'}</td>
-                            <td className="text-center"><span className={`fw-bold text-${p.jp >= 20 ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                            <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
                             <td className="text-center">
                               {(userRole === 'super_admin' || userRole === 'admin') ? (
                                 <button 
