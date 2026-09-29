@@ -17,6 +17,8 @@ export default function AdminPage() {
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
   const [userRole, setUserRole] = useState<string>('');
   const [searchPegawai, setSearchPegawai] = useState('');
+  const [searchSertifikasi, setSearchSertifikasi] = useState('');
+  const [searchIdp, setSearchIdp] = useState('');
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
@@ -33,7 +35,7 @@ export default function AdminPage() {
     setCurrentPagePegawai(1);
     setCurrentPageSert(1);
     setCurrentPageIdp(1);
-  }, [filterMode, statusFilter, tahunFilter, searchPegawai]);
+  }, [filterMode, statusFilter, tahunFilter, searchPegawai, searchSertifikasi, searchIdp]);
 
   // Pagination UI Component
   const PaginationControls = ({ currentPage, setCurrentPage, totalItems }: { currentPage: number, setCurrentPage: (p: number) => void, totalItems: number }) => {
@@ -750,7 +752,21 @@ export default function AdminPage() {
               {/* REKAP SERTIFIKASI TAB */}
               {activeTab === 'view-sertifikasi' && (
                 <div className="table-card">
-                  <h5 className="fw-bold mb-4">Rekapitulasi Seluruh Sertifikat</h5>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="fw-bold mb-0">Rekapitulasi Seluruh Sertifikat</h5>
+                    <div className="d-flex gap-2">
+                      <div className="position-relative">
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm pe-4" 
+                          placeholder="Cari Nama / NIP / Kursus..." 
+                          value={searchSertifikasi}
+                          onChange={e => setSearchSertifikasi(e.target.value)}
+                        />
+                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                      </div>
+                    </div>
+                  </div>
                   <div className="table-responsive">
                     <table className="table table-hover align-middle">
                       <thead className="table-light">
@@ -771,6 +787,12 @@ export default function AdminPage() {
                             const sertItems = pegawaiList.flatMap((p) => {
                               if (!p.sertifikasi || p.sertifikasi.length === 0) return [{ nip: p.nip, nama: p.nama, isEmpty: true }];
                               return p.sertifikasi.map((s: any) => ({ nip: p.nip, nama: p.nama, isEmpty: false, data: s }));
+                            }).filter((item) => {
+                              if (!searchSertifikasi) return true;
+                              const query = searchSertifikasi.toLowerCase();
+                              return (item.nama && item.nama.toLowerCase().includes(query)) ||
+                                     (item.nip && item.nip.toLowerCase().includes(query)) ||
+                                     (item.data?.nama_kursus && item.data.nama_kursus.toLowerCase().includes(query));
                             });
                             
                             const paginatedSert = sertItems.slice((currentPageSert - 1) * ITEMS_PER_PAGE, currentPageSert * ITEMS_PER_PAGE);
@@ -828,12 +850,24 @@ export default function AdminPage() {
                   </div>
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h5 className="fw-bold mb-0">Daftar Pengajuan IDP Pegawai</h5>
-                    <button className="btn btn-sm btn-primary" onClick={() => {
-                      setIdpForm({ isEdit: false });
-                      setShowIdpModal(true);
-                    }}>
-                      <i className="bi bi-plus-lg me-1"></i> Tambah IDP
-                    </button>
+                    <div className="d-flex gap-2">
+                      <div className="position-relative">
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm pe-4" 
+                          placeholder="Cari Nama / Kompetensi..." 
+                          value={searchIdp}
+                          onChange={e => setSearchIdp(e.target.value)}
+                        />
+                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                      </div>
+                      <button className="btn btn-sm btn-primary" onClick={() => {
+                        setIdpForm({ isEdit: false });
+                        setShowIdpModal(true);
+                      }}>
+                        <i className="bi bi-plus-lg me-1"></i> Tambah IDP
+                      </button>
+                    </div>
                   </div>
                   <div className="table-responsive">
                     <table className="table table-hover align-middle" style={{fontSize: '0.85rem'}}>
@@ -857,6 +891,12 @@ export default function AdminPage() {
                             const idpItems = pegawaiList.flatMap((p) => {
                               if (!p.idp || p.idp.length === 0) return [];
                               return p.idp.map((idp: any) => ({ p, idp }));
+                            }).filter((item: any) => {
+                              if (!searchIdp) return true;
+                              const query = searchIdp.toLowerCase();
+                              return (item.p.nama && item.p.nama.toLowerCase().includes(query)) ||
+                                     (item.p.nip && item.p.nip.toLowerCase().includes(query)) ||
+                                     (item.idp.jenis_kompetensi && item.idp.jenis_kompetensi.toLowerCase().includes(query));
                             });
                             
                             if (idpItems.length === 0) return null;
