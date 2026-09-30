@@ -698,97 +698,111 @@ export default function AdminPage() {
               );})()}
 
               {/* REKAP SERTIFIKASI TAB */}
-              {activeTab === 'view-sertifikasi' && (
-                <div className="table-card">
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="fw-bold mb-0">Rekapitulasi Seluruh Sertifikat</h5>
-                    <div className="d-flex gap-2">
-                      <div className="position-relative">
-                        <input 
-                          type="text" 
-                          className="form-control form-control-sm pe-4" 
-                          placeholder="Cari Nama / NIP / Kursus..." 
-                          value={searchSertifikasi}
-                          onChange={e => setSearchSertifikasi(e.target.value)}
-                        />
-                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+              {activeTab === 'view-sertifikasi' && (() => {
+                const groupedByOPD: Record<string, any[]> = {};
+                pegawaiList.forEach(p => {
+                  const opd = p.unit_kerja || 'Belum Diatur';
+                  if (!groupedByOPD[opd]) groupedByOPD[opd] = [];
+                  groupedByOPD[opd].push(p);
+                });
+                const sortedOPDs = Object.keys(groupedByOPD).sort();
+
+                return (
+                  <div className="table-card">
+                    <div className="d-flex flex-column mb-4 gap-3">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <h5 className="fw-bold mb-0">Rekapitulasi Sertifikasi per OPD</h5>
+                        <div className="d-flex gap-2">
+                          <div className="position-relative">
+                            <input 
+                              type="text" 
+                              className="form-control form-control-sm pe-4" 
+                              placeholder="Cari Nama / NIP..." 
+                              value={searchSertifikasi}
+                              onChange={e => setSearchSertifikasi(e.target.value)}
+                            />
+                            <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div className="d-flex align-items-center gap-2">
+                          <span className="badge bg-secondary fs-6">Seluruh Pegawai: {pegawaiList.length}</span>
+                          <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
+                          <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
+                        </div>
+                        <div className="d-flex gap-2">
+                          <button className="btn btn-sm btn-success" onClick={exportToExcelPNS} title="Unduh PNS ke Excel">
+                            <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
+                          </button>
+                          <button className="btn btn-sm btn-success" onClick={exportToExcelPPPK} title="Unduh PPPK ke Excel">
+                            <i className="bi bi-file-earmark-excel me-1"></i> Export PPPK
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="table-responsive">
-                    <table className="table table-hover align-middle">
-                      <thead className="table-light">
-                        <tr>
-                          <th>No</th>
-                          <th>Pemilik (Nama)</th>
-                          <th>Nama Kursus</th>
-                          <th>Institusi</th>
-                          <th>No. Sertifikat</th>
-                          <th>Tanggal</th>
-                          <th>JP</th>
-                          <th className="text-center">Dokumen</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(
-                          (() => {
-                            const sertItems = pegawaiList.flatMap((p) => {
-                              if (!p.sertifikasi || p.sertifikasi.length === 0) return [{ nip: p.nip, nama: p.nama, isEmpty: true }];
-                              return p.sertifikasi.map((s: any) => ({ nip: p.nip, nama: p.nama, isEmpty: false, data: s }));
-                            }).filter((item) => {
-                              if (!searchSertifikasi) return true;
-                              const query = searchSertifikasi.toLowerCase();
-                              return (item.nama && item.nama.toLowerCase().includes(query)) ||
-                                     (item.nip && item.nip.toLowerCase().includes(query)) ||
-                                     (item.data?.nama_kursus && item.data.nama_kursus.toLowerCase().includes(query));
-                            });
-                            
-                            const paginatedSert = sertItems.slice((currentPageSert - 1) * ITEMS_PER_PAGE, currentPageSert * ITEMS_PER_PAGE);
-                            
-                            return (
-                              <>
-                                {paginatedSert.map((item: any, idx: number) => {
-                                  const displayNo = (currentPageSert - 1) * ITEMS_PER_PAGE + idx + 1;
-                                  if (item.isEmpty) {
-                                    return (
-                                      <tr key={item.nip + "-empty"}>
-                                        <td>{displayNo}</td>
-                                        <td className="fw-bold">{item.nama}</td>
-                                        <td className="text-muted fst-italic" colSpan={3}>Belum ada data sertifikasi</td>
-                                        <td><span className="badge bg-info rounded-pill">0 JP</span></td>
-                                        <td></td>
+
+                    <div className="accordion" id="accordionOPD">
+                      {sortedOPDs.map((opd, opdIndex) => {
+                        let opdPegawai = groupedByOPD[opd];
+                        if (searchSertifikasi) {
+                          const query = searchSertifikasi.toLowerCase();
+                          opdPegawai = opdPegawai.filter(p => 
+                            (p.nama && p.nama.toLowerCase().includes(query)) || 
+                            (p.nip && p.nip.toLowerCase().includes(query))
+                          );
+                        }
+                        if (opdPegawai.length === 0) return null;
+
+                        return (
+                          <div className="accordion-item mb-2 border rounded" key={opdIndex}>
+                            <h2 className="accordion-header" id={`heading${opdIndex}`}>
+                              <button className="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${opdIndex}`} aria-expanded="false" aria-controls={`collapse${opdIndex}`}>
+                                {opd} <span className="badge bg-secondary ms-2">{opdPegawai.length} Pegawai</span>
+                              </button>
+                            </h2>
+                            <div id={`collapse${opdIndex}`} className="accordion-collapse collapse" aria-labelledby={`heading${opdIndex}`} data-bs-parent="#accordionOPD">
+                              <div className="accordion-body p-0">
+                                <div className="table-responsive">
+                                  <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
+                                    <thead className="table-light">
+                                      <tr>
+                                        <th>No</th>
+                                        <th>NIP</th>
+                                        <th>Nama Pegawai</th>
+                                        <th>Jabatan</th>
+                                        <th className="text-center">Total JP</th>
+                                        <th className="text-center">Aksi</th>
                                       </tr>
-                                    );
-                                  }
-                                  const s = item.data;
-                                  return (
-                                    <tr key={s.id || item.nip + "-" + idx}>
-                                      <td>{displayNo}</td>
-                                      <td className="fw-bold">{item.nama}</td>
-                                      <td className="text-primary fw-bold">{s.nama_kursus || s.jenis_sertifikasi || '-'}</td>
-                                      <td>{s.institusi_penyelenggara || '-'}</td>
-                                      <td>{s.nomor_sertifikasi || '-'}</td>
-                                      <td>{s.tanggal_sertifikasi || '-'}</td>
-                                      <td><span className="badge bg-info rounded-pill">{s.jumlah_jp || 0} JP</span></td>
-                                      <td className="text-center">
-                                        {s.link_sertifikat ? <button onClick={() => handleLihatDokumen(s.link_sertifikat)} className="btn btn-sm btn-outline-primary"><i className="bi bi-file-earmark-text"></i> Lihat</button> : '-'}
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </>
-                            );
-                          })()
-                        )}
-                      </tbody>
-                    </table>
+                                    </thead>
+                                    <tbody>
+                                      {opdPegawai.map((p, pIndex) => (
+                                        <tr key={pIndex}>
+                                          <td>{pIndex + 1}</td>
+                                          <td>{p.nip}</td>
+                                          <td className="fw-bold">{p.nama || '-'}</td>
+                                          <td>{p.jabatan || '-'}</td>
+                                          <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                                          <td className="text-center">
+                                            <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
+                                              <i className="bi bi-eye"></i> Detail
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  {(() => {
-                    const sertItemsLength = pegawaiList.reduce((acc, p) => acc + (!p.sertifikasi || p.sertifikasi.length === 0 ? 1 : p.sertifikasi.length), 0);
-                    return <PaginationControls currentPage={currentPageSert} setCurrentPage={setCurrentPageSert} totalItems={sertItemsLength} />;
-                  })()}
-                </div>
-              )}
+                );
+              })()}
 
               {/* APPROVAL IDP TAB */}
               {activeTab === 'view-idp' && (
