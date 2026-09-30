@@ -328,6 +328,8 @@ export default function SertifikasiPage() {
                             <label className="form-label">Jenis Kursus *</label>
                             <select className="form-select" required value={k.jenis_kursus || ''} onChange={e => handleChange(k.id, 'jenis_kursus', e.target.value)}>
                               <option value="">- Pilih Jenis Kursus -</option>
+                              <option value="Webinar">Webinar</option>
+                              <option value="Sertifikasi">Sertifikasi</option>
                               <option value="Magang">Magang</option>
                               <option value="Kursus">Kursus</option>
                               <option value="Penataran">Penataran</option>
