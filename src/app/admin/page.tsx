@@ -783,40 +783,42 @@ export default function AdminPage() {
                                       {opd} <span className="badge bg-secondary ms-2">{opdPegawai.length} Pegawai</span>
                                     </button>
                                   </h2>
-                                  <div className={`accordion-collapse collapse ${openOPD === opd ? 'show' : ''}`}>
-                                    <div className="accordion-body p-0">
-                                      <div className="table-responsive">
-                                        <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
-                                          <thead className="table-light">
-                                            <tr>
-                                              <th>No</th>
-                                              <th>NIP</th>
-                                              <th>Nama Pegawai</th>
-                                              <th>Jabatan</th>
-                                              <th className="text-center">Total JP</th>
-                                              <th className="text-center">Aksi</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            {opdPegawai.map((p, pIndex) => (
-                                              <tr key={pIndex}>
-                                                <td>{pIndex + 1}</td>
-                                                <td>{p.nip}</td>
-                                                <td className="fw-bold">{p.nama || '-'}</td>
-                                                <td>{p.jabatan || '-'}</td>
-                                                <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
-                                                <td className="text-center">
-                                                  <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
-                                                    <i className="bi bi-eye"></i> Detail
-                                                  </button>
-                                                </td>
+                                  {openOPD === opd && (
+                                    <div className="accordion-collapse">
+                                      <div className="accordion-body p-0 border-top">
+                                        <div className="table-responsive">
+                                          <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
+                                            <thead className="table-light">
+                                              <tr>
+                                                <th>No</th>
+                                                <th>NIP</th>
+                                                <th>Nama Pegawai</th>
+                                                <th>Jabatan</th>
+                                                <th className="text-center">Total JP</th>
+                                                <th className="text-center">Aksi</th>
                                               </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
+                                            </thead>
+                                            <tbody>
+                                              {opdPegawai.map((p, pIndex) => (
+                                                <tr key={pIndex}>
+                                                  <td>{pIndex + 1}</td>
+                                                  <td>{p.nip}</td>
+                                                  <td className="fw-bold">{p.nama || '-'}</td>
+                                                  <td>{p.jabatan || '-'}</td>
+                                                  <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                                                  <td className="text-center">
+                                                    <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
+                                                      <i className="bi bi-eye"></i> Detail
+                                                    </button>
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
+                                  )}
                                 </div>
                               );
                             })}
