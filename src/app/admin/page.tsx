@@ -1290,7 +1290,7 @@ export default function AdminPage() {
                     <div className="col-12 mt-4 pt-3 border-top">
                       <h6 className="fw-bold text-primary mb-3">Informasi Pendidikan Dasar</h6>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                       <label className="form-label">Tingkat Pendidikan</label>
                       <select className="form-select" value={pegawaiForm.tingkat_pendidikan || ''} onChange={e => setPegawaiForm({...pegawaiForm, tingkat_pendidikan: e.target.value})}>
                         <option value="">- Pilih Tingkat -</option>
@@ -1304,13 +1304,9 @@ export default function AdminPage() {
                         <option value="S3">Strata 3 (S3)</option>
                       </select>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                       <label className="form-label">Fakultas / Program Studi / Jurusan</label>
                       <input type="text" className="form-control" value={pegawaiForm.jurusan || ''} onChange={e => setPegawaiForm({...pegawaiForm, jurusan: e.target.value})} placeholder="Cth: Ilmu Hukum" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Nama Sekolah / Universitas</label>
-                      <input type="text" className="form-control" value={pegawaiForm.sekolah || ''} onChange={e => setPegawaiForm({...pegawaiForm, sekolah: e.target.value})} placeholder="Cth: Universitas Terbuka" />
                     </div>
 
                   </div>
