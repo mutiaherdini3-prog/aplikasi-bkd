@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [userRole, setUserRole] = useState<string>('');
   const [searchPegawai, setSearchPegawai] = useState('');
   const [searchSertifikasi, setSearchSertifikasi] = useState('');
+  const [exportJenisKursusFilter, setExportJenisKursusFilter] = useState('all');
   const [searchIdp, setSearchIdp] = useState('');
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -400,6 +401,19 @@ export default function AdminPage() {
       if (statusFilter === 'all') return true;
       if (statusFilter === 'PW' && p.status_pegawai?.toLowerCase().includes('kontrak')) return true;
       return p.status_pegawai === statusFilter;
+    }).filter(p => {
+      if (exportJenisKursusFilter !== 'all') {
+        const certs = p.filteredSertifikasi || p.sertifikasi || [];
+        return certs.some((s: any) => (s['jenis kursus'] || s.jenis_kursus) === exportJenisKursusFilter);
+      }
+      return true;
+    }).map(p => {
+      if (exportJenisKursusFilter !== 'all') {
+        const certs = p.filteredSertifikasi || p.sertifikasi || [];
+        const filteredCerts = certs.filter((s: any) => (s['jenis kursus'] || s.jenis_kursus) === exportJenisKursusFilter);
+        return { ...p, filteredSertifikasi: filteredCerts };
+      }
+      return p;
     });
 
     const pnsData = finalFiltered.filter(p => (p.status_pegawai || '').toUpperCase().includes('PNS'));
@@ -933,7 +947,33 @@ export default function AdminPage() {
                           <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
                           <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                         </div>
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 align-items-center">
+                          <select 
+                            className="form-select form-select-sm border-secondary shadow-sm" 
+                            style={{ width: '180px', cursor: 'pointer' }}
+                            value={exportJenisKursusFilter}
+                            onChange={(e) => setExportJenisKursusFilter(e.target.value)}
+                          >
+                            <option value="all">Semua Jenis Kursus</option>
+                            <option value="Webinar">Webinar</option>
+                            <option value="Sertifikasi">Sertifikasi</option>
+                            <option value="Magang">Magang</option>
+                            <option value="Kursus">Kursus</option>
+                            <option value="Penataran">Penataran</option>
+                            <option value="Pengembangan kompetensi dalam bentuk pelatihan klasikal lainnya">Klasikal Lainnya</option>
+                            <option value="Coaching">Coaching</option>
+                            <option value="Mentoring">Mentoring</option>
+                            <option value="E-learning">E-learning</option>
+                            <option value="Bimbingan jarak jauh">Bimbingan Jarak Jauh</option>
+                            <option value="Detasering">Detasering</option>
+                            <option value="Pembelajaran alam terbuka (outbond)">Outbond</option>
+                            <option value="Diklat fungsional">Diklat Fungsional</option>
+                            <option value="Patok banding (benchmark)">Benchmark</option>
+                            <option value="Pertukaran antaran PNS dengan karyawan BUMN/BUMD">Pertukaran BUMN/BUMD</option>
+                            <option value="Belajar mandiri">Belajar Mandiri</option>
+                            <option value="Komunitas belajar">Komunitas Belajar</option>
+                            <option value="Bimbingan di tempat kerja">Bimbingan di Tempat Kerja</option>
+                          </select>
                           <button className="btn btn-sm btn-success" onClick={exportToExcelSert} title="Unduh Semua ke Excel">
                             <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
                           </button>
