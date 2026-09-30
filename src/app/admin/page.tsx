@@ -1096,7 +1096,7 @@ export default function AdminPage() {
                     <div className="col-md-6">
                       <label className="form-label">Jenis Kelamin *</label>
                       <select className="form-select" required value={pegawaiForm.jenkel || ''} onChange={e => setPegawaiForm({...pegawaiForm, jenkel: e.target.value})}>
-                        <option value="">- Pilih Jenis Kelamin -</option>
+                        <option value="">- PILIH JENIS KELAMIN -</option>
                         <option value="LAKI-LAKI">LAKI-LAKI</option>
                         <option value="PEREMPUAN">PEREMPUAN</option>
                       </select>
@@ -1112,7 +1112,7 @@ export default function AdminPage() {
                         value={pegawaiForm.unit_kerja || ''} 
                         onChange={e => setPegawaiForm({...pegawaiForm, unit_kerja: e.target.value})}
                       >
-                        <option value="">- Pilih Unit Kerja -</option>
+                        <option value="">- PILIH UNIT KERJA -</option>
                         {UNIT_KERJA_OPTIONS.map(opd => (
                           <option key={opd} value={opd.toUpperCase()}>{opd.toUpperCase()}</option>
                         ))}
