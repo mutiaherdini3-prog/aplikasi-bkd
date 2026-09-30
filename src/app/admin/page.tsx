@@ -943,8 +943,10 @@ export default function AdminPage() {
                       
                       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div className="d-flex align-items-center gap-2">
-                          <span className="badge bg-secondary fs-6">Seluruh Pegawai: {pegawaiList.length}</span>
-                          <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
+                          <span className="badge bg-secondary fs-6">Total Pegawai: {pegawaiList.length}</span>
+                          <span className="badge bg-success fs-6">Memenuhi: {pegawaiList.filter(p => checkLulusJP(p)).length}</span>
+                          <span className="badge bg-warning text-dark fs-6">Belum: {pegawaiList.filter(p => !checkLulusJP(p)).length}</span>
+                          <span className="badge bg-primary fs-6 ms-2">PNS: {pnsList.length}</span>
                           <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                         </div>
                         <div className="d-flex gap-2 align-items-center">
@@ -960,19 +962,28 @@ export default function AdminPage() {
                             <option value="Magang">Magang</option>
                             <option value="Kursus">Kursus</option>
                             <option value="Penataran">Penataran</option>
-                            <option value="Pengembangan kompetensi dalam bentuk pelatihan klasikal lainnya">Klasikal Lainnya</option>
+                            <option value="Pengembangan kompetensi dalam bentuk pelatihan klasikal lainnya">Pengembangan kompetensi dalam bentuk pelatihan klasikal lainnya</option>
                             <option value="Coaching">Coaching</option>
                             <option value="Mentoring">Mentoring</option>
                             <option value="E-learning">E-learning</option>
-                            <option value="Bimbingan jarak jauh">Bimbingan Jarak Jauh</option>
+                            <option value="Bimbingan jarak jauh">Bimbingan jarak jauh</option>
                             <option value="Detasering">Detasering</option>
-                            <option value="Pembelajaran alam terbuka (outbond)">Outbond</option>
-                            <option value="Diklat fungsional">Diklat Fungsional</option>
-                            <option value="Patok banding (benchmark)">Benchmark</option>
-                            <option value="Pertukaran antaran PNS dengan karyawan BUMN/BUMD">Pertukaran BUMN/BUMD</option>
-                            <option value="Belajar mandiri">Belajar Mandiri</option>
-                            <option value="Komunitas belajar">Komunitas Belajar</option>
-                            <option value="Bimbingan di tempat kerja">Bimbingan di Tempat Kerja</option>
+                            <option value="Pembelajaran alam terbuka (outbond)">Pembelajaran alam terbuka (outbond)</option>
+                            <option value="Diklat fungsional">Diklat fungsional</option>
+                            <option value="Patok banding (benchmark)">Patok banding (benchmark)</option>
+                            <option value="Pertukaran antaran PNS dengan karyawan BUMN/BUMD">Pertukaran antaran PNS dengan karyawan BUMN/BUMD</option>
+                            <option value="Belajar mandiri">Belajar mandiri</option>
+                            <option value="Komunitas belajar">Komunitas belajar</option>
+                            <option value="Bimbingan di tempat kerja">Bimbingan di tempat kerja</option>
+                            <option value="Pengembangan kompetensi dalam bentuk pelatihan non-klasikal lainnya">Pengembangan kompetensi dalam bentuk pelatihan non-klasikal lainnya</option>
+                            <option value="Pelatihan dasar">Pelatihan dasar</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="Diklat teknis">Diklat teknis</option>
+                            <option value="Seminar">Seminar</option>
+                            <option value="Bimbingan teknis">Bimbingan teknis</option>
+                            <option value="Sosialisasi">Sosialisasi</option>
+                            <option value="Pelatihan manajerial">Pelatihan manajerial</option>
+                            <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
                           <button className="btn btn-sm btn-success" onClick={exportToExcelSert} title="Unduh Semua ke Excel">
                             <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
