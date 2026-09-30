@@ -341,8 +341,6 @@ export default function AdminPage() {
         "Jabatan": p.jabatan,
         "Unit Kerja": p.unit_kerja,
         "Total JP": p.jp,
-        "Target JP": getTargetJP(p),
-        "Status Kelulusan": statusKelulusanLabel || (checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI"),
       };
 
       const certs = p.filteredSertifikasi || p.sertifikasi || [];
@@ -636,6 +634,9 @@ export default function AdminPage() {
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
                       <div className="d-flex gap-2">
+                        <button className="btn btn-sm btn-success" onClick={exportToExcel} title="Unduh Semua ke Excel">
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
+                        </button>
                         <button className="btn btn-sm btn-success" onClick={exportToExcelPNS} title="Unduh PNS ke Excel">
                           <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
                         </button>
@@ -670,7 +671,7 @@ export default function AdminPage() {
                             <td>{p.status_aktif || 'Aktif'}</td>
                             <td>{p.jabatan || '-'}</td>
                             <td>{p.unit_kerja || '-'}</td>
-                            <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                            <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
                             <td className="text-center">
                               {(userRole === 'super_admin' || userRole === 'admin') ? (
                                 <button 
@@ -828,6 +829,9 @@ export default function AdminPage() {
                           <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                         </div>
                         <div className="d-flex gap-2">
+                          <button className="btn btn-sm btn-success" onClick={exportToExcel} title="Unduh Semua ke Excel">
+                            <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
+                          </button>
                           <button className="btn btn-sm btn-success" onClick={exportToExcelPNS} title="Unduh PNS ke Excel">
                             <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
                           </button>
@@ -899,7 +903,7 @@ export default function AdminPage() {
                                                   <td>{p.nip}</td>
                                                   <td className="fw-bold">{p.nama || '-'}</td>
                                                   <td>{p.jabatan || '-'}</td>
-                                                  <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                                                  <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
                                                   <td className="text-center">
                                                     <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
                                                       <i className="bi bi-eye"></i> Detail
