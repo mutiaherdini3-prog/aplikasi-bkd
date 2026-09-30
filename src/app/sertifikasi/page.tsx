@@ -103,8 +103,8 @@ export default function SertifikasiPage() {
   const handleFileChange = (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert(`File ${file.name} terlalu besar! Maksimal 2MB.`);
+      if (file.size > 1 * 1024 * 1024) {
+        alert(`File ${file.name} terlalu besar! Maksimal 1MB.`);
         e.target.value = '';
         return;
       }
@@ -506,7 +506,7 @@ export default function SertifikasiPage() {
                         <h6 className="mb-2 text-primary" style={{fontSize:'0.85rem'}}>
                           <span className="badge bg-secondary me-1">Aktifitas {index + 1}</span> {k.nama_kursus} <span className="text-muted fw-normal">(No: {k.nomor_sertifikasi})</span>
                         </h6>
-                        <label className="form-label">Pilih File Sertifikat (PDF/JPG) <span className="text-danger">*</span> <small className="text-muted">(Maks. 2MB)</small></label>
+                        <label className="form-label">Pilih File Sertifikat (PDF/JPG) <span className="text-danger">*</span> <small className="text-muted">(Maks. 1MB)</small></label>
                         <input type="file" className="form-control mb-3" accept=".pdf, .jpg, .jpeg, .png" required={!k.file} onChange={e => handleFileChange(k.id, e)} />
                         {k.preview && (
                           <div className="mt-2 p-2 border rounded bg-white d-inline-block text-center">
