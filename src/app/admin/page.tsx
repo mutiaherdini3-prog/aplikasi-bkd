@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -258,6 +259,19 @@ export default function AdminPage() {
     const isP3K = status.includes('P3K') || status.includes('PPPK');
     return isP3K ? 24 : 20;
   };
+
+  const chartData = [...availableYears].reverse().map(year => {
+    let lulus = 0;
+    let belum = 0;
+    rawPegawaiList.forEach(p => {
+      const serts = p.sertifikasi?.filter((s: any) => s.tahun === year);
+      const jp = serts?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
+      const tempP = { ...p, jp };
+      if (checkLulusJP(tempP)) lulus++;
+      else belum++;
+    });
+    return { year, 'Memenuhi Syarat': lulus, 'Belum Memenuhi': belum };
+  });
 
   const lulus = pegawaiList.filter(p => checkLulusJP(p)).length;
   const belum = pegawaiList.length - lulus;
@@ -529,6 +543,32 @@ export default function AdminPage() {
                           <p>PPPK Belum Memenuhi</p>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="card card-custom p-4 mb-4 shadow-sm border-0">
+                    <h5 className="fw-bold mb-4">
+                      <i className="bi bi-graph-up text-primary me-2"></i> 
+                      Grafik Kelulusan per Tahun
+                    </h5>
+                    <div style={{ width: '100%', height: 350 }}>
+                      {chartData.length > 0 ? (
+                        <ResponsiveContainer>
+                          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                            <XAxis dataKey="year" stroke="#6b7280" />
+                            <YAxis stroke="#6b7280" />
+                            <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                            <Line type="monotone" dataKey="Memenuhi Syarat" stroke="#10b981" strokeWidth={3} activeDot={{ r: 8, fill: '#10b981' }} dot={{ r: 4 }} />
+                            <Line type="monotone" dataKey="Belum Memenuhi" stroke="#f59e0b" strokeWidth={3} activeDot={{ r: 8, fill: '#f59e0b' }} dot={{ r: 4 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="d-flex align-items-center justify-content-center h-100 text-muted">
+                          Belum ada data tersedia
+                        </div>
+                      )}
                     </div>
                   </div>
 
