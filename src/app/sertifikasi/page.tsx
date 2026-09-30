@@ -469,7 +469,7 @@ export default function SertifikasiPage() {
                           <div className="col-md-12">
                             <label className="form-label">Biaya Pelatihan *</label>
                             <div className="d-flex gap-2">
-                              <select className="form-select bg-light" style={{width: 'auto'}} value={k.biaya_tipe || 'Berbayar'} onChange={e => {
+                              <select className="form-select bg-light" style={{width: '130px', flexShrink: 0}} value={k.biaya_tipe || 'Berbayar'} onChange={e => {
                                 handleChange(k.id, 'biaya_tipe', e.target.value);
                                 if (e.target.value === 'Gratis') handleChange(k.id, 'biaya_nominal', '0');
                               }}>
@@ -477,7 +477,7 @@ export default function SertifikasiPage() {
                                 <option value="Gratis">Gratis</option>
                               </select>
                               {k.biaya_tipe !== 'Gratis' && (
-                                <input type="number" className="form-control" placeholder="Nominal (Contoh: 500000)" required value={k.biaya_nominal || ''} onChange={e => handleChange(k.id, 'biaya_nominal', e.target.value)} />
+                                <input type="number" className="form-control" style={{flexGrow: 1}} placeholder="Nominal (Contoh: 500000)" required value={k.biaya_nominal || ''} onChange={e => handleChange(k.id, 'biaya_nominal', e.target.value)} />
                               )}
                             </div>
                           </div>
