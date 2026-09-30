@@ -589,57 +589,6 @@ export default function AdminPage() {
 
                 return (
                 <div>
-                  <div className="row g-4 mb-4">
-                    <div className="col-md-3">
-                      <div className="card border-0 shadow-sm rounded-4 h-100" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white' }}>
-                        <div className="card-body p-4 d-flex flex-column justify-content-between">
-                          <div className="d-flex justify-content-between align-items-start mb-3">
-                            <h6 className="fw-semibold text-white-50 mb-0">Total Pegawai</h6>
-                            <div className="bg-white bg-opacity-25 rounded p-2"><i className="bi bi-people-fill fs-5"></i></div>
-                          </div>
-                          <h2 className="display-5 fw-bold mb-0">{totalPegawai}</h2>
-                          <small className="text-white-50 mt-2">PNS & PPPK Aktif</small>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <div className="card border-0 shadow-sm rounded-4 h-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                        <div className="card-body p-4 d-flex flex-column justify-content-between">
-                          <div className="d-flex justify-content-between align-items-start mb-3">
-                            <h6 className="fw-semibold text-white-50 mb-0">Total PNS</h6>
-                            <div className="bg-white bg-opacity-25 rounded p-2"><i className="bi bi-person-badge-fill fs-5"></i></div>
-                          </div>
-                          <h2 className="display-5 fw-bold mb-0">{totalPNS}</h2>
-                          <small className="text-white-50 mt-2">Pegawai Negeri Sipil</small>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <div className="card border-0 shadow-sm rounded-4 h-100" style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: 'white' }}>
-                        <div className="card-body p-4 d-flex flex-column justify-content-between">
-                          <div className="d-flex justify-content-between align-items-start mb-3">
-                            <h6 className="fw-semibold text-white-50 mb-0">Total PPPK</h6>
-                            <div className="bg-white bg-opacity-25 rounded p-2"><i className="bi bi-person-workspace fs-5"></i></div>
-                          </div>
-                          <h2 className="display-5 fw-bold mb-0">{totalPPPK}</h2>
-                          <small className="text-white-50 mt-2">Pegawai Pemerintah</small>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <div className="card border-0 shadow-sm rounded-4 h-100" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white' }}>
-                        <div className="card-body p-4 d-flex flex-column justify-content-between">
-                          <div className="d-flex justify-content-between align-items-start mb-3">
-                            <h6 className="fw-semibold text-white-50 mb-0">Lulus JP {currentYear}</h6>
-                            <div className="bg-white bg-opacity-25 rounded p-2"><i className="bi bi-award-fill fs-5"></i></div>
-                          </div>
-                          <h2 className="display-5 fw-bold mb-0">{percentLulus}%</h2>
-                          <small className="text-white-50 mt-2">Persentase Memenuhi Syarat</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="row g-4">
                     <div className="col-lg-8">
                       <div className="card card-custom p-4 shadow-sm border-0 h-100 rounded-4">
