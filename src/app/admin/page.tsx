@@ -32,7 +32,7 @@ export default function AdminPage() {
   const [currentPageSert, setCurrentPageSert] = useState(1);
   const [currentPageIdp, setCurrentPageIdp] = useState(1);
   const [openOPD, setOpenOPD] = useState<string | null>(null);
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 10;
 
   // Reset pagination on filter change
   useEffect(() => {
