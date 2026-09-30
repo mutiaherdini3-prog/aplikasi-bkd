@@ -702,7 +702,19 @@ export default function AdminPage() {
               {activeTab === 'view-sertifikasi' && (() => {
                 const groupedByOPD: Record<string, any[]> = {};
                 pegawaiList.forEach(p => {
-                  const opd = p.unit_kerja || 'Belum Diatur';
+                  let opd = p.unit_kerja || 'Belum Diatur';
+                  // Normalize OPD name
+                  if (opd !== 'Belum Diatur') {
+                    opd = opd.toUpperCase();
+                    if (opd.includes(' - PEMERINTAH')) {
+                      opd = opd.split(' - PEMERINTAH')[0];
+                    }
+                    if (opd.includes('SDM')) {
+                      opd = opd.replace('SDM', 'SUMBER DAYA MANUSIA');
+                    }
+                    opd = opd.trim();
+                  }
+                  
                   if (!groupedByOPD[opd]) groupedByOPD[opd] = [];
                   groupedByOPD[opd].push(p);
                 });
