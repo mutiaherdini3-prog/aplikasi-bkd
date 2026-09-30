@@ -629,7 +629,7 @@ export default function AdminPage() {
                               {(userRole === 'super_admin' || userRole === 'admin') && (
                                 <>
                                   <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
-                                    const jenkelOptions = ['Laki-Laki', 'Perempuan'];
+                                    const jenkelOptions = ['LAKI-LAKI', 'PEREMPUAN'];
                                     let matchedJenkel = p.jenkel || '';
                                     if (p.jenkel) {
                                       const found = jenkelOptions.find(o => o.toLowerCase() === p.jenkel.trim().toLowerCase());
@@ -1097,8 +1097,8 @@ export default function AdminPage() {
                       <label className="form-label">Jenis Kelamin *</label>
                       <select className="form-select" required value={pegawaiForm.jenkel || ''} onChange={e => setPegawaiForm({...pegawaiForm, jenkel: e.target.value})}>
                         <option value="">- Pilih Jenis Kelamin -</option>
-                        <option value="Laki-Laki">Laki-Laki</option>
-                        <option value="Perempuan">Perempuan</option>
+                        <option value="LAKI-LAKI">LAKI-LAKI</option>
+                        <option value="PEREMPUAN">PEREMPUAN</option>
                       </select>
                     </div>
                     <div className="col-md-6">
