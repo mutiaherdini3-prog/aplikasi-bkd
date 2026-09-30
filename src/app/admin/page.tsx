@@ -703,7 +703,6 @@ export default function AdminPage() {
               {/* REKAP SERTIFIKASI TAB */}
               {activeTab === 'view-sertifikasi' && (() => {
                 const groupedByOPD: Record<string, any[]> = {};
-                const groupedByOPD: Record<string, any[]> = {};
                 
                 pegawaiList.forEach(p => {
                   let matchedOpd = 'Belum Diatur';
