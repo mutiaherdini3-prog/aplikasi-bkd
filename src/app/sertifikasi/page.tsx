@@ -451,25 +451,25 @@ export default function SertifikasiPage() {
                             <label className="form-label">Tanggal Berakhir *</label>
                             <input type="date" className="form-control" required value={k.tanggal_akhir || ''} onChange={e => handleChange(k.id, 'tanggal_akhir', e.target.value)} />
                           </div>
-                          <div className="col-md-4">
+                          <div className="col-md-6">
                             <label className="form-label">Tahun Kursus *</label>
                             <input type="number" className="form-control" placeholder="Contoh: 2026" required value={k.tahun || ''} onChange={e => handleChange(k.id, 'tahun', e.target.value)} />
                           </div>
-                          <div className="col-md-4">
+                          <div className="col-md-6">
                             <label className="form-label">Durasi (JP) *</label>
                             <div className="input-group">
                               <input type="number" className="form-control" placeholder="0" required value={k.jumlah_jp || ''} onChange={e => handleChange(k.id, 'jumlah_jp', e.target.value)} />
                               <span className="input-group-text bg-white text-muted" style={{borderColor:'#bae6fd'}}>JP</span>
                             </div>
                           </div>
-                          <div className="col-md-4">
+                          <div className="col-md-6">
                             <label className="form-label">Penanda Tangan *</label>
                             <input type="text" className="form-control" placeholder="Contoh: Kepala Dinas" required value={k.pejabat || ''} onChange={e => handleChange(k.id, 'pejabat', e.target.value)} />
                           </div>
-                          <div className="col-md-4">
+                          <div className="col-md-6">
                             <label className="form-label">Biaya Pelatihan *</label>
                             <div className="input-group">
-                              <select className="form-select bg-light" style={{maxWidth:'110px'}} value={k.biaya_tipe || 'Berbayar'} onChange={e => {
+                              <select className="form-select bg-light" style={{flex: '0 0 130px'}} value={k.biaya_tipe || 'Berbayar'} onChange={e => {
                                 handleChange(k.id, 'biaya_tipe', e.target.value);
                                 if (e.target.value === 'Gratis') handleChange(k.id, 'biaya_nominal', '0');
                               }}>
