@@ -434,6 +434,11 @@ export default function AdminPage() {
     const idpItems = pegawaiList.flatMap((p) => {
       if (!p.idp || p.idp.length === 0) return [];
       return p.idp.map((idp: any) => ({ p, idp }));
+    }).filter((item: any) => {
+      if (tahunFilter !== 'all') {
+        if (item.idp.tahun !== tahunFilter && (!item.idp.waktu_pelaksanaan_awal || !item.idp.waktu_pelaksanaan_awal.includes(tahunFilter))) return false;
+      }
+      return true;
     });
 
     if (idpItems.length === 0) {
@@ -529,7 +534,21 @@ export default function AdminPage() {
             <div className="topbar">
               <h5 className="fw-bold text-secondary mb-0">{getTopbarTitle()}</h5>
               <div className="d-flex align-items-center gap-3">
-                <i className="bi bi-bell fs-5 text-muted"></i>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted fw-bold" style={{fontSize: '0.85rem'}}>Tahun:</span>
+                  <select 
+                    className="form-select form-select-sm border-secondary shadow-sm" 
+                    style={{ width: '100px', cursor: 'pointer', fontWeight: 'bold' }}
+                    value={tahunFilter}
+                    onChange={(e) => setTahunFilter(e.target.value)}
+                  >
+                    <option value="all">Semua</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                  </select>
+                </div>
+                <i className="bi bi-bell fs-5 text-muted ms-2"></i>
                 <div className="d-flex align-items-center gap-2">
                   <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px', fontWeight: 'bold' }}>AD</div>
                   <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>Administrator Utama</span>
@@ -959,6 +978,9 @@ export default function AdminPage() {
                               if (!p.idp || p.idp.length === 0) return [];
                               return p.idp.map((idp: any) => ({ p, idp }));
                             }).filter((item: any) => {
+                              if (tahunFilter !== 'all') {
+                                if (item.idp.tahun !== tahunFilter && (!item.idp.waktu_pelaksanaan_awal || !item.idp.waktu_pelaksanaan_awal.includes(tahunFilter))) return false;
+                              }
                               if (!searchIdp) return true;
                               const query = searchIdp.toLowerCase();
                               return (item.p.nama && item.p.nama.toLowerCase().includes(query)) ||
