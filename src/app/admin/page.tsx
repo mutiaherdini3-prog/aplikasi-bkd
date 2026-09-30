@@ -322,7 +322,7 @@ export default function AdminPage() {
     return '';
   };
 
-  const generateExcelSheet = (pegawaiData: any[], sheetName: string, workbook: any, statusKelulusanLabel?: string) => {
+  const generateExcelSheet = (pegawaiData: any[], sheetName: string, workbook: any, statusKelulusanLabel?: string, showTargetAndStatus = false) => {
     if (pegawaiData.length === 0) return;
     
     const maxCerts = Math.max(0, ...pegawaiData.map(p => {
@@ -342,6 +342,10 @@ export default function AdminPage() {
         "Unit Kerja": p.unit_kerja,
         "Total JP": p.jp,
       };
+      if (showTargetAndStatus) {
+        baseRow["Target JP"] = getTargetJP(p);
+        baseRow["Status Kelulusan"] = statusKelulusanLabel || (checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI");
+      }
 
       const certs = p.filteredSertifikasi || p.sertifikasi || [];
       for (let i = 0; i < maxCerts; i++) {
@@ -386,10 +390,11 @@ export default function AdminPage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   };
 
-  const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK') => {
+  const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK', onlyWithJP = false, showTargetAndStatus = false) => {
     let baseList = pegawaiList;
-    if (mode === 'lulus') baseList = pegawaiList.filter(p => checkLulusJP(p));
-    if (mode === 'belum') baseList = pegawaiList.filter(p => !checkLulusJP(p));
+    if (onlyWithJP) baseList = baseList.filter(p => p.jp > 0);
+    if (mode === 'lulus') baseList = baseList.filter(p => checkLulusJP(p));
+    if (mode === 'belum') baseList = baseList.filter(p => !checkLulusJP(p));
 
     const finalFiltered = baseList.filter(p => {
       if (statusFilter === 'all') return true;
@@ -410,9 +415,9 @@ export default function AdminPage() {
     const workbook = XLSX.utils.book_new();
     const statusLabel = mode === 'lulus' ? "MEMENUHI" : mode === 'belum' ? "BELUM MEMENUHI" : undefined;
     
-    if ((!targetType || targetType === 'PNS') && pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel);
-    if ((!targetType || targetType === 'PPPK') && pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel);
-    if (!targetType && pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel);
+    if ((!targetType || targetType === 'PNS') && pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel, showTargetAndStatus);
+    if ((!targetType || targetType === 'PPPK') && pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel, showTargetAndStatus);
+    if (!targetType && pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel, showTargetAndStatus);
     
     if (workbook.SheetNames.length === 0) {
       alert('Tidak ada data untuk di-export');
@@ -422,11 +427,16 @@ export default function AdminPage() {
     XLSX.writeFile(workbook, `Laporan_Sertifikasi_${title}_${tahunFilter}.xlsx`);
   };
 
-  const exportToExcel = () => handleExport("Pegawai", "all");
-  const exportToExcelPNS = () => handleExport("Pegawai_PNS", "all", "PNS");
-  const exportToExcelPPPK = () => handleExport("Pegawai_PPPK", "all", "PPPK");
-  const exportToExcelMemenuhi = () => handleExport("MemenuhiJP", "lulus");
-  const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum");
+  const exportToExcelDataPegawai = () => handleExport("Data_Pegawai", "all", undefined, true, false);
+  const exportToExcelDataPegawaiPNS = () => handleExport("Data_Pegawai_PNS", "all", "PNS", true, false);
+  const exportToExcelDataPegawaiPPPK = () => handleExport("Data_Pegawai_PPPK", "all", "PPPK", true, false);
+
+  const exportToExcelSert = () => handleExport("Rekap_Sertifikasi", "all", undefined, false, true);
+  const exportToExcelSertPNS = () => handleExport("Rekap_Sertifikasi_PNS", "all", "PNS", false, true);
+  const exportToExcelSertPPPK = () => handleExport("Rekap_Sertifikasi_PPPK", "all", "PPPK", false, true);
+
+  const exportToExcelMemenuhi = () => handleExport("MemenuhiJP", "lulus", undefined, false, true);
+  const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum", undefined, false, true);
 
   const exportIdpToExcel = () => {
     const idpItems = pegawaiList.flatMap((p) => {
@@ -634,13 +644,13 @@ export default function AdminPage() {
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
                       <div className="d-flex gap-2">
-                        <button className="btn btn-sm btn-success" onClick={exportToExcel} title="Unduh Semua ke Excel">
+                        <button className="btn btn-sm btn-success" onClick={exportToExcelDataPegawai} title="Unduh Semua ke Excel">
                           <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
                         </button>
-                        <button className="btn btn-sm btn-success" onClick={exportToExcelPNS} title="Unduh PNS ke Excel">
+                        <button className="btn btn-sm btn-success" onClick={exportToExcelDataPegawaiPNS} title="Unduh PNS ke Excel">
                           <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
                         </button>
-                        <button className="btn btn-sm btn-success" onClick={exportToExcelPPPK} title="Unduh PPPK ke Excel">
+                        <button className="btn btn-sm btn-success" onClick={exportToExcelDataPegawaiPPPK} title="Unduh PPPK ke Excel">
                           <i className="bi bi-file-earmark-excel me-1"></i> Export PPPK
                         </button>
                       </div>
@@ -829,13 +839,13 @@ export default function AdminPage() {
                           <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                         </div>
                         <div className="d-flex gap-2">
-                          <button className="btn btn-sm btn-success" onClick={exportToExcel} title="Unduh Semua ke Excel">
+                          <button className="btn btn-sm btn-success" onClick={exportToExcelSert} title="Unduh Semua ke Excel">
                             <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
                           </button>
-                          <button className="btn btn-sm btn-success" onClick={exportToExcelPNS} title="Unduh PNS ke Excel">
+                          <button className="btn btn-sm btn-success" onClick={exportToExcelSertPNS} title="Unduh PNS ke Excel">
                             <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
                           </button>
-                          <button className="btn btn-sm btn-success" onClick={exportToExcelPPPK} title="Unduh PPPK ke Excel">
+                          <button className="btn btn-sm btn-success" onClick={exportToExcelSertPPPK} title="Unduh PPPK ke Excel">
                             <i className="bi bi-file-earmark-excel me-1"></i> Export PPPK
                           </button>
                         </div>
