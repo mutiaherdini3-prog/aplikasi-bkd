@@ -542,20 +542,22 @@ export default function AdminPage() {
             <div className="topbar">
               <h5 className="fw-bold text-secondary mb-0">{getTopbarTitle()}</h5>
               <div className="d-flex align-items-center gap-3">
-                <div className="d-flex align-items-center gap-2">
-                  <span className="text-muted fw-bold" style={{fontSize: '0.85rem'}}>Tahun:</span>
-                  <select 
-                    className="form-select form-select-sm border-secondary shadow-sm" 
-                    style={{ width: '100px', cursor: 'pointer', fontWeight: 'bold' }}
-                    value={tahunFilter}
-                    onChange={(e) => setTahunFilter(e.target.value)}
-                  >
-                    <option value="all">Semua</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                  </select>
-                </div>
+                {activeTab !== 'view-dashboard' && (
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="text-muted fw-bold" style={{fontSize: '0.85rem'}}>Tahun:</span>
+                    <select 
+                      className="form-select form-select-sm border-secondary shadow-sm" 
+                      style={{ width: '100px', cursor: 'pointer', fontWeight: 'bold' }}
+                      value={tahunFilter}
+                      onChange={(e) => setTahunFilter(e.target.value)}
+                    >
+                      <option value="all">Semua</option>
+                      <option value="2024">2024</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
+                    </select>
+                  </div>
+                )}
                 <i className="bi bi-bell fs-5 text-muted ms-2"></i>
                 <div className="d-flex align-items-center gap-2">
                   <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px', fontWeight: 'bold' }}>AD</div>
