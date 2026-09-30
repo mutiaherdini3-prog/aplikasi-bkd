@@ -466,17 +466,19 @@ export default function SertifikasiPage() {
                             <label className="form-label">Penanda Tangan *</label>
                             <input type="text" className="form-control" placeholder="Contoh: Kepala Dinas" required value={k.pejabat || ''} onChange={e => handleChange(k.id, 'pejabat', e.target.value)} />
                           </div>
-                          <div className="col-md-6">
+                          <div className="col-md-12">
                             <label className="form-label">Biaya Pelatihan *</label>
-                            <div className="input-group">
-                              <select className="form-select bg-light" style={{flex: '0 0 130px'}} value={k.biaya_tipe || 'Berbayar'} onChange={e => {
+                            <div className="d-flex gap-2">
+                              <select className="form-select bg-light" style={{width: 'auto'}} value={k.biaya_tipe || 'Berbayar'} onChange={e => {
                                 handleChange(k.id, 'biaya_tipe', e.target.value);
                                 if (e.target.value === 'Gratis') handleChange(k.id, 'biaya_nominal', '0');
                               }}>
                                 <option value="Berbayar">Berbayar</option>
                                 <option value="Gratis">Gratis</option>
                               </select>
-                              <input type="number" className="form-control" placeholder="Contoh: 500000" style={{display: k.biaya_tipe === 'Gratis' ? 'none' : 'block'}} required={k.biaya_tipe !== 'Gratis'} value={k.biaya_nominal || ''} onChange={e => handleChange(k.id, 'biaya_nominal', e.target.value)} />
+                              {k.biaya_tipe !== 'Gratis' && (
+                                <input type="number" className="form-control" placeholder="Nominal (Contoh: 500000)" required value={k.biaya_nominal || ''} onChange={e => handleChange(k.id, 'biaya_nominal', e.target.value)} />
+                              )}
                             </div>
                           </div>
                         </div>
