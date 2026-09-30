@@ -788,23 +788,40 @@ export default function AdminPage() {
                 pegawaiList.forEach(p => {
                   let matchedOpd = 'Belum Diatur';
                   if (p.unit_kerja) {
-                    const normalizeString = (s: string) => {
-                      if (!s) return "";
-                      return s.toUpperCase()
-                              .replace(/&/g, 'DAN')
-                              .replace(/SDM/g, 'SUMBER DAYA MANUSIA')
+                    const raw = p.unit_kerja.toUpperCase();
+                    const getWords = (s: string) => {
+                      if (!s) return [];
+                      const cleaned = s.toUpperCase()
+                              .replace(/&/g, ' DAN ')
+                              .replace(/SDM/g, ' SUMBER DAYA MANUSIA ')
                               .replace(/ - PEMERINTAH.*/g, '')
                               .replace(/KABUPATEN BANGKA BARAT/g, '')
                               .replace(/KAB\. BANGKA BARAT/g, '')
-                              .replace(/[^A-Z0-9]/g, '');
+                              .replace(/[^A-Z0-9\s]/g, ' ')
+                              .trim();
+                      return Array.from(new Set(cleaned.split(/\s+/).filter(w => w !== 'DAN' && w.length > 2)));
                     };
 
-                    const raw = p.unit_kerja.toUpperCase();
-                    const rawNorm = normalizeString(p.unit_kerja);
-                    const found = UNIT_KERJA_OPTIONS.find(o => {
-                      const optNorm = normalizeString(o);
-                      return rawNorm.includes(optNorm) || optNorm.includes(rawNorm);
+                    const matchScore = (w1: string[], w2: string[]) => {
+                      if (w1.length === 0 || w2.length === 0) return 0;
+                      const common = w1.filter(w => w2.includes(w)).length;
+                      return common / Math.min(w1.length, w2.length);
+                    };
+
+                    const rawWords = getWords(p.unit_kerja);
+                    let bestMatch = null;
+                    let bestScore = 0;
+
+                    UNIT_KERJA_OPTIONS.forEach(opt => {
+                      const optWords = getWords(opt);
+                      const score = matchScore(rawWords, optWords);
+                      if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = opt;
+                      }
                     });
+
+                    let found = bestScore >= 0.7 ? bestMatch : null;
                     if (found) {
                       matchedOpd = found;
                     } else {
