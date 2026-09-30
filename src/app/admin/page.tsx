@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [currentPagePegawai, setCurrentPagePegawai] = useState(1);
   const [currentPageSert, setCurrentPageSert] = useState(1);
   const [currentPageIdp, setCurrentPageIdp] = useState(1);
+  const [openOPD, setOpenOPD] = useState<string | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   // Reset pagination on filter change
@@ -744,61 +745,85 @@ export default function AdminPage() {
                     </div>
 
                     <div className="accordion" id="accordionOPD">
-                      {sortedOPDs.map((opd, opdIndex) => {
-                        let opdPegawai = groupedByOPD[opd];
-                        if (searchSertifikasi) {
-                          const query = searchSertifikasi.toLowerCase();
-                          opdPegawai = opdPegawai.filter(p => 
-                            (p.nama && p.nama.toLowerCase().includes(query)) || 
-                            (p.nip && p.nip.toLowerCase().includes(query))
-                          );
-                        }
-                        if (opdPegawai.length === 0) return null;
+                      {(() => {
+                        const filteredOPDs = sortedOPDs.filter(opd => {
+                          let opdPegawai = groupedByOPD[opd];
+                          if (searchSertifikasi) {
+                            const query = searchSertifikasi.toLowerCase();
+                            opdPegawai = opdPegawai.filter(p => 
+                              (p.nama && p.nama.toLowerCase().includes(query)) || 
+                              (p.nip && p.nip.toLowerCase().includes(query))
+                            );
+                          }
+                          return opdPegawai.length > 0;
+                        });
+
+                        const paginatedOPDs = filteredOPDs.slice((currentPageSert - 1) * ITEMS_PER_PAGE, currentPageSert * ITEMS_PER_PAGE);
 
                         return (
-                          <div className="accordion-item mb-2 border rounded" key={opdIndex}>
-                            <h2 className="accordion-header" id={`heading${opdIndex}`}>
-                              <button className="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${opdIndex}`} aria-expanded="false" aria-controls={`collapse${opdIndex}`}>
-                                {opd} <span className="badge bg-secondary ms-2">{opdPegawai.length} Pegawai</span>
-                              </button>
-                            </h2>
-                            <div id={`collapse${opdIndex}`} className="accordion-collapse collapse" aria-labelledby={`heading${opdIndex}`} data-bs-parent="#accordionOPD">
-                              <div className="accordion-body p-0">
-                                <div className="table-responsive">
-                                  <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
-                                    <thead className="table-light">
-                                      <tr>
-                                        <th>No</th>
-                                        <th>NIP</th>
-                                        <th>Nama Pegawai</th>
-                                        <th>Jabatan</th>
-                                        <th className="text-center">Total JP</th>
-                                        <th className="text-center">Aksi</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {opdPegawai.map((p, pIndex) => (
-                                        <tr key={pIndex}>
-                                          <td>{pIndex + 1}</td>
-                                          <td>{p.nip}</td>
-                                          <td className="fw-bold">{p.nama || '-'}</td>
-                                          <td>{p.jabatan || '-'}</td>
-                                          <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
-                                          <td className="text-center">
-                                            <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
-                                              <i className="bi bi-eye"></i> Detail
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
+                          <>
+                            {paginatedOPDs.map((opd, opdIndex) => {
+                              let opdPegawai = groupedByOPD[opd];
+                              if (searchSertifikasi) {
+                                const query = searchSertifikasi.toLowerCase();
+                                opdPegawai = opdPegawai.filter(p => 
+                                  (p.nama && p.nama.toLowerCase().includes(query)) || 
+                                  (p.nip && p.nip.toLowerCase().includes(query))
+                                );
+                              }
+
+                              return (
+                                <div className="accordion-item mb-2 border rounded" key={opdIndex}>
+                                  <h2 className="accordion-header">
+                                    <button 
+                                      className={`accordion-button fw-bold ${openOPD === opd ? '' : 'collapsed'}`} 
+                                      type="button" 
+                                      onClick={() => setOpenOPD(openOPD === opd ? null : opd)}
+                                    >
+                                      {opd} <span className="badge bg-secondary ms-2">{opdPegawai.length} Pegawai</span>
+                                    </button>
+                                  </h2>
+                                  <div className={`accordion-collapse collapse ${openOPD === opd ? 'show' : ''}`}>
+                                    <div className="accordion-body p-0">
+                                      <div className="table-responsive">
+                                        <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
+                                          <thead className="table-light">
+                                            <tr>
+                                              <th>No</th>
+                                              <th>NIP</th>
+                                              <th>Nama Pegawai</th>
+                                              <th>Jabatan</th>
+                                              <th className="text-center">Total JP</th>
+                                              <th className="text-center">Aksi</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {opdPegawai.map((p, pIndex) => (
+                                              <tr key={pIndex}>
+                                                <td>{pIndex + 1}</td>
+                                                <td>{p.nip}</td>
+                                                <td className="fw-bold">{p.nama || '-'}</td>
+                                                <td>{p.jabatan || '-'}</td>
+                                                <td className="text-center"><span className={`fw-bold text-${checkLulusJP(p) ? 'success' : 'danger'}`}>{p.jp} JP</span></td>
+                                                <td className="text-center">
+                                                  <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
+                                                    <i className="bi bi-eye"></i> Detail
+                                                  </button>
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div>
+                              );
+                            })}
+                            <PaginationControls currentPage={currentPageSert} setCurrentPage={setCurrentPageSert} totalItems={filteredOPDs.length} />
+                          </>
                         );
-                      })}
+                      })()}
                     </div>
                   </div>
                 );
@@ -832,7 +857,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="table-responsive">
-                    <table className="table table-hover align-middle" style={{fontSize: '0.85rem'}}>
+                    <table className="table table-sm table-hover align-middle" style={{fontSize: '0.85rem'}}>
                       <thead className="table-light">
                         <tr>
                           <th>No</th>
@@ -953,7 +978,7 @@ export default function AdminPage() {
                 
                 <h6 className="fw-bold text-secondary mb-3">Daftar Sertifikat Terunggah:</h6>
                 <div className="table-responsive bg-white border rounded-3">
-                  <table className="table table-hover mb-0" style={{ fontSize: '0.85rem' }}>
+                  <table className="table table-sm table-hover mb-0" style={{ fontSize: '0.85rem' }}>
                     <thead className="table-light">
                       <tr>
                         <th>No</th>
