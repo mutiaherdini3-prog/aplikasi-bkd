@@ -728,16 +728,15 @@ export default function AdminPage() {
                         <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
-                      <div className="d-flex gap-2">
-                        <button className="btn btn-sm btn-success" onClick={exportToExcelDataPegawai} title="Unduh Semua ke Excel">
-                          <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
+                      <div className="dropdown">
+                        <button className="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                         </button>
-                        <button className="btn btn-sm btn-success" onClick={exportToExcelDataPegawaiPNS} title="Unduh PNS ke Excel">
-                          <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
-                        </button>
-                        <button className="btn btn-sm btn-success" onClick={exportToExcelDataPegawaiPPPK} title="Unduh PPPK ke Excel">
-                          <i className="bi bi-file-earmark-excel me-1"></i> Export PPPK
-                        </button>
+                        <ul className="dropdown-menu">
+                          <li><button className="dropdown-item" onClick={exportToExcelDataPegawai}>Semua</button></li>
+                          <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPNS}>PNS</button></li>
+                          <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPPPK}>PPPK</button></li>
+                        </ul>
                       </div>
                     </div>
                   </div>
@@ -985,15 +984,16 @@ export default function AdminPage() {
                             <option value="Pelatihan manajerial">Pelatihan manajerial</option>
                             <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
-                          <button className="btn btn-sm btn-success" onClick={exportToExcelSert} title="Unduh Semua ke Excel">
-                            <i className="bi bi-file-earmark-excel me-1"></i> Export Semua
-                          </button>
-                          <button className="btn btn-sm btn-success" onClick={exportToExcelSertPNS} title="Unduh PNS ke Excel">
-                            <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
-                          </button>
-                          <button className="btn btn-sm btn-success" onClick={exportToExcelSertPPPK} title="Unduh PPPK ke Excel">
-                            <i className="bi bi-file-earmark-excel me-1"></i> Export PPPK
-                          </button>
+                          <div className="dropdown">
+                            <button className="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                            </button>
+                            <ul className="dropdown-menu">
+                              <li><button className="dropdown-item" onClick={exportToExcelSert}>Semua</button></li>
+                              <li><button className="dropdown-item" onClick={exportToExcelSertPNS}>PNS</button></li>
+                              <li><button className="dropdown-item" onClick={exportToExcelSertPPPK}>PPPK</button></li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
                     </div>
