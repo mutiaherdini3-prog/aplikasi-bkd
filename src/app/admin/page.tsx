@@ -430,6 +430,55 @@ export default function AdminPage() {
   const exportToExcelMemenuhi = () => handleExport("MemenuhiJP", "lulus");
   const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum");
 
+  const exportIdpToExcel = () => {
+    const idpItems = pegawaiList.flatMap((p) => {
+      if (!p.idp || p.idp.length === 0) return [];
+      return p.idp.map((idp: any) => ({ p, idp }));
+    });
+
+    if (idpItems.length === 0) {
+      alert("Tidak ada data IDP untuk diexport!");
+      return;
+    }
+
+    const excelData = idpItems.map((item, index) => {
+      const p = item.p;
+      const idp = item.idp;
+      
+      const formatRupiah = (angka: any) => {
+        if (!angka) return "Rp 0";
+        return "Rp " + Number(angka).toLocaleString('id-ID');
+      };
+
+      let waktuStr = "";
+      if (idp.waktu_pelaksanaan_awal && idp.waktu_pelaksanaan_akhir) {
+        waktuStr = `${idp.waktu_pelaksanaan_awal} s.d. ${idp.waktu_pelaksanaan_akhir}`;
+      } else if (idp.waktu_pelaksanaan_awal) {
+        waktuStr = idp.waktu_pelaksanaan_awal;
+      }
+
+      return {
+        "No": index + 1,
+        "Nama Pegawai": p.nama || "",
+        "NIP": p.nip || "",
+        "Jabatan": p.jabatan || "",
+        "Jenis kompetensi": idp.jenis_kompetensi || "",
+        "Jenis pengembangan": idp.jenis_pengembangan || "",
+        "Jalur pengembangan": idp.jalur_pengembangan || "",
+        "Penyelenggara": idp.penyelenggara || "",
+        "Waktu Pelaksanan": waktuStr,
+        "JP": idp.jp || "",
+        "Anggaran": formatRupiah(idp.anggaran),
+        "Status": idp.status || ""
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data IDP");
+    XLSX.writeFile(workbook, "Rekap_IDP_ASN.xlsx");
+  };
+
   return (
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -876,6 +925,9 @@ export default function AdminPage() {
                         />
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                       </div>
+                      <button className="btn btn-sm btn-success" onClick={exportIdpToExcel}>
+                        <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                      </button>
                       <button className="btn btn-sm btn-primary" onClick={() => {
                         setIdpForm({ isEdit: false });
                         setShowIdpModal(true);
