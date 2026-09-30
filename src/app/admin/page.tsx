@@ -794,6 +794,7 @@ export default function AdminPage() {
                       const cleaned = s.toUpperCase()
                               .replace(/&/g, ' DAN ')
                               .replace(/SDM/g, ' SUMBER DAYA MANUSIA ')
+                              .replace(/MUNTOK/g, ' MENTOK ')
                               .replace(/ - PEMERINTAH.*/g, '')
                               .replace(/KABUPATEN BANGKA BARAT/g, '')
                               .replace(/KAB\. BANGKA BARAT/g, '')
