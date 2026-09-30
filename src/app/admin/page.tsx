@@ -799,6 +799,7 @@ export default function AdminPage() {
                               .replace(/[^A-Z0-9]/g, '');
                     };
 
+                    const raw = p.unit_kerja.toUpperCase();
                     const rawNorm = normalizeString(p.unit_kerja);
                     const found = UNIT_KERJA_OPTIONS.find(o => {
                       const optNorm = normalizeString(o);
