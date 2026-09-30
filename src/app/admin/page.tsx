@@ -29,7 +29,7 @@ export default function AdminPage() {
   const [currentPagePegawai, setCurrentPagePegawai] = useState(1);
   const [currentPageSert, setCurrentPageSert] = useState(1);
   const [currentPageIdp, setCurrentPageIdp] = useState(1);
-  const ITEMS_PER_PAGE = 50;
+  const ITEMS_PER_PAGE = 20;
 
   // Reset pagination on filter change
   useEffect(() => {
@@ -385,7 +385,7 @@ export default function AdminPage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   };
 
-  const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum') => {
+  const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK') => {
     let baseList = pegawaiList;
     if (mode === 'lulus') baseList = pegawaiList.filter(p => checkLulusJP(p));
     if (mode === 'belum') baseList = pegawaiList.filter(p => !checkLulusJP(p));
@@ -409,11 +409,11 @@ export default function AdminPage() {
     const workbook = XLSX.utils.book_new();
     const statusLabel = mode === 'lulus' ? "MEMENUHI" : mode === 'belum' ? "BELUM MEMENUHI" : undefined;
     
-    if (pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel);
-    if (pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel);
-    if (pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel);
+    if ((!targetType || targetType === 'PNS') && pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel);
+    if ((!targetType || targetType === 'PPPK') && pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel);
+    if (!targetType && pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel);
     
-    if (pnsData.length === 0 && pppkData.length === 0 && pwData.length === 0) {
+    if (workbook.SheetNames.length === 0) {
       alert('Tidak ada data untuk di-export');
       return;
     }
@@ -422,6 +422,8 @@ export default function AdminPage() {
   };
 
   const exportToExcel = () => handleExport("Pegawai", "all");
+  const exportToExcelPNS = () => handleExport("Pegawai_PNS", "all", "PNS");
+  const exportToExcelPPPK = () => handleExport("Pegawai_PPPK", "all", "PPPK");
   const exportToExcelMemenuhi = () => handleExport("MemenuhiJP", "lulus");
   const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum");
 
@@ -531,38 +533,50 @@ export default function AdminPage() {
                 
                 return (
                 <div className="table-card">
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
-                    <div className="d-flex gap-2">
-                      <div className="position-relative">
-                        <input 
-                          type="text" 
-                          className="form-control form-control-sm pe-4" 
-                          placeholder="Cari Nama / NIP..." 
-                          value={searchPegawai}
-                          onChange={e => setSearchPegawai(e.target.value)}
-                        />
-                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                  <div className="d-flex flex-column mb-4 gap-3">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
+                      <div className="d-flex gap-2">
+                        <div className="position-relative">
+                          <input 
+                            type="text" 
+                            className="form-control form-control-sm pe-4" 
+                            placeholder="Cari Nama / NIP..." 
+                            value={searchPegawai}
+                            onChange={e => setSearchPegawai(e.target.value)}
+                          />
+                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                        </div>
+                        {(userRole === 'super_admin' || userRole === 'admin') && (
+                          <button className="btn btn-sm btn-primary" onClick={() => {
+                            setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0 });
+                            setShowPegawaiModal(true);
+                          }}>
+                            <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
+                          </button>
+                        )}
                       </div>
-                      {(userRole === 'super_admin' || userRole === 'admin') && (
-                        <button className="btn btn-sm btn-primary" onClick={() => {
-                          setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0 });
-                          setShowPegawaiModal(true);
-                        }}>
-                          <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
+                    </div>
+                    
+                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="badge bg-secondary fs-6">Seluruh Pegawai: {pegawaiList.length}</span>
+                        <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
+                        <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
+                      </div>
+                      <div className="d-flex gap-2">
+                        <button className="btn btn-sm btn-success" onClick={exportToExcelPNS} title="Unduh PNS ke Excel">
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export PNS
                         </button>
-                      )}
-                      <button 
-                        className="btn btn-sm btn-success"
-                        onClick={exportToExcel}
-                        title="Unduh data pegawai ke Excel"
-                      >
-                        <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
-                      </button>
+                        <button className="btn btn-sm btn-success" onClick={exportToExcelPPPK} title="Unduh PPPK ke Excel">
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export PPPK
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  
                   <div className="table-responsive">
-                    <table className="table table-hover align-middle">
+                    <table className="table table-sm table-hover align-middle" style={{ fontSize: '0.85rem' }}>
                       <thead className="table-light">
                         <tr>
                           <th>No</th>
