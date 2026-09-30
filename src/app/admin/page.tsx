@@ -788,16 +788,21 @@ export default function AdminPage() {
                 pegawaiList.forEach(p => {
                   let matchedOpd = 'Belum Diatur';
                   if (p.unit_kerja) {
-                    const raw = p.unit_kerja.toUpperCase();
+                    const normalizeString = (s: string) => {
+                      if (!s) return "";
+                      return s.toUpperCase()
+                              .replace(/&/g, 'DAN')
+                              .replace(/SDM/g, 'SUMBER DAYA MANUSIA')
+                              .replace(/ - PEMERINTAH.*/g, '')
+                              .replace(/KABUPATEN BANGKA BARAT/g, '')
+                              .replace(/KAB\. BANGKA BARAT/g, '')
+                              .replace(/[^A-Z0-9]/g, '');
+                    };
+
+                    const rawNorm = normalizeString(p.unit_kerja);
                     const found = UNIT_KERJA_OPTIONS.find(o => {
-                      const opt = o.toUpperCase();
-                      if (raw === opt) return true;
-                      if (raw.includes(opt) || opt.includes(raw)) return true;
-                      if (raw.includes('SDM') && opt.includes('SUMBER DAYA MANUSIA')) {
-                        const replaced = raw.replace('SDM', 'SUMBER DAYA MANUSIA');
-                        return replaced.includes(opt) || opt.includes(replaced);
-                      }
-                      return false;
+                      const optNorm = normalizeString(o);
+                      return rawNorm.includes(optNorm) || optNorm.includes(rawNorm);
                     });
                     if (found) {
                       matchedOpd = found;
