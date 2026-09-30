@@ -693,6 +693,7 @@ export default function AdminPage() {
                       </tbody>
                     </table>
                   </div>
+                  <PaginationControls currentPage={currentPagePegawai} setCurrentPage={setCurrentPagePegawai} totalItems={filteredPegawaiList.length} />
                 </div>
               );})()}
 
