@@ -380,6 +380,30 @@ export default function LoginPage() {
                 padding: 2rem;
             }
         }
+        /* Sembunyikan elemen bawaan browser password manager */
+        .login-side [data-password-manager], 
+        .login-side [class*="password"], 
+        .login-side .overlay,
+        .login-side a[href*="password"],
+        .login-side a[data-l10n-id],
+        .login-side .password-manager-detected,
+        .login-side div[jscontroller],
+        .login-side [data-credential-manager] {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+            position: absolute !important;
+            opacity: 0 !important;
+        }
+        .mb-4 {
+            position: relative;
+        }
+        .mb-4 > a,
+        .mb-4 > div > a {
+            display: none !important;
+        }
       `}} />
 
       <div className="split-layout">
@@ -392,23 +416,20 @@ export default function LoginPage() {
                 <p>Pengelolaan Sertifikat & Pemenuhan Jam Pelajaran<br/><b>Pemerintah Kabupaten Bangka Barat</b></p>
             </div>
             
-            <form onSubmit={handleAuth}>
+            <form onSubmit={handleAuth} autoComplete="off">
                 <div className="mb-4">
                     <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide">NIP / ID Pegawai</label>
                     <div className="input-group">
                         <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-person text-muted"></i></span>
-                        <input type="text" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan NIP Anda" required value={nip} onChange={e => setNip(e.target.value)} />
+                        <input type="text" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan NIP Anda" required value={nip} onChange={e => setNip(e.target.value)} autoComplete="off" />
                     </div>
                 </div>
 
                 <div className="mb-4">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                        <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-0">Kata Sandi</label>
-                        <a href="#" className="small text-decoration-none fw-semibold" style={{color: '#1e4b85'}} data-bs-toggle="modal" data-bs-target="#gantiSandiModal">Lupa Sandi?</a>
-                    </div>
+                    <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-2">Kata Sandi</label>
                     <div className="input-group">
                         <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-lock text-muted"></i></span>
-                        <input type="password" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan kata sandi" required value={password} onChange={e => setPassword(e.target.value)} />
+                        <input type="password" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan kata sandi" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
                     </div>
                 </div>
 
