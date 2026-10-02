@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
@@ -13,6 +13,15 @@ export default function DashboardPage() {
   const [isAtasan, setIsAtasan] = useState(false);
   const [totalJP, setTotalJP] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // State untuk Konfirmasi Hapus
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmData, setDeleteConfirmData] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
 
   const fetchData = async () => {
@@ -73,33 +82,59 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
-  const hapusSertifikasi = async (rowIndex: string) => {
-    try {
-      const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
-      if (res.ok) fetchData();
-      else alert('Gagal menghapus sertifikat');
-    } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+  const hapusSertifikasi = async (rowIndex: string, namaKursus?: string) => {
+    setDeleteConfirmData({
+      title: 'Hapus Sertifikasi',
+      message: `Apakah Anda yakin ingin menghapus sertifikasi${namaKursus ? ` "${namaKursus}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
+          if (res.ok) { fetchData(); setShowDeleteConfirm(false); setDeleteConfirmData(null); }
+          else alert('Gagal menghapus sertifikat');
+        } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+        finally { setIsDeleting(false); }
+      }
+    });
+    setShowDeleteConfirm(true);
   };
 
-  const hapusPendidikan = async (rowIndex: string) => {
+  const hapusPendidikan = async (rowIndex: string, namaPendidikan?: string) => {
     if (rowIndex === 'pegawai_sheet') {
       alert('Pendidikan dasar ini diisi oleh Admin dan tidak dapat dihapus dari sini.');
       return;
     }
-    if (!confirm('Yakin ingin menghapus riwayat pendidikan ini?')) return;
-    try {
-      const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
-      if (res.ok) fetchData();
-      else alert('Gagal menghapus pendidikan');
-    } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+    setDeleteConfirmData({
+      title: 'Hapus Riwayat Pendidikan',
+      message: `Apakah Anda yakin ingin menghapus riwayat pendidikan${namaPendidikan ? ` "${namaPendidikan}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
+          if (res.ok) { fetchData(); setShowDeleteConfirm(false); setDeleteConfirmData(null); }
+          else alert('Gagal menghapus pendidikan');
+        } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+        finally { setIsDeleting(false); }
+      }
+    });
+    setShowDeleteConfirm(true);
   };
 
-  const hapusIDP = async (rowIndex: string) => {
-    try {
-      const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
-      if (res.ok) fetchData();
-      else alert('Gagal menghapus IDP');
-    } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); }
+  const hapusIDP = async (rowIndex: string, namaKompetensi?: string) => {
+    setDeleteConfirmData({
+      title: 'Hapus Pengajuan IDP',
+      message: `Apakah Anda yakin ingin menghapus pengajuan IDP${namaKompetensi ? ` "${namaKompetensi}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
+          if (res.ok) { fetchData(); setShowDeleteConfirm(false); setDeleteConfirmData(null); }
+          else alert('Gagal menghapus IDP');
+        } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); }
+        finally { setIsDeleting(false); }
+      }
+    });
+    setShowDeleteConfirm(true);
   };
 
   const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
@@ -287,7 +322,7 @@ export default function DashboardPage() {
                                   <i className="bi bi-file-earmark-text"></i> Lihat
                                 </button>
                               )}
-                              <button className="btn btn-sm btn-outline-danger" title="Hapus" onClick={() => hapusSertifikasi(s._rowIndex)}>
+                              <button className="btn btn-sm btn-outline-danger" title="Hapus" onClick={() => hapusSertifikasi(s._rowIndex, s.nama_kursus || s.jenis_sertifikasi)}>
                                 <i className="bi bi-trash"></i>
                               </button>
                             </td>
@@ -370,7 +405,7 @@ export default function DashboardPage() {
                                <span className="badge bg-secondary">{idp.status}</span>}
                             </td>
                             <td className="text-center">
-                              <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIDP(idp._rowIndex)}>
+                              <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIDP(idp._rowIndex, idp.jenis_kompetensi)}>
                                 <i className="bi bi-trash"></i>
                               </button>
                             </td>
@@ -498,6 +533,44 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Konfirmasi Hapus */}
+      {showDeleteConfirm && deleteConfirmData && (
+        <div style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(15,23,42,0.6)',backdropFilter:'blur(4px)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:9999,animation:'fadeInOverlay 0.2s ease-out'}} onClick={(e) => { if (e.target === e.currentTarget && !isDeleting) { setShowDeleteConfirm(false); setDeleteConfirmData(null); } }}>
+          <div style={{background:'white',borderRadius:'20px',padding:'40px 36px 32px',maxWidth:'440px',width:'90%',textAlign:'center',boxShadow:'0 25px 60px rgba(0,0,0,0.15)',animation:'slideInModal 0.3s cubic-bezier(0.16,1,0.3,1)'}}>
+            <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'linear-gradient(135deg,#fee2e2,#fecaca)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',animation:'pulseWarning 2s ease-in-out infinite'}}>
+              <i className="bi bi-exclamation-triangle-fill" style={{fontSize:'2rem',color:'#dc2626'}}></i>
+            </div>
+            <div style={{fontSize:'1.3rem',fontWeight:700,color:'#1e293b',marginBottom:'8px'}}>{deleteConfirmData.title}</div>
+            <div style={{fontSize:'0.92rem',color:'#64748b',lineHeight:1.6,marginBottom:'28px'}}>{deleteConfirmData.message}</div>
+            <div style={{display:'flex',gap:'12px',justifyContent:'center'}}>
+              <button 
+                style={{flex:1,padding:'12px 20px',borderRadius:'12px',fontWeight:600,fontSize:'0.95rem',border:'2px solid #e2e8f0',background:'white',color:'#475569',cursor:'pointer'}}
+                onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmData(null); }}
+                disabled={isDeleting}
+              >Batal</button>
+              <button 
+                style={{flex:1,padding:'12px 20px',borderRadius:'12px',fontWeight:600,fontSize:'0.95rem',border:'none',background:'linear-gradient(135deg,#dc2626,#b91c1c)',color:'white',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',opacity:isDeleting?0.7:1}}
+                onClick={deleteConfirmData.onConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <><div style={{width:'18px',height:'18px',border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'white',borderRadius:'50%',animation:'spinLoader 0.6s linear infinite'}}></div> Menghapus...</>
+                ) : (
+                  <><i className="bi bi-trash3-fill"></i> Ya, Hapus</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInModal { from { opacity: 0; transform: scale(0.85) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes pulseWarning { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes spinLoader { to { transform: rotate(360deg); } }
+      `}} />
     </>
   );
 }
