@@ -65,6 +65,10 @@ export default function AdminPage() {
   const [currentPagePegawai, setCurrentPagePegawai] = useState(1);
   const [currentPageSert, setCurrentPageSert] = useState(1);
   const [currentPageIdp, setCurrentPageIdp] = useState(1);
+  const [currentPageTren, setCurrentPageTren] = useState(1);
+  const [searchTren, setSearchTren] = useState('');
+  const [filterTrenStatus, setFilterTrenStatus] = useState<'all' | 'naik' | 'turun' | 'fluktuatif' | 'stabil'>('all');
+  const [selectedOpdChart, setSelectedOpdChart] = useState<string>('all');
   const [openOPD, setOpenOPD] = useState<string | null>(null);
   const ITEMS_PER_PAGE = 10;
 
@@ -73,7 +77,8 @@ export default function AdminPage() {
     setCurrentPagePegawai(1);
     setCurrentPageSert(1);
     setCurrentPageIdp(1);
-  }, [filterMode, statusFilter, tahunFilter, searchPegawai, searchSertifikasi, searchIdp]);
+    setCurrentPageTren(1);
+  }, [filterMode, statusFilter, tahunFilter, searchPegawai, searchSertifikasi, searchIdp, searchTren, filterTrenStatus]);
 
   // Pagination UI Component
   const PaginationControls = ({ currentPage, setCurrentPage, totalItems }: { currentPage: number, setCurrentPage: (p: number) => void, totalItems: number }) => {
@@ -398,6 +403,7 @@ export default function AdminPage() {
     if (activeTab === 'view-dashboard') return 'Overview Kelulusan 20 JP Pegawai';
     if (activeTab === 'view-pegawai') return 'Manajemen Data Pegawai';
     if (activeTab === 'view-sertifikasi') return 'Manajemen Rekap Sertifikasi';
+    if (activeTab === 'view-tren') return 'Analisis Tren Tahunan Pemenuhan JP per OPD';
     if (activeTab === 'view-idp') return 'Approval Individual Development Plan (IDP)';
     return '';
   };
@@ -585,6 +591,35 @@ export default function AdminPage() {
     XLSX.writeFile(workbook, "Rekap_IDP_ASN.xlsx");
   };
 
+  const exportTrenToExcel = () => {
+    const excelRows = opdTrendData.map((item, idx) => {
+      const row: any = {
+        "No": idx + 1,
+        "Nama OPD / Unit Kerja": item.opd,
+        "Total Pegawai": item.totalMembers,
+      };
+
+      trendYears.forEach(year => {
+        const stats = item.yearlyStats[year];
+        row[`${year} (Lulus)`] = stats?.lulus || 0;
+        row[`${year} (%)`] = `${stats?.persentase || 0}%`;
+        row[`${year} (Rata-rata JP)`] = stats?.avgJp || 0;
+      });
+
+      row["Status Tren"] = 
+        item.statusTren === 'naik' ? 'Naik (Meningkat)' :
+        item.statusTren === 'turun' ? 'Turun (Menurun)' :
+        item.statusTren === 'fluktuatif' ? 'Fluktuatif (Naik-Turun)' : 'Stabil';
+
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Tren_Tahunan_OPD");
+    XLSX.writeFile(workbook, "Rekap_Tren_Tahunan_OPD.xlsx");
+  };
+
   const { groupedByOPD, sortedOPDs } = useMemo(() => {
     const grouped: Record<string, any[]> = {};
     pegawaiList.forEach(p => {
@@ -652,6 +687,155 @@ export default function AdminPage() {
     
     return { filteredOPDs: resultOPDs, processedOPDs: processed };
   }, [sortedOPDs, groupedByOPD, searchSertifikasi]);
+
+  const trendYears = useMemo(() => {
+    const yearsFromData = rawPegawaiList.flatMap(p => p.sertifikasi?.map((s: any) => String(s.tahun)).filter(Boolean) || []);
+    const uniqueYears = Array.from(new Set(yearsFromData)).filter(y => /^\d{4}$/.test(y)).sort();
+    const baseYears = ['2023', '2024', '2025'];
+    baseYears.forEach(y => {
+      if (!uniqueYears.includes(y)) uniqueYears.push(y);
+    });
+    return uniqueYears.sort();
+  }, [rawPegawaiList]);
+
+  const opdTrendData = useMemo(() => {
+    return sortedOPDs.map(opd => {
+      const members = groupedByOPD[opd] || [];
+      const totalMembers = members.length;
+
+      const yearlyStats: Record<string, { lulus: number; belum: number; persentase: number; totalJp: number; avgJp: number }> = {};
+      const rates: number[] = [];
+
+      trendYears.forEach(year => {
+        let lulusCount = 0;
+        let totalJp = 0;
+
+        members.forEach(p => {
+          const sertsYear = p.sertifikasi?.filter((s: any) => String(s.tahun) === String(year)) || [];
+          const jpYear = sertsYear.reduce((acc: number, curr: any) => acc + (Number(curr.jumlah_jp) || 0), 0);
+          totalJp += jpYear;
+          if (checkLulusJP({ ...p, jp: jpYear })) {
+            lulusCount++;
+          }
+        });
+
+        const persentase = totalMembers > 0 ? Math.round((lulusCount / totalMembers) * 100) : 0;
+        const avgJp = totalMembers > 0 ? Number((totalJp / totalMembers).toFixed(1)) : 0;
+
+        yearlyStats[year] = {
+          lulus: lulusCount,
+          belum: totalMembers - lulusCount,
+          persentase,
+          totalJp,
+          avgJp
+        };
+        rates.push(persentase);
+      });
+
+      let isIncreasing = true;
+      let isDecreasing = true;
+      let hasChanges = false;
+
+      for (let i = 1; i < rates.length; i++) {
+        if (rates[i] > rates[i - 1]) {
+          isDecreasing = false;
+          hasChanges = true;
+        } else if (rates[i] < rates[i - 1]) {
+          isIncreasing = false;
+          hasChanges = true;
+        }
+      }
+
+      let statusTren: 'naik' | 'turun' | 'fluktuatif' | 'stabil' = 'stabil';
+      if (!hasChanges) {
+        statusTren = 'stabil';
+      } else if (isIncreasing) {
+        statusTren = 'naik';
+      } else if (isDecreasing) {
+        statusTren = 'turun';
+      } else {
+        statusTren = 'fluktuatif';
+      }
+
+      return {
+        opd,
+        totalMembers,
+        yearlyStats,
+        statusTren,
+        latestRate: rates[rates.length - 1] || 0,
+        firstRate: rates[0] || 0
+      };
+    });
+  }, [sortedOPDs, groupedByOPD, trendYears]);
+
+  const { countNaik, countTurun, countFluktuatif, countStabil } = useMemo(() => {
+    let naik = 0, turun = 0, fluktuatif = 0, stabil = 0;
+    opdTrendData.forEach(d => {
+      if (d.statusTren === 'naik') naik++;
+      else if (d.statusTren === 'turun') turun++;
+      else if (d.statusTren === 'fluktuatif') fluktuatif++;
+      else stabil++;
+    });
+    return { countNaik: naik, countTurun: turun, countFluktuatif: fluktuatif, countStabil: stabil };
+  }, [opdTrendData]);
+
+  const currentChartData = useMemo(() => {
+    return trendYears.map(year => {
+      if (selectedOpdChart === 'all') {
+        const totalAllPegawai = rawPegawaiList.length;
+        let totalAllLulus = 0;
+        let totalAllJp = 0;
+
+        rawPegawaiList.forEach(p => {
+          const sertsYear = p.sertifikasi?.filter((s: any) => String(s.tahun) === String(year)) || [];
+          const jpYear = sertsYear.reduce((acc: number, curr: any) => acc + (Number(curr.jumlah_jp) || 0), 0);
+          totalAllJp += jpYear;
+          if (checkLulusJP({ ...p, jp: jpYear })) {
+            totalAllLulus++;
+          }
+        });
+
+        const persentase = totalAllPegawai > 0 ? Math.round((totalAllLulus / totalAllPegawai) * 100) : 0;
+        const avgJp = totalAllPegawai > 0 ? Number((totalAllJp / totalAllPegawai).toFixed(1)) : 0;
+
+        return {
+          tahun: year,
+          'Persentase Capai Target (%)': persentase,
+          'Rata-rata JP': avgJp,
+          lulus: totalAllLulus,
+          total: totalAllPegawai
+        };
+      } else {
+        const found = opdTrendData.find(d => d.opd === selectedOpdChart);
+        const stats = found?.yearlyStats[year] || { lulus: 0, belum: 0, persentase: 0, avgJp: 0, totalJp: 0 };
+        return {
+          tahun: year,
+          'Persentase Capai Target (%)': stats.persentase,
+          'Rata-rata JP': stats.avgJp,
+          lulus: stats.lulus,
+          total: found?.totalMembers || 0
+        };
+      }
+    });
+  }, [trendYears, selectedOpdChart, rawPegawaiList, opdTrendData]);
+
+  const filteredOpdTrendList = useMemo(() => {
+    return opdTrendData.filter(item => {
+      if (filterTrenStatus !== 'all' && item.statusTren !== filterTrenStatus) {
+        return false;
+      }
+      if (searchTren) {
+        const query = searchTren.toLowerCase();
+        return item.opd.toLowerCase().includes(query);
+      }
+      return true;
+    });
+  }, [opdTrendData, filterTrenStatus, searchTren]);
+
+  const paginatedOpdTrend = useMemo(() => {
+    const start = (currentPageTren - 1) * ITEMS_PER_PAGE;
+    return filteredOpdTrendList.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredOpdTrendList, currentPageTren]);
 
   return (
     <>
@@ -746,6 +930,7 @@ export default function AdminPage() {
                 <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai</a></li>
               )}
               <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
+              <li><a onClick={() => setActiveTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
               <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
               <li className="mt-5"><a onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-left"></i> Logout</a></li>
             </ul>
@@ -1209,6 +1394,296 @@ export default function AdminPage() {
                   </div>
                 );
               })()}
+
+              {/* TREN TAHUNAN OPD TAB */}
+              {activeTab === 'view-tren' && (
+                <div>
+                  {/* KPI Summary Cards */}
+                  <div className="row g-3 mb-4">
+                    <div className="col-12 col-sm-6 col-xl-3">
+                      <div className="stat-card">
+                        <div className="stat-icon bg-info-subtle text-info">
+                          <i className="bi bi-buildings"></i>
+                        </div>
+                        <div>
+                          <div className="text-secondary small fw-bold text-uppercase">Total OPD Terdata</div>
+                          <h3 className="fw-bold mb-0 mt-1">{opdTrendData.length}</h3>
+                          <div className="text-muted small mt-1">Perangkat Daerah</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-12 col-sm-6 col-xl-3">
+                      <div className="stat-card">
+                        <div className="stat-icon bg-success-subtle text-success">
+                          <i className="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div>
+                          <div className="text-secondary small fw-bold text-uppercase">Tren Meningkat</div>
+                          <h3 className="fw-bold text-success mb-0 mt-1">{countNaik} <span className="fs-6 fw-normal text-muted">OPD</span></h3>
+                          <div className="text-success small mt-1"><i className="bi bi-check-circle-fill me-1"></i>Kinerja Naik Tiap Tahun</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-12 col-sm-6 col-xl-3">
+                      <div className="stat-card">
+                        <div className="stat-icon bg-danger-subtle text-danger">
+                          <i className="bi bi-graph-down-arrow"></i>
+                        </div>
+                        <div>
+                          <div className="text-secondary small fw-bold text-uppercase">Tren Menurun</div>
+                          <h3 className="fw-bold text-danger mb-0 mt-1">{countTurun} <span className="fs-6 fw-normal text-muted">OPD</span></h3>
+                          <div className="text-danger small mt-1"><i className="bi bi-exclamation-triangle-fill me-1"></i>Perlu Evaluasi Diklat</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-12 col-sm-6 col-xl-3">
+                      <div className="stat-card">
+                        <div className="stat-icon bg-warning-subtle text-warning">
+                          <i className="bi bi-activity"></i>
+                        </div>
+                        <div>
+                          <div className="text-secondary small fw-bold text-uppercase">Fluktuatif / Stabil</div>
+                          <h3 className="fw-bold text-warning-emphasis mb-0 mt-1">{countFluktuatif + countStabil} <span className="fs-6 fw-normal text-muted">OPD</span></h3>
+                          <div className="text-muted small mt-1">Naik-Turun / Konsisten</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chart Card */}
+                  <div className="table-card mb-4">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                      <div>
+                        <h5 className="fw-bold mb-1">
+                          <i className="bi bi-graph-up text-primary me-2"></i>
+                          Visualisasi Tren Pemenuhan 20 JP per Tahun
+                        </h5>
+                        <p className="text-muted small mb-0">
+                          {selectedOpdChart === 'all' 
+                            ? 'Menampilkan rata-rata capaian seluruh OPD se-Kabupaten Bangka Barat' 
+                            : `Menampilkan tren capaian: ${selectedOpdChart}`}
+                        </p>
+                      </div>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="text-muted small fw-bold">Pilih OPD:</span>
+                        <select 
+                          className="form-select form-select-sm border-secondary shadow-sm"
+                          style={{ maxWidth: '280px', fontWeight: 'bold' }}
+                          value={selectedOpdChart}
+                          onChange={(e) => setSelectedOpdChart(e.target.value)}
+                        >
+                          <option value="all">Semua OPD (Rata-rata Kabupaten)</option>
+                          {sortedOPDs.map((opd, i) => (
+                            <option key={i} value={opd}>{opd}</option>
+                          ))}
+                        </select>
+                        {selectedOpdChart !== 'all' && (
+                          <button 
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={() => setSelectedOpdChart('all')}
+                            title="Reset ke semua OPD"
+                          >
+                            <i className="bi bi-arrow-counterclockwise"></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ width: '100%', height: 320 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={currentChartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                          <XAxis dataKey="tahun" stroke="#64748b" />
+                          <YAxis yAxisId="left" domain={[0, 100]} unit="%" stroke="#10b981" />
+                          <YAxis yAxisId="right" orientation="right" unit=" JP" stroke="#6366f1" />
+                          <RechartsTooltip 
+                            contentStyle={{ background: '#ffffff', borderRadius: 12, border: '1px solid #e2e8f0', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                            formatter={(value: any, name: any) => [
+                              name === 'Persentase Capai Target (%)' ? `${value}%` : `${value} JP`,
+                              name
+                            ]}
+                          />
+                          <Legend />
+                          <Line 
+                            yAxisId="left" 
+                            type="monotone" 
+                            dataKey="Persentase Capai Target (%)" 
+                            stroke="#10b981" 
+                            strokeWidth={3} 
+                            dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} 
+                            activeDot={{ r: 8 }} 
+                          />
+                          <Line 
+                            yAxisId="right" 
+                            type="monotone" 
+                            dataKey="Rata-rata JP" 
+                            stroke="#6366f1" 
+                            strokeWidth={3} 
+                            strokeDasharray="4 4" 
+                            dot={{ r: 6, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }} 
+                            activeDot={{ r: 8 }} 
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Matriks Table Card */}
+                  <div className="table-card">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                      <div>
+                        <h5 className="fw-bold mb-1">
+                          <i className="bi bi-table text-primary me-2"></i>
+                          Matriks Rekapitulasi Tahunan per OPD
+                        </h5>
+                        <p className="text-muted small mb-0">
+                          Membandingkan persentase pegawai yang memenuhi minimal 20 JP (PNS) / 24 JP (PPPK) dari tahun ke tahun.
+                        </p>
+                      </div>
+
+                      <div className="d-flex flex-wrap gap-2 align-items-center">
+                        <div className="position-relative">
+                          <input 
+                            type="text" 
+                            className="form-control form-control-sm pe-4" 
+                            placeholder="Cari Nama OPD..." 
+                            value={searchTren}
+                            onChange={e => setSearchTren(e.target.value)}
+                          />
+                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                        </div>
+
+                        <select 
+                          className="form-select form-select-sm border-secondary shadow-sm"
+                          style={{ width: '170px', cursor: 'pointer' }}
+                          value={filterTrenStatus}
+                          onChange={(e: any) => setFilterTrenStatus(e.target.value)}
+                        >
+                          <option value="all">Semua Status Tren</option>
+                          <option value="naik">📈 Tren Naik (Meningkat)</option>
+                          <option value="turun">📉 Tren Turun (Menurun)</option>
+                          <option value="fluktuatif">〰️ Fluktuatif</option>
+                          <option value="stabil">➡️ Stabil</option>
+                        </select>
+
+                        <button className="btn btn-sm btn-success shadow-sm" onClick={exportTrenToExcel}>
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Excel Rekap Tren
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.88rem' }}>
+                        <thead className="table-light">
+                          <tr>
+                            <th style={{ width: '50px' }}>No</th>
+                            <th>Perangkat Daerah (OPD)</th>
+                            <th className="text-center" style={{ width: '110px' }}>Pegawai</th>
+                            {trendYears.map(year => (
+                              <th key={year} className="text-center" style={{ minWidth: '130px' }}>
+                                Capaian {year}
+                              </th>
+                            ))}
+                            <th className="text-center" style={{ width: '140px' }}>Status Tren</th>
+                            <th className="text-center" style={{ width: '110px' }}>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginatedOpdTrend.length === 0 ? (
+                            <tr>
+                              <td colSpan={5 + trendYears.length} className="text-center py-4 text-muted">
+                                <i className="bi bi-inbox fs-4 d-block mb-1"></i>
+                                Tidak ada data OPD yang cocok dengan pencarian.
+                              </td>
+                            </tr>
+                          ) : (
+                            paginatedOpdTrend.map((item, idx) => {
+                              const rowNumber = (currentPageTren - 1) * ITEMS_PER_PAGE + idx + 1;
+                              return (
+                                <tr key={idx} className={selectedOpdChart === item.opd ? 'table-primary' : ''}>
+                                  <td>{rowNumber}</td>
+                                  <td>
+                                    <div className="fw-bold text-dark">{item.opd}</div>
+                                  </td>
+                                  <td className="text-center">
+                                    <span className="badge bg-light text-dark border">
+                                      {item.totalMembers} org
+                                    </span>
+                                  </td>
+                                  {trendYears.map(year => {
+                                    const stats = item.yearlyStats[year] || { lulus: 0, persentase: 0 };
+                                    const pct = stats.persentase;
+                                    const badgeColor = pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning text-dark' : pct > 0 ? 'bg-info text-dark' : 'bg-secondary';
+                                    return (
+                                      <td key={year} className="text-center">
+                                        <div className="d-flex flex-column align-items-center">
+                                          <div className="d-flex align-items-center gap-1">
+                                            <span className="fw-bold small">{stats.lulus}</span>
+                                            <span className="text-muted" style={{fontSize: '0.75rem'}}>/{item.totalMembers}</span>
+                                            <span className={`badge ${badgeColor} ms-1`} style={{ fontSize: '0.75rem' }}>
+                                              {pct}%
+                                            </span>
+                                          </div>
+                                          <div className="progress w-100 mt-1" style={{ height: '4px', maxWidth: '80px', background: '#e2e8f0' }}>
+                                            <div 
+                                              className={`progress-bar ${pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning' : 'bg-primary'}`} 
+                                              style={{ width: `${Math.min(100, pct)}%` }}
+                                            ></div>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    );
+                                  })}
+                                  <td className="text-center">
+                                    {item.statusTren === 'naik' && (
+                                      <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                        <i className="bi bi-arrow-up-right me-1"></i> Naik
+                                      </span>
+                                    )}
+                                    {item.statusTren === 'turun' && (
+                                      <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                        <i className="bi bi-arrow-down-right me-1"></i> Turun
+                                      </span>
+                                    )}
+                                    {item.statusTren === 'fluktuatif' && (
+                                      <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                        <i className="bi bi-arrow-left-right me-1"></i> Fluktuatif
+                                      </span>
+                                    )}
+                                    {item.statusTren === 'stabil' && (
+                                      <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                        <i className="bi bi-dash me-1"></i> Stabil
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="text-center">
+                                    <button 
+                                      className={`btn btn-sm ${selectedOpdChart === item.opd ? 'btn-primary' : 'btn-outline-primary'}`}
+                                      onClick={() => {
+                                        setSelectedOpdChart(item.opd);
+                                        window.scrollTo({ top: 120, behavior: 'smooth' });
+                                      }}
+                                      title="Fokus grafik pada OPD ini"
+                                    >
+                                      <i className="bi bi-graph-up me-1"></i> Grafik
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <PaginationControls 
+                      currentPage={currentPageTren} 
+                      setCurrentPage={setCurrentPageTren} 
+                      totalItems={filteredOpdTrendList.length} 
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* APPROVAL IDP TAB */}
               {activeTab === 'view-idp' && (
