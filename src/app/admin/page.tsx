@@ -1,11 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const UNIT_KERJA_OPTIONS = ["Sekretariat Daerah","Asisten Pemerintahan dan Kesejahteraan Rakyat","Asisten Perekonomian dan Pembangunan","Asisten Administrasi Umum","Staf Ahli Bupati Bidang Hukum, Politik dan Pemerintahan","Staf Ahli Bupati Bidang Ekonomi dan Pembangunan","Staf Ahli Bupati Bidang Kemasyarakatan dan Sumber Daya Manusia","Bagian Kesejahteraan Rakyat","Bagian Tata Pemerintahan","Bagian Perekonomian dan Pembangunan","Bagian Pengadaan Barang dan Jasa","Bagian Hukum","Bagian Umum, Perlengkapan dan Protokol","Bagian Organisasi","Sekretariat DPRD","Inspektorat","Badan Pengelolaan Keuangan dan Aset Daerah","Badan Pengelolaan Pajak dan Retribusi Daerah","Badan Kepegawaian dan Pengembangan Sumber Daya Manusia Daerah","Badan Perencanaan Pembangunan, Riset dan Inovasi Daerah","Badan Penanggulangan Bencana Daerah","Badan Kesatuan Bangsa dan Politik","Dinas Perhubungan, Perumahan dan Kawasan Permukiman","Dinas Komunikasi dan Informatika","Dinas Kebudayaan dan Pariwisata","Dinas Perikanan","Dinas Koperasi, Usaha Kecil Menengah dan Perdagangan","Dinas Perindustrian dan Tenaga Kerja","Dinas Perpustakaan dan Kearsipan","Dinas Pekerjaan Umum dan Penataan Ruang","Dinas Pendidikan,kepemudaan & Olah Raga","SMP Negeri 1 Mentok","SMP Negeri 2 Mentok","SMP Negeri 3 Mentok","SMP Negeri 4 Mentok","SMP Negeri 5 Mentok","SMP Negeri 6 Mentok","SD Negeri 01 Mentok","SD Negeri 02 Mentok","SD Negeri 03 Mentok","SD Negeri 04 Mentok","SD Negeri 05 Mentok","SD Negeri 06 Mentok","SD Negeri 07 Mentok","SD Negeri 08 Mentok","SD Negeri 09 Mentok","SD Negeri 10 Mentok","SD Negeri 11 Mentok","SD Negeri 12 Mentok","SD Negeri 13 Mentok","SD Negeri 14 Mentok","SD Negeri 15 Mentok","SD Negeri 16 Mentok","SD Negeri 17 Mentok","SD Negeri 18 Mentok","SD Negeri 19 Mentok","SD Negeri 20 Mentok","SD Negeri 21 Mentok","SD Negeri 22 Mentok","SD Negeri 23 Mentok","SD Negeri 24 Mentok","TK Negeri Pembina Mentok","TK Negeri Sejiran Setason Mentok","SMP Negeri 1 Jebus","SMP Negeri 2 Jebus","SMP Negeri 3 Jebus","SD Negeri 01 Jebus","SD Negeri 02 Jebus","SD Negeri 03 Jebus","SD Negeri 04 Jebus","SD Negeri 05 Jebus","SD Negeri 06 Jebus","SD Negeri 07 Jebus","SD Negeri 08 Jebus","SD Negeri 09 Jebus","SD Negeri 10 Jebus","SD Negeri 11 Jebus","SD Negeri 12 Jebus","SD Negeri 13 Jebus","SD Negeri 14 Jebus","SD Negeri 15 Jebus","SD Negeri 16 Jebus","SD Negeri 17 Jebus","TK Negeri Pembina Jebus","SMP Negeri 1 Parittiga","SMP Negeri 2 Parittiga","SMP Negeri 3 Parittiga","SMP Negeri 4 Parittiga","SD Negeri 01 Parittiga","SD Negeri 02 Parittiga","SD Negeri 03 Parittiga","SD Negeri 04 Parittiga","SD Negeri 05 Parittiga","SD Negeri 06 Parittiga","SD Negeri 07 Parittiga","SD Negeri 08 Parittiga","SD Negeri 09 Parittiga","SD Negeri 10 Parittiga","SD Negeri 11 Parittiga","SD Negeri 12 Parittiga","SD Negeri 13 Parittiga","SD Negeri 14 Parittiga","SD Negeri 15 Parittiga","SD Negeri 16 Parittiga","SD Negeri 17 Parittiga","SD Negeri 18 Parittiga","SD Negeri 19 Parittiga","TK Negeri Pembina Parittiga","SMP Negeri 1 Kelapa","SMP Negeri 2 Kelapa","SMP Negeri 3 Kelapa","SMP Negeri 4 Kelapa","SMP Negeri 5 Kelapa","SD Negeri 1 Kelapa","SD Negeri 2 Kelapa","SD Negeri 3 Kelapa","SD Negeri 4 Kelapa","SD Negeri 5 Kelapa","SD Negeri 6 Kelapa","SD Negeri 7 Kelapa","SD Negeri 8 Kelapa","SD Negeri 9 Kelapa","SD Negeri 10 Kelapa","SD Negeri 11 Kelapa","SD Negeri 12 Kelapa","SD Negeri 13 Kelapa","SD Negeri 14 Kelapa","SD Negeri 15 Kelapa","SD Negeri 16 Kelapa","SD Negeri 17 Kelapa","SD Negeri 18 Kelapa","SD Negeri 19 Kelapa","SD Negeri 20 Kelapa","SD Negeri 21 Kelapa","SD Negeri 22 Kelapa","SD Negeri 23 Kelapa","SD Negeri 24 Kelapa","SD Negeri 25 Kelapa","SD Negeri 26 Kelapa","SD Negeri 27 Kelapa","TK Negeri Pembina Kelapa","SMP Negeri 1 Tempilang","SMP Negeri 2 Tempilang","SMP Negeri 3 Tempilang","SMP Negeri 4 Tempilang","SD Negeri 1 Tempilang","SD Negeri 2 Tempilang","SD Negeri 3 Tempilang","SD Negeri 4 Tempilang","SD Negeri 5 Tempilang","SD Negeri 6 Tempilang","SD Negeri 7 Tempilang","SD Negeri 8 Tempilang","SD Negeri 9 Tempilang","SD Negeri 10 Tempilang","SD Negeri 11 Tempilang","SD Negeri 12 Tempilang","SD Negeri 13 Tempilang","SD Negeri 14 Tempilang","SD Negeri 15 Tempilang","SD Negeri 16 Tempilang","SD Negeri 17 Tempilang","SD Negeri 18 Tempilang","SD Negeri 19 Tempilang","SD Negeri 20 Tempilang","SD Negeri 21 Tempilang","SD Negeri 22 Tempilang","TK Negeri Pembina Tempilang","SMP Negeri 1 Simpang Teritip","SMP Negeri 2 Simpang Teritip","SMP Negeri 3 Simpang Teritip","SMP Negeri 4 Simpang Teritip","SMP Negeri 5 Simpang Teritip","SMP Negeri 6 Simpang Teritip","SD Negeri 1 Simpang Teritip","SD Negeri 2 Simpang Teritip","SD Negeri 3 Simpang Teritip","SD Negeri 4 Simpang Teritip","SD Negeri 5 Simpang Teritip","SD Negeri 6 Simpang Teritip","SD Negeri 7 Simpang Teritip","SD Negeri 8 Simpang Teritip","SD Negeri 9 Simpang Teritip","SD Negeri 10 Simpang Teritip","SD Negeri 11 Simpang Teritip","SD Negeri 12 Simpang Teritip","SD Negeri 13 Simpang Teritip","SD Negeri 14 Simpang Teritip","SD Negeri 15 Simpang Teritip","SD Negeri 16 Simpang Teritip","SD Negeri 17 Simpang Teritip","SD Negeri 18 Simpang Teritip","SD Negeri 19 Simpang Teritip","TK Negeri Pembina Simpang Teritip","Dinas Ketahanan Pangan dan Pertanian","Dinas Kesehatan","Puskesmas Puput","Puskesmas Jebus","Puskesmas Sekar Biru","Puskesmas Tempilang","Puskesmas Kelapa","Puskesmas Mentok","Puskesmas Simpang Teritip","Puskesmas Kundi","Dinas Sosial, Pemberdayaan Masyarakat dan Desa","Dinas Penanaman Modal dan Pelayanan Satu Pintu","Dinas Lingkungan Hidup","Satuan Polisi Pamong Praja dan Pemadam Kebakaran","Dinas Kependudukan dan Pencatatan Sipil","Dinas Pemberdayaan Perempuan dan Perlindungan Anak, Pengendalian Penduduk dan Keluarga Berencana","Kecamatan Mentok","Kecamatan Jebus","Kecamatan Simpang Teritip","Kecamatan Kelapa","Kecamatan Tempilang","Kecamatan Parittiga","Kelurahan Tanjung","Kelurahan Sungai Daeng","Kelurahan Sungai Baru","Kelurahan Menjelang","Kelurahan Keranggan","Kelurahan Kelapa","UPT RSUD Sejiran Setason"];
+const getWords = (s: string) => {
+  if (!s) return [];
+  const cleaned = s.toUpperCase()
+          .replace(/&/g, ' DAN ')
+          .replace(/SDM/g, ' SUMBER DAYA MANUSIA ')
+          .replace(/MUNTOK/g, ' MENTOK ')
+          .replace(/ - PEMERINTAH.*/g, '')
+          .replace(/KABUPATEN BANGKA BARAT/g, '')
+          .replace(/KAB\. BANGKA BARAT/g, '')
+          .replace(/[^A-Z0-9\s]/g, ' ')
+          .trim();
+  return Array.from(new Set(cleaned.split(/\s+/).filter(w => w !== 'DAN' && w.length > 2)));
+};
+
+const matchScore = (w1: string[], w2: string[]) => {
+  if (w1.length === 0 || w2.length === 0) return 0;
+  const common = w1.filter(w => w2.includes(w)).length;
+  return common / Math.min(w1.length, w2.length);
+};
+
+const PARSED_UNIT_KERJA_OPTIONS = UNIT_KERJA_OPTIONS.map(opt => ({
+  opt,
+  words: getWords(opt)
+}));
 
 export default function AdminPage() {
   const router = useRouter();
@@ -23,6 +47,15 @@ export default function AdminPage() {
   const [searchSertifikasi, setSearchSertifikasi] = useState('');
   const [exportJenisKursusFilter, setExportJenisKursusFilter] = useState('all');
   const [searchIdp, setSearchIdp] = useState('');
+
+  // State untuk Konfirmasi Hapus
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmData, setDeleteConfirmData] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
@@ -103,17 +136,29 @@ export default function AdminPage() {
     setPegawaiList(computed);
   }, [rawPegawaiList, tahunFilter]);
 
-  const hapusPegawai = async (nip: string) => {
-    if (confirm('Yakin ingin menghapus pegawai ini beserta seluruh datanya?')) {
-      try {
-        const res = await fetch(`/api/pegawai?nip=${nip}`, { method: 'DELETE' });
-        if (res.ok) {
-          fetchData();
-        } else {
-          alert('Gagal menghapus pegawai');
+  const hapusPegawai = async (nip: string, namaPegawai?: string) => {
+    setDeleteConfirmData({
+      title: 'Hapus Data Pegawai',
+      message: `Apakah Anda yakin ingin menghapus pegawai${namaPegawai ? ` "${namaPegawai}"` : ''} (NIP: ${nip}) beserta seluruh datanya? Tindakan ini tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/pegawai?nip=${nip}`, { method: 'DELETE' });
+          if (res.ok) {
+            fetchData();
+            setShowDeleteConfirm(false);
+            setDeleteConfirmData(null);
+          } else {
+            alert('Gagal menghapus pegawai');
+          }
+        } catch (err) {
+          alert('Terjadi kesalahan saat menghapus');
+        } finally {
+          setIsDeleting(false);
         }
-      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
-    }
+      }
+    });
+    setShowDeleteConfirm(true);
   };
 
   const getGolonganOptions = () => {
@@ -221,14 +266,29 @@ export default function AdminPage() {
     }
   };
 
-  const hapusIdp = async (rowIndex: number) => {
-    if (confirm('Yakin ingin menghapus pengajuan IDP ini?')) {
-      try {
-        const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
-        if (res.ok) fetchData();
-        else alert('Gagal menghapus IDP');
-      } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
-    }
+  const hapusIdp = async (rowIndex: number, namaKompetensi?: string) => {
+    setDeleteConfirmData({
+      title: 'Hapus Pengajuan IDP',
+      message: `Apakah Anda yakin ingin menghapus pengajuan IDP${namaKompetensi ? ` "${namaKompetensi}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
+          if (res.ok) {
+            fetchData();
+            setShowDeleteConfirm(false);
+            setDeleteConfirmData(null);
+          } else {
+            alert('Gagal menghapus IDP');
+          }
+        } catch (err) {
+          alert('Terjadi kesalahan saat menghapus');
+        } finally {
+          setIsDeleting(false);
+        }
+      }
+    });
+    setShowDeleteConfirm(true);
   };
 
   const updateIdpStatus = async (rowIndex: number, newStatus: string) => {
@@ -244,13 +304,13 @@ export default function AdminPage() {
     }
   };
 
-  const availableYears = Array.from(new Set(
+  const availableYears = useMemo(() => Array.from(new Set(
     rawPegawaiList.flatMap(p => p.sertifikasi?.map((s: any) => s.tahun).filter(Boolean))
-  )).sort().reverse();
+  )).sort().reverse(), [rawPegawaiList]);
 
-  const availableUnitKerja = Array.from(new Set(
+  const availableUnitKerja = useMemo(() => Array.from(new Set(
     semuaPegawai.map(p => p.unit_kerja).filter(Boolean)
-  )).sort();
+  )).sort(), [semuaPegawai]);
 
   const checkLulusJP = (p: any) => {
     const status = (p.status_pegawai || '').toUpperCase();
@@ -264,35 +324,54 @@ export default function AdminPage() {
     return isP3K ? 24 : 20;
   };
 
-  const chartData = [...availableYears].reverse().map(year => {
-    let lulus = 0;
-    let belum = 0;
-    rawPegawaiList.forEach(p => {
-      const serts = p.sertifikasi?.filter((s: any) => s.tahun === year);
-      const jp = serts?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
-      const tempP = { ...p, jp };
-      if (checkLulusJP(tempP)) lulus++;
-      else belum++;
+  const chartData = useMemo(() => {
+    return [...availableYears].reverse().map(year => {
+      let lulus = 0;
+      let belum = 0;
+      rawPegawaiList.forEach(p => {
+        const serts = p.sertifikasi?.filter((s: any) => s.tahun === year);
+        const jp = serts?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
+        const tempP = { ...p, jp };
+        if (checkLulusJP(tempP)) lulus++;
+        else belum++;
+      });
+      return { year, 'Memenuhi Syarat': lulus, 'Belum Memenuhi': belum };
     });
-    return { year, 'Memenuhi Syarat': lulus, 'Belum Memenuhi': belum };
-  });
+  }, [availableYears, rawPegawaiList]);
 
-  const lulus = pegawaiList.filter(p => checkLulusJP(p)).length;
-  const belum = pegawaiList.length - lulus;
+  const {
+    lulus,
+    belum,
+    sudahPengembangan,
+    pnsList,
+    pppkList,
+    lulusPNS,
+    lulusPPPK,
+    belumPNS,
+    belumPPPK
+  } = useMemo(() => {
+    const lls = pegawaiList.filter(p => checkLulusJP(p)).length;
+    const blm = pegawaiList.length - lls;
+    const sdh = pegawaiList.filter(p => p.jp > 0).length;
+    
+    const pns = pegawaiList.filter(p => (p.status_pegawai || '').toUpperCase().includes('PNS'));
+    const pppk = pegawaiList.filter(p => {
+      const s = (p.status_pegawai || '').toUpperCase();
+      return s.includes('P3K') || s.includes('PPPK');
+    });
 
-  const sudahPengembangan = pegawaiList.filter(p => p.jp > 0).length;
-  const pnsList = pegawaiList.filter(p => {
-    const s = (p.status_pegawai || '').toUpperCase();
-    return s.includes('PNS');
-  });
-  const pppkList = pegawaiList.filter(p => {
-    const s = (p.status_pegawai || '').toUpperCase();
-    return s.includes('P3K') || s.includes('PPPK');
-  });
-  const lulusPNS = pnsList.filter(p => checkLulusJP(p)).length;
-  const lulusPPPK = pppkList.filter(p => checkLulusJP(p)).length;
-  const belumPNS = pnsList.length - lulusPNS;
-  const belumPPPK = pppkList.length - lulusPPPK;
+    return {
+      lulus: lls,
+      belum: blm,
+      sudahPengembangan: sdh,
+      pnsList: pns,
+      pppkList: pppk,
+      lulusPNS: pns.filter(p => checkLulusJP(p)).length,
+      lulusPPPK: pppk.filter(p => checkLulusJP(p)).length,
+      belumPNS: pns.length - pns.filter(p => checkLulusJP(p)).length,
+      belumPPPK: pppk.length - pppk.filter(p => checkLulusJP(p)).length
+    };
+  }, [pegawaiList]);
   let sertifCounter = 1;
   let idpCounter = 1;
 
@@ -506,6 +585,45 @@ export default function AdminPage() {
     XLSX.writeFile(workbook, "Rekap_IDP_ASN.xlsx");
   };
 
+  const { groupedByOPD, sortedOPDs } = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    pegawaiList.forEach(p => {
+      let matchedOpd = 'Belum Diatur';
+      if (p.unit_kerja) {
+        const raw = p.unit_kerja.toUpperCase();
+        const rawWords = getWords(p.unit_kerja);
+        let bestMatch = null;
+        let bestScore = 0;
+
+        PARSED_UNIT_KERJA_OPTIONS.forEach(({opt, words}) => {
+          const score = matchScore(rawWords, words);
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = opt;
+          }
+        });
+
+        let found = bestScore >= 0.7 ? bestMatch : null;
+        if (found) {
+          matchedOpd = found;
+        } else {
+          // Fallback if not found in list, clean it up manually
+          let opd = raw;
+          if (opd.includes(' - PEMERINTAH')) opd = opd.split(' - PEMERINTAH')[0];
+          if (opd.includes('SDM')) opd = opd.replace('SDM', 'SUMBER DAYA MANUSIA');
+          matchedOpd = opd.trim();
+        }
+      }
+      if (!grouped[matchedOpd]) grouped[matchedOpd] = [];
+      grouped[matchedOpd].push(p);
+    });
+    
+    return {
+      groupedByOPD: grouped,
+      sortedOPDs: Object.keys(grouped).sort()
+    };
+  }, [pegawaiList]);
+
   return (
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -530,6 +648,59 @@ export default function AdminPage() {
         .badge-status { padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; }
         .status-ok { background-color: #dcfce7; color: #166534; }
         .status-warn { background-color: #fef3c7; color: #b45309; }
+
+        /* Confirm Delete Modal Styles */
+        @keyframes fadeInOverlay {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideInModal {
+          from { opacity: 0; transform: scale(0.85) translateY(20px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes pulseWarning {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.08); }
+        }
+        @keyframes spinLoader {
+          to { transform: rotate(360deg); }
+        }
+        .delete-confirm-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+          display: flex; align-items: center; justify-content: center;
+          z-index: 9999; animation: fadeInOverlay 0.2s ease-out;
+        }
+        .delete-confirm-card {
+          background: white; border-radius: 20px; padding: 40px 36px 32px;
+          max-width: 440px; width: 90%; text-align: center;
+          box-shadow: 0 25px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+          animation: slideInModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .delete-confirm-icon {
+          width: 72px; height: 72px; border-radius: 50%;
+          background: linear-gradient(135deg, #fee2e2, #fecaca);
+          display: flex; align-items: center; justify-content: center;
+          margin: 0 auto 20px; animation: pulseWarning 2s ease-in-out infinite;
+        }
+        .delete-confirm-icon i { font-size: 2rem; color: #dc2626; }
+        .delete-confirm-title { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+        .delete-confirm-msg { font-size: 0.92rem; color: #64748b; line-height: 1.6; margin-bottom: 28px; }
+        .delete-confirm-actions { display: flex; gap: 12px; justify-content: center; }
+        .delete-confirm-actions .btn-cancel {
+          flex: 1; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem;
+          border: 2px solid #e2e8f0; background: white; color: #475569; cursor: pointer;
+          transition: all 0.2s;
+        }
+        .delete-confirm-actions .btn-cancel:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .delete-confirm-actions .btn-delete {
+          flex: 1; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem;
+          border: none; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; cursor: pointer;
+          transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .delete-confirm-actions .btn-delete:hover { background: linear-gradient(135deg, #b91c1c, #991b1b); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
+        .delete-confirm-actions .btn-delete:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+        .delete-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spinLoader 0.6s linear infinite; }
       `}} />
 
       <div className="container-fluid p-0">
@@ -850,7 +1021,7 @@ export default function AdminPage() {
                                     });
                                     setShowPegawaiModal(true);
                                   }}><i className="bi bi-pencil"></i></button>
-                                  <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
+                                  <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip, p.nama)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
                                 </>
                               )}
                             </td>
@@ -865,62 +1036,6 @@ export default function AdminPage() {
 
               {/* REKAP SERTIFIKASI TAB */}
               {activeTab === 'view-sertifikasi' && (() => {
-                const groupedByOPD: Record<string, any[]> = {};
-                
-                pegawaiList.forEach(p => {
-                  let matchedOpd = 'Belum Diatur';
-                  if (p.unit_kerja) {
-                    const raw = p.unit_kerja.toUpperCase();
-                    const getWords = (s: string) => {
-                      if (!s) return [];
-                      const cleaned = s.toUpperCase()
-                              .replace(/&/g, ' DAN ')
-                              .replace(/SDM/g, ' SUMBER DAYA MANUSIA ')
-                              .replace(/MUNTOK/g, ' MENTOK ')
-                              .replace(/ - PEMERINTAH.*/g, '')
-                              .replace(/KABUPATEN BANGKA BARAT/g, '')
-                              .replace(/KAB\. BANGKA BARAT/g, '')
-                              .replace(/[^A-Z0-9\s]/g, ' ')
-                              .trim();
-                      return Array.from(new Set(cleaned.split(/\s+/).filter(w => w !== 'DAN' && w.length > 2)));
-                    };
-
-                    const matchScore = (w1: string[], w2: string[]) => {
-                      if (w1.length === 0 || w2.length === 0) return 0;
-                      const common = w1.filter(w => w2.includes(w)).length;
-                      return common / Math.min(w1.length, w2.length);
-                    };
-
-                    const rawWords = getWords(p.unit_kerja);
-                    let bestMatch = null;
-                    let bestScore = 0;
-
-                    UNIT_KERJA_OPTIONS.forEach(opt => {
-                      const optWords = getWords(opt);
-                      const score = matchScore(rawWords, optWords);
-                      if (score > bestScore) {
-                        bestScore = score;
-                        bestMatch = opt;
-                      }
-                    });
-
-                    let found = bestScore >= 0.7 ? bestMatch : null;
-                    if (found) {
-                      matchedOpd = found;
-                    } else {
-                      // Fallback if not found in list, clean it up manually
-                      let opd = raw;
-                      if (opd.includes(' - PEMERINTAH')) opd = opd.split(' - PEMERINTAH')[0];
-                      if (opd.includes('SDM')) opd = opd.replace('SDM', 'SUMBER DAYA MANUSIA');
-                      matchedOpd = opd.trim();
-                    }
-                  }
-                  if (!groupedByOPD[matchedOpd]) groupedByOPD[matchedOpd] = [];
-                  groupedByOPD[matchedOpd].push(p);
-                });
-                
-                const sortedOPDs = Object.keys(groupedByOPD).sort();
-
                 return (
                   <div className="table-card">
                     <div className="d-flex flex-column mb-4 gap-3">
@@ -1000,31 +1115,41 @@ export default function AdminPage() {
 
                     <div className="accordion" id="accordionOPD">
                       {(() => {
-                        const filteredOPDs = sortedOPDs.filter(opd => {
-                          let opdPegawai = groupedByOPD[opd];
-                          if (searchSertifikasi) {
-                            const query = searchSertifikasi.toLowerCase();
-                            opdPegawai = opdPegawai.filter(p => 
-                              (p.nama && p.nama.toLowerCase().includes(query)) || 
-                              (p.nip && p.nip.toLowerCase().includes(query))
-                            );
-                          }
-                          return opdPegawai.length > 0;
-                        });
+                        const { filteredOPDs, processedOPDs } = useMemo(() => {
+                          const resultOPDs = sortedOPDs.filter(opd => {
+                            let opdPegawai = groupedByOPD[opd];
+                            if (searchSertifikasi) {
+                              const query = searchSertifikasi.toLowerCase();
+                              opdPegawai = opdPegawai.filter(p => 
+                                (p.nama && p.nama.toLowerCase().includes(query)) || 
+                                (p.nip && p.nip.toLowerCase().includes(query))
+                              );
+                            }
+                            return opdPegawai.length > 0;
+                          });
+                          
+                          const processed: Record<string, any[]> = {};
+                          resultOPDs.forEach(opd => {
+                            let opdPegawai = groupedByOPD[opd];
+                            if (searchSertifikasi) {
+                              const query = searchSertifikasi.toLowerCase();
+                              opdPegawai = opdPegawai.filter(p => 
+                                (p.nama && p.nama.toLowerCase().includes(query)) || 
+                                (p.nip && p.nip.toLowerCase().includes(query))
+                              );
+                            }
+                            processed[opd] = opdPegawai;
+                          });
+                          
+                          return { filteredOPDs: resultOPDs, processedOPDs: processed };
+                        }, [sortedOPDs, groupedByOPD, searchSertifikasi]);
 
                         const paginatedOPDs = filteredOPDs.slice((currentPageSert - 1) * ITEMS_PER_PAGE, currentPageSert * ITEMS_PER_PAGE);
 
                         return (
                           <>
                             {paginatedOPDs.map((opd, opdIndex) => {
-                              let opdPegawai = groupedByOPD[opd];
-                              if (searchSertifikasi) {
-                                const query = searchSertifikasi.toLowerCase();
-                                opdPegawai = opdPegawai.filter(p => 
-                                  (p.nama && p.nama.toLowerCase().includes(query)) || 
-                                  (p.nip && p.nip.toLowerCase().includes(query))
-                                );
-                              }
+                              const opdPegawai = processedOPDs[opd];
 
                               return (
                                 <div className="accordion-item mb-2 border rounded" key={opdIndex}>
@@ -1187,7 +1312,7 @@ export default function AdminPage() {
                                           setIdpForm({ ...idp, nip: p.nip, isEdit: true });
                                           setShowIdpModal(true);
                                         }}><i className="bi bi-pencil"></i></button>
-                                        <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex)}><i className="bi bi-trash"></i></button>
+                                        <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex, idp.jenis_kompetensi)}><i className="bi bi-trash"></i></button>
                                       </td>
                                     </tr>
                                   );
@@ -1525,6 +1650,39 @@ export default function AdminPage() {
                   <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Dokumen Preview" />
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus */}
+      {showDeleteConfirm && deleteConfirmData && (
+        <div className="delete-confirm-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isDeleting) { setShowDeleteConfirm(false); setDeleteConfirmData(null); } }}>
+          <div className="delete-confirm-card">
+            <div className="delete-confirm-icon">
+              <i className="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div className="delete-confirm-title">{deleteConfirmData.title}</div>
+            <div className="delete-confirm-msg">{deleteConfirmData.message}</div>
+            <div className="delete-confirm-actions">
+              <button 
+                className="btn-cancel" 
+                onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmData(null); }}
+                disabled={isDeleting}
+              >
+                Batal
+              </button>
+              <button 
+                className="btn-delete" 
+                onClick={deleteConfirmData.onConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <><div className="delete-spinner"></div> Menghapus...</>
+                ) : (
+                  <><i className="bi bi-trash3-fill"></i> Ya, Hapus</>
+                )}
+              </button>
             </div>
           </div>
         </div>

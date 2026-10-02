@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -8,9 +8,50 @@ export default function LoginPage() {
   const [nip, setNip] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captchaQuestion, setCaptchaQuestion] = useState('');
+  const [captchaExpected, setCaptchaExpected] = useState<number>(0);
+  const [captchaError, setCaptchaError] = useState(false);
+
+  const generateCaptcha = useCallback(() => {
+    const ops = ['+', '-', '×'];
+    const op = ops[Math.floor(Math.random() * ops.length)];
+    let a: number, b: number, answer: number;
+    
+    if (op === '+') {
+      a = Math.floor(Math.random() * 50) + 1;
+      b = Math.floor(Math.random() * 40) + 1;
+      answer = a + b;
+    } else if (op === '-') {
+      a = Math.floor(Math.random() * 50) + 10;
+      b = Math.floor(Math.random() * (a - 1)) + 1;
+      answer = a - b;
+    } else {
+      a = Math.floor(Math.random() * 12) + 1;
+      b = Math.floor(Math.random() * 9) + 1;
+      answer = a * b;
+    }
+    
+    setCaptchaQuestion(`${a} ${op} ${b} = ?`);
+    setCaptchaExpected(answer);
+    setCaptchaAnswer('');
+    setCaptchaError(false);
+  }, []);
+
+  useEffect(() => {
+    generateCaptcha();
+  }, [generateCaptcha]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validasi CAPTCHA
+    if (parseInt(captchaAnswer) !== captchaExpected) {
+      setCaptchaError(true);
+      generateCaptcha();
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -404,6 +445,106 @@ export default function LoginPage() {
         .mb-4 > div > a {
             display: none !important;
         }
+        }
+
+        /* CAPTCHA Styles */
+        .captcha-container {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #bae6fd;
+            border-radius: 14px;
+            padding: 16px;
+            transition: all 0.3s;
+        }
+        .captcha-container:focus-within {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+        .captcha-question-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .captcha-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .captcha-question {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0c4a6e;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            flex: 1;
+            user-select: none;
+        }
+        .captcha-refresh {
+            background: transparent;
+            border: 2px solid #7dd3fc;
+            border-radius: 10px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0284c7;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .captcha-refresh:hover {
+            background: #0284c7;
+            color: white;
+            border-color: #0284c7;
+            transform: rotate(180deg);
+        }
+        .captcha-input {
+            text-align: center;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 2px;
+            border: 2px solid #bae6fd !important;
+            background: white !important;
+        }
+        .captcha-input:focus {
+            border-color: #38bdf8 !important;
+        }
+        .captcha-input-error {
+            border-color: #f87171 !important;
+            background: #fef2f2 !important;
+            animation: shakeError 0.4s ease;
+        }
+        .captcha-error-msg {
+            color: #dc2626;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 8px;
+            text-align: center;
+        }
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        /* Hide number input spinner */
+        .captcha-input::-webkit-outer-spin-button,
+        .captcha-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .captcha-input[type=number] {
+            -moz-appearance: textfield;
+        }
       `}} />
 
       <div className="split-layout">
@@ -430,6 +571,35 @@ export default function LoginPage() {
                     <div className="input-group">
                         <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-lock text-muted"></i></span>
                         <input type="password" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan kata sandi" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-2">Verifikasi Keamanan</label>
+                    <div className="captcha-container">
+                        <div className="captcha-question-row">
+                            <div className="captcha-icon">
+                                <i className="bi bi-shield-check"></i>
+                            </div>
+                            <div className="captcha-question">{captchaQuestion}</div>
+                            <button type="button" className="captcha-refresh" onClick={generateCaptcha} title="Ganti soal">
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                        <input 
+                            type="number" 
+                            className={`form-control captcha-input ${captchaError ? 'captcha-input-error' : ''}`}
+                            placeholder="Masukkan jawaban" 
+                            required 
+                            value={captchaAnswer} 
+                            onChange={e => { setCaptchaAnswer(e.target.value); setCaptchaError(false); }}
+                            autoComplete="off"
+                        />
+                        {captchaError && (
+                            <div className="captcha-error-msg">
+                                <i className="bi bi-exclamation-circle me-1"></i>Jawaban salah, silakan coba lagi
+                            </div>
+                        )}
                     </div>
                 </div>
 
