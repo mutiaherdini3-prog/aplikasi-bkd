@@ -624,6 +624,35 @@ export default function AdminPage() {
     };
   }, [pegawaiList]);
 
+  const { filteredOPDs, processedOPDs } = useMemo(() => {
+    const resultOPDs = sortedOPDs.filter(opd => {
+      let opdPegawai = groupedByOPD[opd] || [];
+      if (searchSertifikasi) {
+        const query = searchSertifikasi.toLowerCase();
+        opdPegawai = opdPegawai.filter(p => 
+          (p.nama && p.nama.toLowerCase().includes(query)) || 
+          (p.nip && p.nip.toLowerCase().includes(query))
+        );
+      }
+      return opdPegawai.length > 0;
+    });
+    
+    const processed: Record<string, any[]> = {};
+    resultOPDs.forEach(opd => {
+      let opdPegawai = groupedByOPD[opd] || [];
+      if (searchSertifikasi) {
+        const query = searchSertifikasi.toLowerCase();
+        opdPegawai = opdPegawai.filter(p => 
+          (p.nama && p.nama.toLowerCase().includes(query)) || 
+          (p.nip && p.nip.toLowerCase().includes(query))
+        );
+      }
+      processed[opd] = opdPegawai;
+    });
+    
+    return { filteredOPDs: resultOPDs, processedOPDs: processed };
+  }, [sortedOPDs, groupedByOPD, searchSertifikasi]);
+
   return (
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -1115,35 +1144,6 @@ export default function AdminPage() {
 
                     <div className="accordion" id="accordionOPD">
                       {(() => {
-                        const { filteredOPDs, processedOPDs } = useMemo(() => {
-                          const resultOPDs = sortedOPDs.filter(opd => {
-                            let opdPegawai = groupedByOPD[opd];
-                            if (searchSertifikasi) {
-                              const query = searchSertifikasi.toLowerCase();
-                              opdPegawai = opdPegawai.filter(p => 
-                                (p.nama && p.nama.toLowerCase().includes(query)) || 
-                                (p.nip && p.nip.toLowerCase().includes(query))
-                              );
-                            }
-                            return opdPegawai.length > 0;
-                          });
-                          
-                          const processed: Record<string, any[]> = {};
-                          resultOPDs.forEach(opd => {
-                            let opdPegawai = groupedByOPD[opd];
-                            if (searchSertifikasi) {
-                              const query = searchSertifikasi.toLowerCase();
-                              opdPegawai = opdPegawai.filter(p => 
-                                (p.nama && p.nama.toLowerCase().includes(query)) || 
-                                (p.nip && p.nip.toLowerCase().includes(query))
-                              );
-                            }
-                            processed[opd] = opdPegawai;
-                          });
-                          
-                          return { filteredOPDs: resultOPDs, processedOPDs: processed };
-                        }, [sortedOPDs, groupedByOPD, searchSertifikasi]);
-
                         const paginatedOPDs = filteredOPDs.slice((currentPageSert - 1) * ITEMS_PER_PAGE, currentPageSert * ITEMS_PER_PAGE);
 
                         return (
