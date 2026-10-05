@@ -511,7 +511,7 @@ export async function PUT(request: Request) {
     appendFieldPut('tingkat pendidikan', tingkat_pendidikan);
     appendFieldPut('jurusan', jurusan);
     appendFieldPut('sekolah', sekolah);
-    if (email !== undefined) appendFieldPut('email', email);
+    if (email !== undefined) appendFieldPut('email', email ? email.trim().toLowerCase() : '');
     
     // Status Aktif
     if (status_aktif !== undefined) {

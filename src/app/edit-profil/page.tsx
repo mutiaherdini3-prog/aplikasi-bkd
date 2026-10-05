@@ -155,6 +155,13 @@ export default function EditProfilPage() {
         throw new Error(json.message || json.error || 'Gagal menyimpan data');
       }
       
+      // Sinkronkan email di local storage
+      if (formData.email && formData.email.trim() !== '') {
+        localStorage.setItem('userEmail', formData.email.trim().toLowerCase());
+      } else {
+        localStorage.removeItem('userEmail');
+      }
+
       // Reload dashboard secara utuh agar data terbaru langsung tampil
       window.location.href = '/dashboard';
     } catch (err: any) {
@@ -229,19 +236,18 @@ export default function EditProfilPage() {
                   </div>
 
                   <div className="col-md-12">
-                    <label className="form-label fw-medium small mb-1">Email Notifikasi *</label>
+                    <label className="form-label fw-medium small mb-1">Email Notifikasi</label>
                     <div className="input-group">
                       <span className="input-group-text"><i className="bi bi-envelope"></i></span>
                       <input 
                         type="email" 
                         className="form-control" 
-                        placeholder="contoh: nama@email.com" 
-                        required 
+                        placeholder="contoh: nama@email.com (opsional)" 
                         value={formData.email} 
                         onChange={e => setFormData({...formData, email: e.target.value})} 
                       />
                     </div>
-                    <small className="text-muted" style={{ fontSize: '0.78rem' }}>Digunakan untuk menerima notifikasi pengajuan dan persetujuan IDP.</small>
+                    <small className="text-muted" style={{ fontSize: '0.78rem' }}>Digunakan untuk menerima notifikasi pengajuan dan persetujuan IDP. Dapat diubah atau dikosongkan kapan saja.</small>
                   </div>
                   
                   <div className="col-md-12">
