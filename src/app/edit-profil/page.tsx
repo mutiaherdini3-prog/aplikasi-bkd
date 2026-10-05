@@ -10,6 +10,7 @@ export default function EditProfilPage() {
   const [formData, setFormData] = useState({
     nip: '',
     nama: '',
+    email: '',
     status_pegawai: '',
     golonganPangkat: '', // Gabungan untuk dropdown
     jenkel: '',
@@ -37,6 +38,7 @@ export default function EditProfilPage() {
           setFormData({
             nip: data.nip || '',
             nama: data.nama || '',
+            email: data.email || '',
             status_pegawai: data.status_pegawai || '',
             golonganPangkat: (data.golongan && data.pangkat && data.pangkat !== 'Tidak Ada' && data.pangkat !== '-')
               ? `${data.golongan} - ${data.pangkat}`
@@ -137,6 +139,7 @@ export default function EditProfilPage() {
         body: JSON.stringify({
           nip: formData.nip,
           nama: formData.nama,
+          email: formData.email,
           status_pegawai: formData.status_pegawai,
           pangkat: valPangkat,
           golongan: valGolongan,
@@ -222,6 +225,22 @@ export default function EditProfilPage() {
                   <div className="col-md-6">
                     <label className="form-label fw-medium small mb-1">Nama Lengkap (Termasuk Gelar) *</label>
                     <input type="text" className="form-control" placeholder="Contoh: Budi Santoso, S.Kom." required value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} />
+                  </div>
+
+                  <div className="col-md-12">
+                    <label className="form-label fw-medium small mb-1">Email Notifikasi *</label>
+                    <div className="input-group">
+                      <span className="input-group-text"><i className="bi bi-envelope"></i></span>
+                      <input 
+                        type="email" 
+                        className="form-control" 
+                        placeholder="contoh: nama@email.com" 
+                        required 
+                        value={formData.email} 
+                        onChange={e => setFormData({...formData, email: e.target.value})} 
+                      />
+                    </div>
+                    <small className="text-muted" style={{ fontSize: '0.78rem' }}>Digunakan untuk menerima notifikasi pengajuan dan persetujuan IDP.</small>
                   </div>
                   
                   <div className="col-md-12">

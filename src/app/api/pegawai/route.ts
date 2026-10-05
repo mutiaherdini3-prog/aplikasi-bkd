@@ -19,7 +19,7 @@ const getColumnName = (n: number) => {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan, tingkat_pendidikan, jurusan, sekolah } = body;
+    const { nip, password, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan, tingkat_pendidikan, jurusan, sekolah, email } = body;
     
     if (!nip || !nama) return NextResponse.json({ success: false, message: 'NIP and Nama are required' }, { status: 400 });
 
@@ -102,6 +102,7 @@ export async function POST(request: Request) {
     if (tingkat_pendidikan !== undefined) appendField('tingkat pendidikan', tingkat_pendidikan);
     if (jurusan !== undefined) appendField('jurusan', jurusan);
     if (sekolah !== undefined) appendField('sekolah', sekolah);
+    if (email !== undefined) appendField('email', email);
 
     if (headersUpdated) {
       const getColumnName = (n: number) => {
@@ -446,7 +447,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan, tingkat_pendidikan, jurusan, sekolah } = body;
+    const { nip, nama, status_pegawai, pangkat, golongan, jenkel, jabatan, unit_kerja, status_aktif, role, nip_atasan, tingkat_pendidikan, jurusan, sekolah, email } = body;
     if (!nip) return NextResponse.json({ success: false }, { status: 400 });
 
     const sheets = getGoogleSheets();
@@ -508,6 +509,7 @@ export async function PUT(request: Request) {
     appendFieldPut('tingkat pendidikan', tingkat_pendidikan);
     appendFieldPut('jurusan', jurusan);
     appendFieldPut('sekolah', sekolah);
+    if (email !== undefined) appendFieldPut('email', email);
     
     // Status Aktif
     if (status_aktif !== undefined) {

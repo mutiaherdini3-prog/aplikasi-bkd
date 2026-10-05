@@ -47,3 +47,15 @@ export const getCachedSheetData = unstable_cache(
   ['google-sheets-data'],
   { tags: ['google-sheets'], revalidate: 300 } // Cache for 5 minutes
 );
+
+export const getColumnName = (n: number) => {
+  let ordA = 'A'.charCodeAt(0);
+  let ordZ = 'Z'.charCodeAt(0);
+  let len = ordZ - ordA + 1;
+  let s = "";
+  while (n >= 0) {
+    s = String.fromCharCode(n % len + ordA) + s;
+    n = Math.floor(n / len) - 1;
+  }
+  return s;
+};

@@ -268,6 +268,12 @@ export default function DashboardPage() {
                     <div className={pegawai?.unit_kerja ? 'info-value' : 'info-value-empty'}>{pegawai?.unit_kerja || '[Belum Diisi]'}</div>
                   </div>
                   <div className="col-sm-6">
+                    <div className="info-label">Email Notifikasi</div>
+                    <div className={pegawai?.email ? 'info-value text-primary' : 'info-value-empty'}>
+                      {pegawai?.email ? <><i className="bi bi-envelope me-1"></i>{pegawai.email}</> : '[Belum Diisi]'}
+                    </div>
+                  </div>
+                  <div className="col-sm-6">
                     <div className="info-label">Total Jam Pelajaran (JP)</div>
                     <div className="info-value" style={{ color: '#0ea5e9', fontWeight: 'bold' }}>{totalJP} JP</div>
                   </div>

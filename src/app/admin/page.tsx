@@ -297,8 +297,17 @@ export default function AdminPage() {
   };
 
   const updateIdpStatus = async (rowIndex: number, newStatus: string) => {
+    let alasan = '';
+    if (newStatus === 'Ditolak') {
+      const input = prompt('Silakan masukkan alasan penolakan:');
+      if (input === null) return; // Dibatalkan oleh admin
+      alasan = input;
+    } else {
+      if (!confirm('Yakin ingin menyetujui pengajuan IDP ini?')) return;
+    }
+
     try {
-      const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(newStatus)}`, { method: 'PUT' });
+      const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(newStatus)}&alasan=${encodeURIComponent(alasan)}`, { method: 'PUT' });
       if (res.ok) {
         fetchData();
       } else {
@@ -1146,7 +1155,10 @@ export default function AdminPage() {
                           <tr key={index}>
                             <td>{(currentPagePegawai - 1) * ITEMS_PER_PAGE + index + 1}</td>
                             <td>{p.nip}</td>
-                            <td className="fw-bold">{p.nama || '-'}</td>
+                            <td className="fw-bold">
+                              {p.nama || '-'}
+                              {p.email && <div className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}><i className="bi bi-envelope me-1"></i>{p.email}</div>}
+                            </td>
                             <td>{p.status_aktif || 'Aktif'}</td>
                             <td>{p.jabatan || '-'}</td>
                             <td>{p.unit_kerja || '-'}</td>

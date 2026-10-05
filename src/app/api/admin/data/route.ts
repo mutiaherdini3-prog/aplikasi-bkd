@@ -145,9 +145,12 @@ export async function GET(request: Request) {
         }
       }
 
+      const emailIdx = headers.indexOf('email');
+
       const pData: any = {
         nip: currentNip,
         nama: row[namaIdx] || '',
+        email: emailIdx !== -1 ? (row[emailIdx] || '') : '',
         status_pegawai: row[statusIdx] || '',
         pangkat: row[pangkatIdx] || '',
         golongan: realGolonganIdx !== -1 ? (row[realGolonganIdx] || '') : '',

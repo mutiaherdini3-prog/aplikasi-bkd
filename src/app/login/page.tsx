@@ -1,54 +1,53 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
   const [nip, setNip] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [captchaQuestion, setCaptchaQuestion] = useState('');
-  const [captchaExpected, setCaptchaExpected] = useState<number>(0);
-  const [captchaError, setCaptchaError] = useState(false);
-
-  const generateCaptcha = useCallback(() => {
-    const ops = ['+', '-', '×'];
-    const op = ops[Math.floor(Math.random() * ops.length)];
-    let a: number, b: number, answer: number;
-    
-    if (op === '+') {
-      a = Math.floor(Math.random() * 50) + 1;
-      b = Math.floor(Math.random() * 40) + 1;
-      answer = a + b;
-    } else if (op === '-') {
-      a = Math.floor(Math.random() * 50) + 10;
-      b = Math.floor(Math.random() * (a - 1)) + 1;
-      answer = a - b;
-    } else {
-      a = Math.floor(Math.random() * 12) + 1;
-      b = Math.floor(Math.random() * 9) + 1;
-      answer = a * b;
-    }
-    
-    setCaptchaQuestion(`${a} ${op} ${b} = ?`);
-    setCaptchaExpected(answer);
-    setCaptchaAnswer('');
-    setCaptchaError(false);
-  }, []);
 
   useEffect(() => {
-    generateCaptcha();
-  }, [generateCaptcha]);
+    // Muat email terakhir jika ada di perangkat ini
+    const lastEmail = localStorage.getItem('lastUserEmail');
+    if (lastEmail) setEmail(lastEmail);
+  }, []);
+
+  const handleNipBlur = async () => {
+    if (!nip || nip.trim().length < 3) return;
+    try {
+      const cleanNip = nip.trim();
+      // Cek apakah ada email tersimpan di localStorage untuk NIP ini
+      const cached = localStorage.getItem(`userEmail_${cleanNip}`);
+      if (cached) {
+        setEmail(cached);
+        return;
+      }
+      // Ambil data pegawai dari server jika sudah pernah isi email
+      const res = await fetch(`/api/pegawai?nip=${cleanNip}`);
+      const result = await res.json();
+      if (result.success && result.data?.pegawai?.email) {
+        setEmail(result.data.pegawai.email);
+        localStorage.setItem(`userEmail_${cleanNip}`, result.data.pegawai.email);
+      }
+    } catch (e) {
+      // Abaikan jika gagal mengambil di background
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validasi CAPTCHA
-    if (parseInt(captchaAnswer) !== captchaExpected) {
-      setCaptchaError(true);
-      generateCaptcha();
+    if (!nip || !password) {
+      alert('NIP dan Kata Sandi wajib diisi!');
+      return;
+    }
+
+    if (!email || !email.includes('@')) {
+      alert('Silakan masukkan alamat email yang valid untuk menerima notifikasi pengajuan!');
       return;
     }
 
@@ -58,7 +57,12 @@ export default function LoginPage() {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'login', nip, password }),
+        body: JSON.stringify({ 
+          action: 'login', 
+          nip: nip.trim(), 
+          password, 
+          email: email.trim().toLowerCase() 
+        }),
       });
 
       const result = await response.json();
@@ -69,6 +73,11 @@ export default function LoginPage() {
 
       const data = result.data;
       localStorage.setItem('loggedInUser', data.nip);
+      if (data.email) {
+        localStorage.setItem('userEmail', data.email);
+        localStorage.setItem('lastUserEmail', data.email);
+        localStorage.setItem(`userEmail_${data.nip}`, data.email);
+      }
       const assignedRole = data.role || (data.jabatan === 'Administrator' ? 'super_admin' : 'pegawai');
       localStorage.setItem('userRole', assignedRole);
       
@@ -446,90 +455,6 @@ export default function LoginPage() {
             display: none !important;
         }
         }
-
-        /* CAPTCHA Styles */
-        .captcha-container {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 10px 14px;
-        }
-        .captcha-question-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .captcha-question {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #334155;
-            letter-spacing: 2px;
-            font-family: 'Courier New', monospace;
-            white-space: nowrap;
-            user-select: none;
-        }
-        .captcha-refresh {
-            background: transparent;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            font-size: 0.85rem;
-        }
-        .captcha-refresh:hover {
-            background: #e2e8f0;
-            color: #334155;
-            transform: rotate(180deg);
-        }
-        .captcha-input {
-            flex: 1;
-            text-align: center;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            letter-spacing: 1px;
-            padding: 6px 10px !important;
-            border: 1px solid #cbd5e1 !important;
-            background: white !important;
-            border-radius: 8px !important;
-            max-width: 120px;
-        }
-        .captcha-input:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-        }
-        .captcha-input-error {
-            border-color: #f87171 !important;
-            background: #fef2f2 !important;
-            animation: shakeError 0.4s ease;
-        }
-        .captcha-error-msg {
-            color: #dc2626;
-            font-size: 0.78rem;
-            font-weight: 500;
-            margin-top: 6px;
-        }
-        @keyframes shakeError {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-5px); }
-            40% { transform: translateX(5px); }
-            60% { transform: translateX(-3px); }
-            80% { transform: translateX(3px); }
-        }
-        .captcha-input::-webkit-outer-spin-button,
-        .captcha-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .captcha-input[type=number] {
-            -moz-appearance: textfield;
-        }
       `}} />
 
       <div className="split-layout">
@@ -547,7 +472,38 @@ export default function LoginPage() {
                     <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide">NIP / ID Pegawai</label>
                     <div className="input-group">
                         <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-person text-muted"></i></span>
-                        <input type="text" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan NIP Anda" required value={nip} onChange={e => setNip(e.target.value)} autoComplete="off" />
+                        <input 
+                            type="text" 
+                            className="form-control border-start-0 ps-0 bg-transparent" 
+                            placeholder="Masukkan NIP Anda" 
+                            required 
+                            value={nip} 
+                            onChange={e => setNip(e.target.value)} 
+                            onBlur={handleNipBlur}
+                            autoComplete="username" 
+                        />
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                        <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-0">Email Pegawai</label>
+                        <span className="badge bg-primary-subtle text-primary border border-primary-subtle" style={{fontSize: '0.7rem'}}>Untuk Notifikasi</span>
+                    </div>
+                    <div className="input-group">
+                        <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-envelope text-muted"></i></span>
+                        <input 
+                            type="email" 
+                            className="form-control border-start-0 ps-0 bg-transparent" 
+                            placeholder="contoh: nama@gmail.com" 
+                            required 
+                            value={email} 
+                            onChange={e => setEmail(e.target.value)} 
+                            autoComplete="email" 
+                        />
+                    </div>
+                    <div className="text-muted mt-1" style={{ fontSize: '0.78rem' }}>
+                        <i className="bi bi-info-circle me-1 text-primary"></i>Email akan otomatis tersimpan & digunakan untuk pemberitahuan status pengajuan IDP.
                     </div>
                 </div>
 
@@ -555,33 +511,7 @@ export default function LoginPage() {
                     <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-2">Kata Sandi</label>
                     <div className="input-group">
                         <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-lock text-muted"></i></span>
-                        <input type="password" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan kata sandi" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
-                    </div>
-                </div>
-
-                <div className="mb-4">
-                    <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-2">Verifikasi Keamanan</label>
-                    <div className="captcha-container">
-                        <div className="captcha-question-row">
-                            <span className="captcha-question">{captchaQuestion}</span>
-                            <button type="button" className="captcha-refresh" onClick={generateCaptcha} title="Ganti soal">
-                                <i className="bi bi-arrow-clockwise"></i>
-                            </button>
-                            <input 
-                                type="number" 
-                                className={`form-control captcha-input ${captchaError ? 'captcha-input-error' : ''}`}
-                                placeholder="Jawaban" 
-                                required 
-                                value={captchaAnswer} 
-                                onChange={e => { setCaptchaAnswer(e.target.value); setCaptchaError(false); }}
-                                autoComplete="off"
-                            />
-                        </div>
-                        {captchaError && (
-                            <div className="captcha-error-msg">
-                                <i className="bi bi-exclamation-circle me-1"></i>Jawaban salah, coba lagi
-                            </div>
-                        )}
+                        <input type="password" className="form-control border-start-0 ps-0 bg-transparent" placeholder="Masukkan kata sandi" required value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" />
                     </div>
                 </div>
 

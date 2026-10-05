@@ -102,12 +102,15 @@ export async function GET(request: Request) {
         }
       }
 
+      const emailIdx = headers.indexOf('email');
+
       result.push({
         nip: row[nipIdx]?.toString().trim() || '',
         nama: row[namaIdx] || '',
         jabatan: jabatanIdx !== -1 ? (row[jabatanIdx] || '') : '',
         unit_kerja: currentUnitKerja,
-        role: finalRole
+        role: finalRole,
+        email: emailIdx !== -1 ? (row[emailIdx] || '') : ''
       });
     }
 

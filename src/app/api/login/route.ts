@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData, getColumnName } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
 
 export async function POST(request: Request) {
   try {
-    const { action, nip, password } = await request.json();
-    if (!nip || !password) return NextResponse.json({ success: false }, { status: 400 });
+    const { action, nip, password, email } = await request.json();
+    if (!nip || !password) return NextResponse.json({ success: false, error: 'NIP dan Password harus diisi' }, { status: 400 });
 
     const sheets = getGoogleSheets();
     const rows = await getCachedSheetData('pegawai!A:ZZ');
-    if (!rows || rows.length === 0) return NextResponse.json({ success: false }, { status: 404 });
+    if (!rows || rows.length === 0) return NextResponse.json({ success: false, error: 'Database kosong' }, { status: 404 });
 
     const headers = rows[0].map((h: string) => h.toLowerCase().trim());
     const nipIdx = headers.indexOf('nip');
@@ -21,12 +21,49 @@ export async function POST(request: Request) {
       if (rows[i][nipIdx]?.trim() === nip.trim()) { rowIndex = i; row = rows[i]; break; }
     }
 
-    if (!row) return NextResponse.json({ success: false, error: 'NIP not found' }, { status: 404 });
+    if (!row) return NextResponse.json({ success: false, error: 'NIP tidak ditemukan' }, { status: 404 });
 
     if (action === 'login') {
-      if (row[passIdx]?.trim() !== password.trim()) return NextResponse.json({ success: false, error: 'Wrong password' }, { status: 401 });
+      if (row[passIdx]?.trim() !== password.trim()) return NextResponse.json({ success: false, error: 'Kata sandi salah' }, { status: 401 });
       const data: any = {};
       headers.forEach((h, i) => data[h] = row[i] || '');
+
+      // Proses update email pengguna jika diinput
+      let emailIdx = headers.indexOf('email');
+      if (email && typeof email === 'string' && email.trim() !== '') {
+        const cleanEmail = email.trim().toLowerCase();
+        
+        // Tambahkan header kolom email jika belum ada
+        if (emailIdx === -1) {
+          emailIdx = headers.length;
+          headers.push('email');
+          rows[0].push('email');
+          const maxCol = getColumnName(headers.length - 1);
+          await sheets.spreadsheets.values.update({
+            spreadsheetId: GOOGLE_SHEET_ID,
+            range: `pegawai!A1:${maxCol}1`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values: [rows[0]] }
+          });
+        }
+
+        // Simpan / update email ke sheet jika berbeda
+        const currentEmailInSheet = row[emailIdx]?.trim().toLowerCase();
+        if (currentEmailInSheet !== cleanEmail) {
+          const colLetter = getColumnName(emailIdx);
+          await sheets.spreadsheets.values.update({
+            spreadsheetId: GOOGLE_SHEET_ID,
+            range: `pegawai!${colLetter}${rowIndex + 1}`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values: [[cleanEmail]] }
+          });
+          row[emailIdx] = cleanEmail;
+          revalidateTag('google-sheets', { expire: 0 });
+        }
+        data.email = cleanEmail;
+      } else {
+        data.email = emailIdx !== -1 ? (row[emailIdx] || '') : '';
+      }
       
       const ALLOWED_ADMIN_NAMES = [
         "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
