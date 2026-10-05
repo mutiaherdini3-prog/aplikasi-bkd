@@ -6,53 +6,14 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const router = useRouter();
   const [nip, setNip] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Muat email terakhir jika ada di perangkat ini
-    const lastEmail = localStorage.getItem('lastUserEmail');
-    if (lastEmail) setEmail(lastEmail);
-  }, []);
-
-  const handleNipBlur = async () => {
-    if (!nip || nip.trim().length < 3) return;
-    try {
-      const cleanNip = nip.trim();
-      if (cleanNip.toLowerCase() === 'admin') {
-        if (!email) setEmail('diklat.babar01@gmail.com');
-        return;
-      }
-      // Cek apakah ada email tersimpan di localStorage untuk NIP ini
-      const cached = localStorage.getItem(`userEmail_${cleanNip}`);
-      if (cached) {
-        setEmail(cached);
-        return;
-      }
-      // Ambil data pegawai dari server jika sudah pernah isi email
-      const res = await fetch(`/api/pegawai?nip=${cleanNip}`);
-      const result = await res.json();
-      if (result.success && result.data?.pegawai?.email) {
-        setEmail(result.data.pegawai.email);
-        localStorage.setItem(`userEmail_${cleanNip}`, result.data.pegawai.email);
-      }
-    } catch (e) {
-      // Abaikan jika gagal mengambil di background
-    }
-  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!nip || !password) {
       alert('NIP dan Kata Sandi wajib diisi!');
-      return;
-    }
-
-    const isAdmin = nip.trim().toLowerCase() === 'admin';
-    if (!isAdmin && (!email || !email.includes('@'))) {
-      alert('Silakan masukkan alamat email yang valid untuk menerima notifikasi pengajuan!');
       return;
     }
 
@@ -65,8 +26,7 @@ export default function LoginPage() {
         body: JSON.stringify({ 
           action: 'login', 
           nip: nip.trim(), 
-          password, 
-          email: email.trim().toLowerCase() 
+          password
         }),
       });
 
@@ -81,12 +41,11 @@ export default function LoginPage() {
       localStorage.removeItem('loggedInUser');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('lastUserEmail');
 
       localStorage.setItem('loggedInUser', data.nip);
       if (data.email) {
         localStorage.setItem('userEmail', data.email);
-        localStorage.setItem('lastUserEmail', data.email);
-        localStorage.setItem(`userEmail_${data.nip}`, data.email);
       }
       const assignedRole = data.role || (data.jabatan === 'Administrator' ? 'super_admin' : 'pegawai');
       localStorage.setItem('userRole', assignedRole);
@@ -489,35 +448,8 @@ export default function LoginPage() {
                             required 
                             value={nip} 
                             onChange={e => setNip(e.target.value)} 
-                            onBlur={handleNipBlur}
                             autoComplete="username" 
                         />
-                    </div>
-                </div>
-
-                <div className="mb-4">
-                    <div className="d-flex justify-content-between align-items-center mb-1">
-                        <label className="form-label fw-bold text-secondary small text-uppercase tracking-wide mb-0">Email Pegawai</label>
-                        <span className="badge bg-primary-subtle text-primary border border-primary-subtle" style={{fontSize: '0.7rem'}}>
-                            {nip.trim().toLowerCase() === 'admin' ? 'Opsional untuk Admin' : 'Untuk Notifikasi'}
-                        </span>
-                    </div>
-                    <div className="input-group">
-                        <span className="input-group-text border-end-0 bg-transparent"><i className="bi bi-envelope text-muted"></i></span>
-                        <input 
-                            type="email" 
-                            className="form-control border-start-0 ps-0 bg-transparent" 
-                            placeholder={nip.trim().toLowerCase() === 'admin' ? "diklat.babar01@gmail.com (opsional)" : "contoh: nama@gmail.com"} 
-                            value={email} 
-                            onChange={e => setEmail(e.target.value)} 
-                            autoComplete="email" 
-                        />
-                    </div>
-                    <div className="text-muted mt-1" style={{ fontSize: '0.78rem' }}>
-                        <i className="bi bi-info-circle me-1 text-primary"></i>
-                        {nip.trim().toLowerCase() === 'admin' 
-                            ? 'Email bersifat opsional untuk akun Administrator Sistem.'
-                            : 'Email akan otomatis tersimpan & digunakan untuk pemberitahuan status pengajuan IDP.'}
                     </div>
                 </div>
 

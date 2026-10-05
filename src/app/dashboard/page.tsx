@@ -202,6 +202,22 @@ export default function DashboardPage() {
       </nav>
 
       <div className="container mt-4">
+        {/* Banner Pengingat Email Jika Belum Dilengkapi */}
+        {pegawai && (!pegawai.email || pegawai.email.trim() === '') && (
+          <div className="alert border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 rounded-3" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%)', borderLeft: '5px solid #0284c7' }}>
+            <div className="d-flex align-items-center mb-2 mb-md-0">
+              <i className="bi bi-envelope-exclamation-fill text-primary fs-3 me-3"></i>
+              <div>
+                <strong className="text-dark d-block">Alamat Email Belum Dilengkapi</strong>
+                <small className="text-secondary">Silakan lengkapi email Anda agar sistem SIPJP dapat mengirimkan notifikasi otomatis saat pengajuan usulan IDP disetujui atau ditolak.</small>
+              </div>
+            </div>
+            <a href="/edit-profil" className="btn btn-primary btn-sm px-3 fw-bold rounded-pill text-nowrap shadow-sm">
+              <i className="bi bi-pencil-square me-1"></i> Isi Email di Profil
+            </a>
+          </div>
+        )}
+
         <div className="card profile-card">
           {/* Banner */}
           <div className="profile-banner">
@@ -237,6 +253,11 @@ export default function DashboardPage() {
                     <i className="bi bi-exclamation-circle-fill me-1"></i> Profil Belum Lengkap
                   </span>
                 )}
+              </div>
+              <div>
+                <a href="/edit-profil" className="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-medium">
+                  <i className="bi bi-pencil-square me-1"></i> Edit Profil
+                </a>
               </div>
             </div>
 
