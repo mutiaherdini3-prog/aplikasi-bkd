@@ -186,7 +186,7 @@ export async function sendIdpSubmissionNotificationToAtasan({
           <p style="font-size: 14px;">Silakan login ke dashboard SIPJP Anda untuk menyetujui atau memberikan catatan penolakan terhadap pengajuan tersebut.</p>
 
           <div style="text-align: center; margin-top: 25px;">
-            <a href="https://bkd-app.vercel.app/login" class="btn-action">Buka Dashboard SIPJP &raquo;</a>
+            <a href="https://sipjp-babar.vercel.app/login" class="btn-action">Buka Dashboard SIPJP &raquo;</a>
           </div>
         </div>
         <div class="footer">
@@ -288,7 +288,7 @@ export async function sendIdpStatusNotificationToBawahan({
           ` : ''}
 
           <div style="text-align: center; margin-top: 25px;">
-            <a href="https://bkd-app.vercel.app/login" class="btn-action">Lihat di Dashboard SIPJP &raquo;</a>
+            <a href="https://sipjp-babar.vercel.app/login" class="btn-action">Lihat di Dashboard SIPJP &raquo;</a>
           </div>
         </div>
         <div class="footer">
