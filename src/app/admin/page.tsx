@@ -1108,7 +1108,7 @@ export default function AdminPage() {
                         </div>
                         {(userRole === 'super_admin' || userRole === 'admin') && (
                           <button className="btn btn-sm btn-primary" onClick={() => {
-                            setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0 });
+                            setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0, email: '' });
                             setShowPegawaiModal(true);
                           }}>
                             <i className="bi bi-person-plus me-1"></i> Tambah Pegawai
@@ -1921,6 +1921,20 @@ export default function AdminPage() {
                         <input type="text" className="form-control" required value={pegawaiForm.password || ''} onChange={e => setPegawaiForm({...pegawaiForm, password: e.target.value})} />
                       </div>
                     )}
+                    <div className="col-md-6">
+                      <label className="form-label">Email Pegawai</label>
+                      <div className="input-group">
+                        <span className="input-group-text"><i className="bi bi-envelope"></i></span>
+                        <input 
+                          type="email" 
+                          className="form-control" 
+                          placeholder="contoh: nama@gmail.com (opsional)" 
+                          value={pegawaiForm.email || ''} 
+                          onChange={e => setPegawaiForm({...pegawaiForm, email: e.target.value})} 
+                        />
+                      </div>
+                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>Untuk menerima notifikasi pengajuan & persetujuan IDP</small>
+                    </div>
                     <div className="col-md-6">
                       <label className="form-label">Status Pegawai</label>
                       <select className="form-select" required value={pegawaiForm.status_pegawai || ''} onChange={e => setPegawaiForm({...pegawaiForm, status_pegawai: e.target.value, golonganPangkat: ''})}>

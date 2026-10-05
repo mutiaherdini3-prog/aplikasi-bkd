@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    const pRows = await getCachedSheetData('pegawai!A:ZZ');
+    const pRows = await getFreshSheetData('pegawai!A:ZZ');
     
     let pHeaders = [];
     if (pRows.length > 0) {
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     if (tingkat_pendidikan !== undefined) appendField('tingkat pendidikan', tingkat_pendidikan);
     if (jurusan !== undefined) appendField('jurusan', jurusan);
     if (sekolah !== undefined) appendField('sekolah', sekolah);
-    if (email !== undefined) appendField('email', email);
+    if (email !== undefined) appendField('email', email ? email.trim().toLowerCase() : '');
 
     if (headersUpdated) {
       const getColumnName = (n: number) => {
