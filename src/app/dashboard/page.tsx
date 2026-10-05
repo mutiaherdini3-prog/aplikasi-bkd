@@ -29,8 +29,8 @@ export default function DashboardPage() {
     if (!nip) return;
     try {
       const [res, resBawahan] = await Promise.all([
-        fetch(`/api/pegawai?nip=${nip}`),
-        fetch(`/api/pegawai?ketua_nip=${nip}`)
+        fetch(`/api/pegawai?nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/api/pegawai?ketua_nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' })
       ]);
 
       const result = await res.json();
@@ -65,11 +65,11 @@ export default function DashboardPage() {
   useEffect(() => {
     const nip = localStorage.getItem('loggedInUser');
     if (!nip) {
-      router.push('/login');
+      window.location.href = '/login';
       return;
     }
     if (nip === 'admin') {
-      router.push('/admin');
+      window.location.href = '/admin';
       return;
     }
 
@@ -79,7 +79,8 @@ export default function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem('loggedInUser');
     localStorage.removeItem('userRole');
-    router.push('/login');
+    localStorage.removeItem('userEmail');
+    window.location.href = '/login';
   };
 
   const hapusSertifikasi = async (rowIndex: string, namaKursus?: string) => {

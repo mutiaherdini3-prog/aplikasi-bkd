@@ -38,6 +38,12 @@ export const getGoogleSheets = () => google.sheets({ version: 'v4', auth: getAut
 export const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!;
 export const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID!;
 
+export async function getFreshSheetData(range: string) {
+  const sheets = getGoogleSheets();
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: GOOGLE_SHEET_ID, range });
+  return res.data.values || [];
+}
+
 export const getCachedSheetData = unstable_cache(
   async (range: string) => {
     const sheets = getGoogleSheets();
@@ -45,7 +51,7 @@ export const getCachedSheetData = unstable_cache(
     return res.data.values || [];
   },
   ['google-sheets-data'],
-  { tags: ['google-sheets'], revalidate: 300 } // Cache for 5 minutes
+  { tags: ['google-sheets'], revalidate: 10 } // Cache maks 10 detik agar update spreadsheet cepat terlihat
 );
 
 export const getColumnName = (n: number) => {

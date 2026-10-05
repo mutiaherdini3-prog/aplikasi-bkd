@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData, getColumnName } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getFreshSheetData, getColumnName } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
@@ -8,7 +10,8 @@ export async function POST(request: Request) {
     if (!nip || !password) return NextResponse.json({ success: false, error: 'NIP dan Password harus diisi' }, { status: 400 });
 
     const sheets = getGoogleSheets();
-    const rows = await getCachedSheetData('pegawai!A:ZZ');
+    // Gunakan getFreshSheetData agar pengecekan sandi & akun selalu real-time langsung dari Google Sheet
+    const rows = await getFreshSheetData('pegawai!A:ZZ');
     if (!rows || rows.length === 0) return NextResponse.json({ success: false, error: 'Database kosong' }, { status: 404 });
 
     const headers = rows[0].map((h: string) => h.toLowerCase().trim());
@@ -125,18 +128,26 @@ export async function POST(request: Request) {
       }
       if (!data['nip_atasan']) data['nip_atasan'] = '';
       
-      return NextResponse.json({ success: true, data });
+      return NextResponse.json({ success: true, data }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+      });
     }
     
     if (action === 'reset-password') {
-      const col = String.fromCharCode(65 + passIdx);
+      const colLetter = getColumnName(passIdx);
       await sheets.spreadsheets.values.update({
-        spreadsheetId: GOOGLE_SHEET_ID, range: `pegawai!${col}${rowIndex + 1}`, valueInputOption: 'USER_ENTERED',
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: `pegawai!${colLetter}${rowIndex + 1}`,
+        valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[password.trim()]] }
       });
       revalidateTag('google-sheets', { expire: 0 });
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+      });
     }
     return NextResponse.json({ success: false });
-  } catch (e: any) { return NextResponse.json({ success: false }, { status: 500 }); }
+  } catch (e: any) { 
+    return NextResponse.json({ success: false, error: e.message }, { status: 500 }); 
+  }
 }

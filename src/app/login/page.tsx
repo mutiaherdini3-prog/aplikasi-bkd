@@ -77,6 +77,11 @@ export default function LoginPage() {
       }
 
       const data = result.data;
+      // Bersihkan sesi lama dari storage agar profil tidak tertukar/stale
+      localStorage.removeItem('loggedInUser');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userEmail');
+
       localStorage.setItem('loggedInUser', data.nip);
       if (data.email) {
         localStorage.setItem('userEmail', data.email);
@@ -86,11 +91,11 @@ export default function LoginPage() {
       const assignedRole = data.role || (data.jabatan === 'Administrator' ? 'super_admin' : 'pegawai');
       localStorage.setItem('userRole', assignedRole);
       
-      if (assignedRole === 'super_admin' || assignedRole === 'admin_diklat' || data.jabatan === 'Administrator') {
-        router.push('/admin');
-      } else {
-        router.push('/dashboard');
-      }
+      const targetUrl = (assignedRole === 'super_admin' || assignedRole === 'admin_diklat' || data.jabatan === 'Administrator') 
+        ? '/admin' 
+        : '/dashboard';
+      // Gunakan window.location.href agar halaman memuat data baru secara utuh tanpa cache SPA yang lama
+      window.location.href = targetUrl;
     } catch (err: any) {
       alert(err.message || 'Login gagal! NIP atau Kata Sandi salah.');
     } finally {

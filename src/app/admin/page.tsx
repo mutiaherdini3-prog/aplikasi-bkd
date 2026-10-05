@@ -392,7 +392,8 @@ export default function AdminPage() {
   const handleLogout = () => {
     localStorage.removeItem('loggedInUser');
     localStorage.removeItem('userRole');
-    router.push('/login');
+    localStorage.removeItem('userEmail');
+    window.location.href = '/login';
   };
 
   const handleLihatDokumen = (url: string) => {

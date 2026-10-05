@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData, getFreshSheetData } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -299,7 +299,7 @@ export async function GET(request: Request) {
 
     // Pegawai
     let pegawaiData: any = null;
-    const pRows = await getCachedSheetData('pegawai!A:ZZ');
+    const pRows = await getFreshSheetData('pegawai!A:ZZ');
     const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
     const pNipIdx = pHeaders.indexOf('nip');
     const nipAtasanIdx = pHeaders.indexOf('nip_atasan');
@@ -440,6 +440,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ 
       success: true, 
       data: { pegawai: pegawaiData, isAtasan, sertifikasi: sertifikasiData, pendidikan: pendidikanData, idp: idpData } 
+    }, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
     });
   } catch (e: any) { return NextResponse.json({ success: false }, { status: 500 }); }
 }
@@ -452,7 +454,7 @@ export async function PUT(request: Request) {
 
     const sheets = getGoogleSheets();
     
-    const pRows = await getCachedSheetData('pegawai!A:ZZ');
+    const pRows = await getFreshSheetData('pegawai!A:ZZ');
     if (pRows.length === 0) return NextResponse.json({ success: false, message: 'Sheet empty' }, { status: 404 });
     
     const pHeaders = pRows[0].map((h: string) => h.toLowerCase().trim());
@@ -583,7 +585,9 @@ export async function PUT(request: Request) {
       }
     });
     revalidateTag('google-sheets', { expire: 0 });
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+    });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
   }

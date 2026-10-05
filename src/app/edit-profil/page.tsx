@@ -31,7 +31,7 @@ export default function EditProfilPage() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/pegawai?nip=${nip}`);
+        const res = await fetch(`/api/pegawai?nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' });
         const json = await res.json();
         const data = json.data?.pegawai;
         if (data) {
@@ -155,7 +155,8 @@ export default function EditProfilPage() {
         throw new Error(json.message || json.error || 'Gagal menyimpan data');
       }
       
-      router.push('/dashboard');
+      // Reload dashboard secara utuh agar data terbaru langsung tampil
+      window.location.href = '/dashboard';
     } catch (err: any) {
       alert('Gagal menyimpan profil: ' + err.message);
     } finally {
