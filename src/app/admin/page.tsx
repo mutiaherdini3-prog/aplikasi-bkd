@@ -1377,131 +1377,7 @@ export default function AdminPage() {
                     </div>
                   )}
 
-                  {/* 5 KPI METRIC CARDS ROW */}
-                  <div className="row g-3 mb-4">
-                    {/* KPI 1: TOTAL ASN */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('view-pegawai')}>
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Total ASN Terdata</span>
-                            <h3 className="fw-bold text-dark mb-0 mt-1">{totalPegawai.toLocaleString('id-ID')}</h3>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
-                            <i className="bi bi-people-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="d-flex gap-2 mb-1">
-                            <span className="badge bg-primary-subtle text-primary border border-primary-subtle" style={{ fontSize: '0.72rem' }}>PNS: {totalPNS}</span>
-                            <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle" style={{ fontSize: '0.72rem' }}>PPPK: {totalPPPK}</span>
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.76rem' }}>Klik untuk kelola data master</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 2: MEMENUHI SYARAT */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Memenuhi Syarat</span>
-                            <div className="d-flex align-items-baseline gap-2 mt-1">
-                              <h3 className="fw-bold text-success mb-0">{lulus.toLocaleString('id-ID')}</h3>
-                              <span className="badge bg-success text-white px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem' }}>{percentLulus}%</span>
-                            </div>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #10b981, #047857)' }}>
-                            <i className="bi bi-patch-check-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="progress mb-2" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-success" style={{ width: `${percentLulus}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="text-muted d-flex justify-content-between" style={{ fontSize: '0.75rem' }}>
-                            <span>PNS: <b>{lulusPNS}</b></span>
-                            <span>PPPK: <b>{lulusPPPK}</b></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 3: BELUM MEMENUHI */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Belum Memenuhi</span>
-                            <div className="d-flex align-items-baseline gap-2 mt-1">
-                              <h3 className="fw-bold text-warning-emphasis mb-0">{belum.toLocaleString('id-ID')}</h3>
-                              <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem' }}>{percentBelum}%</span>
-                            </div>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)' }}>
-                            <i className="bi bi-clock-history"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="progress mb-2" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-warning" style={{ width: `${percentBelum}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                            Perlu percepatan keikutsertaan diklat
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 4: AKUMULASI JP */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card">
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Akumulasi Jam Pelajaran</span>
-                            <h3 className="fw-bold text-dark mb-0 mt-1">{totalJpTerkumpul.toLocaleString('id-ID')} <span className="fs-6 fw-normal text-muted">JP</span></h3>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0e7490)' }}>
-                            <i className="bi bi-mortarboard-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="d-flex align-items-center justify-content-between mb-1">
-                            <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle" style={{ fontSize: '0.72rem' }}>Rata-rata: {avgJp} JP / ASN</span>
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>Dari {totalSertifikatCount.toLocaleString('id-ID')} sertifikat tercatat</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 5: REKAP SERTIFIKASI & IDP */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('view-idp')}>
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Approval & IDP</span>
-                            <h3 className="fw-bold text-dark mb-0 mt-1">{pendingIdp > 0 ? `${pendingIdp} Pending` : `${approvedIdp} Selesai`}</h3>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)' }}>
-                            <i className="bi bi-calendar2-check-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="d-flex align-items-center gap-1 mb-1">
-                            {pendingIdp > 0 ? (
-                              <span className="badge bg-danger-subtle text-danger border border-danger-subtle" style={{ fontSize: '0.72rem' }}>⚠️ Butuh Verifikasi</span>
-                            ) : (
-                              <span className="badge bg-success-subtle text-success border border-success-subtle" style={{ fontSize: '0.72rem' }}>✅ Terverifikasi Rapi</span>
-                            )}
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>Klik untuk modul verifikasi IDP</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CHARTS ROW (TREN & PROPORSI) */}
+                  {/* CHARTS ROW (TREN & PROPORSI) - DI BAGIAN ATAS */}
                   <div className="row g-4 mb-4">
                     {/* GRAFIK 1: TREN KELULUSAN PER TAHUN */}
                     <div className="col-lg-8">
@@ -1634,6 +1510,130 @@ export default function AdminPage() {
                               <div className="fw-bold text-warning-emphasis fs-5">{belum} <span className="fs-6 fw-normal text-muted">org</span></div>
                             </div>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 5 KPI METRIC CARDS ROW */}
+                  <div className="row g-3 mb-4">
+                    {/* KPI 1: TOTAL ASN */}
+                    <div className="col-xl col-md-6">
+                      <div className="dash-kpi-card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('view-pegawai')}>
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div>
+                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Total ASN Terdata</span>
+                            <h3 className="fw-bold text-dark mb-0 mt-1">{totalPegawai.toLocaleString('id-ID')}</h3>
+                          </div>
+                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
+                            <i className="bi bi-people-fill"></i>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="d-flex gap-2 mb-1">
+                            <span className="badge bg-primary-subtle text-primary border border-primary-subtle" style={{ fontSize: '0.72rem' }}>PNS: {totalPNS}</span>
+                            <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle" style={{ fontSize: '0.72rem' }}>PPPK: {totalPPPK}</span>
+                          </div>
+                          <div className="text-muted" style={{ fontSize: '0.76rem' }}>Klik untuk kelola data master</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* KPI 2: MEMENUHI SYARAT */}
+                    <div className="col-xl col-md-6">
+                      <div className="dash-kpi-card">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Memenuhi Syarat</span>
+                            <div className="d-flex align-items-baseline gap-2 mt-1">
+                              <h3 className="fw-bold text-success mb-0">{lulus.toLocaleString('id-ID')}</h3>
+                              <span className="badge bg-success text-white px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem' }}>{percentLulus}%</span>
+                            </div>
+                          </div>
+                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #10b981, #047857)' }}>
+                            <i className="bi bi-patch-check-fill"></i>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="progress mb-2" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
+                            <div className="progress-bar bg-success" style={{ width: `${percentLulus}%`, borderRadius: '10px' }}></div>
+                          </div>
+                          <div className="text-muted d-flex justify-content-between" style={{ fontSize: '0.75rem' }}>
+                            <span>PNS: <b>{lulusPNS}</b></span>
+                            <span>PPPK: <b>{lulusPPPK}</b></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* KPI 3: BELUM MEMENUHI */}
+                    <div className="col-xl col-md-6">
+                      <div className="dash-kpi-card">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Belum Memenuhi</span>
+                            <div className="d-flex align-items-baseline gap-2 mt-1">
+                              <h3 className="fw-bold text-warning-emphasis mb-0">{belum.toLocaleString('id-ID')}</h3>
+                              <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem' }}>{percentBelum}%</span>
+                            </div>
+                          </div>
+                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)' }}>
+                            <i className="bi bi-clock-history"></i>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="progress mb-2" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
+                            <div className="progress-bar bg-warning" style={{ width: `${percentBelum}%`, borderRadius: '10px' }}></div>
+                          </div>
+                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            Perlu percepatan keikutsertaan diklat
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* KPI 4: AKUMULASI JP */}
+                    <div className="col-xl col-md-6">
+                      <div className="dash-kpi-card">
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div>
+                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Akumulasi Jam Pelajaran</span>
+                            <h3 className="fw-bold text-dark mb-0 mt-1">{totalJpTerkumpul.toLocaleString('id-ID')} <span className="fs-6 fw-normal text-muted">JP</span></h3>
+                          </div>
+                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0e7490)' }}>
+                            <i className="bi bi-mortarboard-fill"></i>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="d-flex align-items-center justify-content-between mb-1">
+                            <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle" style={{ fontSize: '0.72rem' }}>Rata-rata: {avgJp} JP / ASN</span>
+                          </div>
+                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>Dari {totalSertifikatCount.toLocaleString('id-ID')} sertifikat tercatat</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* KPI 5: REKAP SERTIFIKASI & IDP */}
+                    <div className="col-xl col-md-6">
+                      <div className="dash-kpi-card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('view-idp')}>
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div>
+                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Approval & IDP</span>
+                            <h3 className="fw-bold text-dark mb-0 mt-1">{pendingIdp > 0 ? `${pendingIdp} Pending` : `${approvedIdp} Selesai`}</h3>
+                          </div>
+                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)' }}>
+                            <i className="bi bi-calendar2-check-fill"></i>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="d-flex align-items-center gap-1 mb-1">
+                            {pendingIdp > 0 ? (
+                              <span className="badge bg-danger-subtle text-danger border border-danger-subtle" style={{ fontSize: '0.72rem' }}>⚠️ Butuh Verifikasi</span>
+                            ) : (
+                              <span className="badge bg-success-subtle text-success border border-success-subtle" style={{ fontSize: '0.72rem' }}>✅ Terverifikasi Rapi</span>
+                            )}
+                          </div>
+                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>Klik untuk modul verifikasi IDP</div>
                         </div>
                       </div>
                     </div>
