@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
-import { sendIdpSubmissionNotificationToAtasan, sendIdpStatusNotificationToBawahan } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,57 +40,6 @@ export async function POST(request: Request) {
     });
 
     revalidateTag('google-sheets', { expire: 0 });
-
-    // Notifikasi email ke Atasan (Ketua)
-    (async () => {
-      try {
-        const pRows = await getCachedSheetData('pegawai!A:ZZ');
-        if (pRows && pRows.length > 0) {
-          const headers = pRows[0].map((h: string) => h.toLowerCase().trim());
-          const pNipIdx = headers.indexOf('nip');
-          const pNamaIdx = headers.indexOf('nama');
-          const pUnitIdx = headers.indexOf('unit kerja');
-          const pEmailIdx = headers.indexOf('email');
-          const pNipAtasanIdx = headers.indexOf('nip_atasan');
-
-          const bawahanRow = pRows.find((r: any) => r[pNipIdx]?.toString().trim() === nip.trim());
-          const bawahanNama = bawahanRow ? (bawahanRow[pNamaIdx] || nip) : nip;
-          const unitKerja = bawahanRow ? (bawahanRow[pUnitIdx] || '') : '';
-
-          const atasanNip = idpData[0]?.nip_ketua || (bawahanRow && pNipAtasanIdx !== -1 ? bawahanRow[pNipAtasanIdx] : '');
-          
-          if (atasanNip && pEmailIdx !== -1) {
-            const atasanRow = pRows.find((r: any) => r[pNipIdx]?.toString().trim() === atasanNip.toString().trim());
-            const atasanEmail = atasanRow ? atasanRow[pEmailIdx]?.toString().trim() : null;
-            const atasanNama = atasanRow ? atasanRow[pNamaIdx] : (idpData[0]?.nama_ketua || 'Atasan');
-
-            if (atasanEmail) {
-              await sendIdpSubmissionNotificationToAtasan({
-                atasanEmail,
-                atasanNama,
-                bawahanNama,
-                bawahanNip: nip,
-                unitKerja,
-                idpItems: idpData.map((item: any) => ({
-                  jenis_kompetensi: item.jenis_kompetensi,
-                  jenis_pengembangan: item.jenis_pengembangan,
-                  jalur_pengembangan: item.jalur_pengembangan,
-                  penyelenggara: item.penyelenggara,
-                  waktu_pelaksanaan_awal: item.waktu_pelaksanaan_awal,
-                  waktu_pelaksanaan_akhir: item.waktu_pelaksanaan_akhir,
-                  jp: item.jp,
-                  anggaran: item.anggaran
-                }))
-              });
-            } else {
-              console.log(`[EMAIL NOTICE] Atasan NIP ${atasanNip} belum mengisi email di login/profil.`);
-            }
-          }
-        }
-      } catch (err: any) {
-        console.error('[EMAIL ERROR on POST IDP]', err.message);
-      }
-    })();
 
     return NextResponse.json({ success: true });
   } catch (e: any) {
@@ -192,45 +140,6 @@ export async function PUT(request: Request) {
     }
 
     revalidateTag('google-sheets', { expire: 0 });
-
-    // Kirim notifikasi email ke Bawahan jika status disetujui atau ditolak
-    if (finalStatus === 'Disetujui' || finalStatus === 'Ditolak' || finalStatus.includes('Setuju')) {
-      (async () => {
-        try {
-          const targetNip = updateData?.nip || bawahanNip;
-          if (!targetNip) return;
-
-          const pRows = await getCachedSheetData('pegawai!A:ZZ');
-          if (pRows && pRows.length > 0) {
-            const headers = pRows[0].map((h: string) => h.toLowerCase().trim());
-            const pNipIdx = headers.indexOf('nip');
-            const pNamaIdx = headers.indexOf('nama');
-            const pEmailIdx = headers.indexOf('email');
-
-            const bawahanRow = pRows.find((r: any) => r[pNipIdx]?.toString().trim() === targetNip.toString().trim());
-            const bawahanEmail = bawahanRow && pEmailIdx !== -1 ? bawahanRow[pEmailIdx]?.toString().trim() : null;
-            const bawahanNama = bawahanRow ? (bawahanRow[pNamaIdx] || targetNip) : targetNip;
-
-            if (bawahanEmail) {
-              await sendIdpStatusNotificationToBawahan({
-                bawahanEmail,
-                bawahanNama,
-                status: finalStatus,
-                jenisKompetensi: finalKompetensi || 'Pengembangan Kompetensi',
-                jenisPengembangan: finalPengembangan,
-                jp: finalJp,
-                alasanTolak: finalAlasanTolak,
-                reviewerNama: (updateData?.nama_ketua || namaKetua || 'Atasan / Admin')
-              });
-            } else {
-              console.log(`[EMAIL NOTICE] Bawahan NIP ${targetNip} belum mengisi email di login/profil.`);
-            }
-          }
-        } catch (err: any) {
-          console.error('[EMAIL ERROR on PUT IDP]', err.message);
-        }
-      })();
-    }
 
     return NextResponse.json({ success: true });
   } catch (e: any) {

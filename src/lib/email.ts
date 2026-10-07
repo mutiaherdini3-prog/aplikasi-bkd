@@ -21,77 +21,9 @@ export interface IdpItemNotification {
 /**
  * Mengirim email menggunakan Nodemailer (SMTP) atau fallback Google Apps Script / Simulasi.
  */
-export async function sendEmail({ to, subject, html, text }: EmailOptions): Promise<{ success: boolean; messageId?: string; simulated?: boolean; error?: string }> {
-  if (!to || !to.includes('@')) {
-    console.warn(`[EMAIL] Alamat email tidak valid: "${to}"`);
-    return { success: false, error: 'Invalid email address' };
-  }
-
-  const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || process.env.GMAIL_USER;
-  const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
-  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
-  const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
-  const smtpFrom = process.env.SMTP_FROM || `"SIPJP Bangka Barat" <${smtpUser || 'no-reply@bangkabaratkab.go.id'}>`;
-
-  // Cek apakah ada Google Apps Script Webhook
-  const scriptUrl = process.env.GOOGLE_APPS_SCRIPT_EMAIL_URL;
-  if (scriptUrl) {
-    try {
-      const res = await fetch(scriptUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, html, text: text || html.replace(/<[^>]*>/g, '') })
-      });
-      const data = await res.json().catch(() => ({}));
-      console.log(`[EMAIL VIA APPS SCRIPT] Terkirim ke: ${to}`);
-      return { success: true, messageId: data.messageId || 'apps-script' };
-    } catch (err: any) {
-      console.error(`[EMAIL VIA APPS SCRIPT ERROR]`, err.message);
-    }
-  }
-
-  // Jika kredensial SMTP tersedia, kirim via Nodemailer
-  if (smtpUser && smtpPass) {
-    try {
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpSecure,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
-
-      const info = await transporter.sendMail({
-        from: smtpFrom,
-        to,
-        subject,
-        html,
-        text: text || html.replace(/<[^>]*>/g, ''),
-      });
-
-      console.log(`[EMAIL SMTP SUKSES] Email terkirim ke: ${to}, Message ID: ${info.messageId}`);
-      return { success: true, messageId: info.messageId };
-    } catch (err: any) {
-      console.error(`[EMAIL SMTP ERROR] Gagal mengirim email ke ${to}:`, err.message);
-      return { success: false, error: err.message };
-    }
-  }
-
-  // Fallback: Simulasi (ketika kredensial SMTP belum diset di .env.local)
-  console.log(`
-===================== [SIMULASI PENGIRIMAN EMAIL] =====================
-Kepada       : ${to}
-Subjek       : ${subject}
-Waktu        : ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}
-Keterangan   : SMTP belum dikonfigurasi di .env.local.
-              Silakan tambahkan SMTP_USER dan SMTP_PASS di .env.local 
-              (misal: akun Gmail dengan App Password) agar email terkirim nyata.
-========================================================================
-  `);
-
+export async function sendEmail({ to }: EmailOptions): Promise<{ success: boolean; messageId?: string; simulated?: boolean; error?: string }> {
+  // Notifikasi email dinonaktifkan sepenuhnya untuk mencegah resiko spam/pemblokiran akun Google
+  console.log(`[EMAIL NONAKTIF] Pengiriman email ke "${to}" dinonaktifkan sesuai permintaan pengguna.`);
   return { success: true, simulated: true };
 }
 
