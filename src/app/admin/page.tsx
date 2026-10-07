@@ -1333,46 +1333,26 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      <div className="col-xl-4 col-lg-5 text-lg-end">
-                        <div className="d-flex flex-column gap-2 align-items-lg-end">
-                          <div className="text-white text-opacity-75 small fw-semibold mb-1">
-                            <i className="bi bi-lightning-charge-fill text-warning me-1"></i>Aksi Cepat Admin
+                      <div className="col-xl-4 col-lg-5">
+                        <div className="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-20 text-white" style={{ backdropFilter: 'blur(8px)' }}>
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span className="small text-white text-opacity-80 fw-semibold">
+                              <i className="bi bi-pie-chart-fill me-1 text-info"></i> Rata-rata Capaian Kabupaten
+                            </span>
+                            <span className="badge bg-success bg-opacity-75 text-white px-2 py-1 rounded-pill small">
+                              {tahunFilter === 'all' ? 'Semua Periode' : `Tahun ${tahunFilter}`}
+                            </span>
                           </div>
-                          <div className="d-flex flex-wrap gap-2 justify-content-lg-end">
-                            {(userRole === 'super_admin' || userRole === 'admin') && (
-                              <button 
-                                className="hero-action-btn bg-white text-primary shadow-sm"
-                                onClick={() => {
-                                  setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0, email: '' });
-                                  setShowPegawaiModal(true);
-                                }}
-                              >
-                                <i className="bi bi-person-plus-fill"></i> Tambah Pegawai
-                              </button>
-                            )}
-                            <button 
-                              className="hero-action-btn bg-white bg-opacity-15 text-white border border-white border-opacity-25"
-                              onClick={() => setActiveTab('view-sertifikasi')}
-                            >
-                              <i className="bi bi-journal-check"></i> Rekap Sertifikat
-                            </button>
-                            <button 
-                              className="hero-action-btn bg-white bg-opacity-15 text-white border border-white border-opacity-25 position-relative"
-                              onClick={() => setActiveTab('view-idp')}
-                            >
-                              <i className="bi bi-calendar2-check"></i> Approval IDP
-                              {pendingIdp > 0 && (
-                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.65rem' }}>
-                                  {pendingIdp}
-                                </span>
-                              )}
-                            </button>
-                            <button 
-                              className="hero-action-btn bg-success text-white shadow-sm"
-                              onClick={exportToExcelDataPegawai}
-                            >
-                              <i className="bi bi-file-earmark-excel"></i> Export Excel
-                            </button>
+                          <div className="d-flex align-items-baseline gap-2 mb-2">
+                            <span className="fs-1 fw-bold text-white lh-1">{percentLulus}%</span>
+                            <span className="text-white text-opacity-75 small">ASN Memenuhi Target</span>
+                          </div>
+                          <div className="progress mb-2" style={{ height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px' }}>
+                            <div className="progress-bar bg-success" style={{ width: `${percentLulus}%`, borderRadius: '10px' }}></div>
+                          </div>
+                          <div className="d-flex justify-content-between text-white text-opacity-75" style={{ fontSize: '0.75rem' }}>
+                            <span>PNS Lulus: <b>{percentPNS}%</b> ({lulusPNS}/{totalPNS})</span>
+                            <span>PPPK Lulus: <b>{percentPPPK}%</b> ({lulusPPPK}/{totalPPPK})</span>
                           </div>
                         </div>
                       </div>
