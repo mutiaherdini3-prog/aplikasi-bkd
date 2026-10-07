@@ -1,29 +1,12 @@
 const git = require('isomorphic-git');
 const http = require('isomorphic-git/http/node');
 const fs = require('fs');
-const readline = require('readline');
+require('dotenv').config({ path: '.env.local' });
 
-async function push(token) {
+async function doPush() {
+  const token = process.argv[2] || process.env.GITHUB_TOKEN;
   if (!token) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-    return new Promise((resolve) => {
-      rl.question('Masukkan GitHub Personal Access Token (PAT): ', async (ans) => {
-        rl.close();
-        await doPush(ans.trim());
-        resolve();
-      });
-    });
-  } else {
-    await doPush(token.trim());
-  }
-}
-
-async function doPush(token) {
-  if (!token) {
-    console.error('❌ Token tidak boleh kosong!');
+    console.error('❌ GITHUB_TOKEN tidak ditemukan di .env.local atau argumen!');
     process.exit(1);
   }
   console.log('🚀 Sedang melakukan push ke GitHub (mutiaherdini3-prog/aplikasi-bkd, branch main)...');
@@ -35,7 +18,7 @@ async function doPush(token) {
       remote: 'origin',
       ref: 'main',
       onAuth: () => ({
-        username: token,
+        username: token.trim(),
         password: ''
       })
     });
@@ -46,5 +29,4 @@ async function doPush(token) {
   }
 }
 
-const argToken = process.argv[2];
-push(argToken);
+doPush();
