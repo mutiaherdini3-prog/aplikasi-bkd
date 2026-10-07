@@ -1238,55 +1238,7 @@ export default function AdminPage() {
               {/* DASHBOARD TAB */}
               {activeTab === 'view-dashboard' && (() => {
                 const totalPegawai = pegawaiList.length;
-                const totalPNS = pnsList.length;
-                const totalPPPK = pppkList.length;
-                
-                const currentYear = tahunFilter !== 'all' ? tahunFilter : (chartData.length > 0 ? chartData[chartData.length - 1].year : new Date().getFullYear().toString());
-                const currentYearData = chartData.find(d => d.year === currentYear) || { 'Memenuhi Syarat': 0, 'Belum Memenuhi': 0 };
-                
                 const percentLulus = totalPegawai > 0 ? Math.round((lulus / totalPegawai) * 100) : 0;
-                const percentBelum = totalPegawai > 0 ? (100 - percentLulus) : 0;
-                const percentPNS = totalPNS > 0 ? Math.round((lulusPNS / totalPNS) * 100) : 0;
-                const percentPPPK = totalPPPK > 0 ? Math.round((lulusPPPK / totalPPPK) * 100) : 0;
-
-                // Total akumulasi JP & Rata-rata
-                const totalJpTerkumpul = pegawaiList.reduce((acc, p) => acc + (p.jp || 0), 0);
-                const avgJp = totalPegawai > 0 ? (totalJpTerkumpul / totalPegawai).toFixed(1) : '0';
-
-                // Total Dokumen Sertifikat
-                const totalSertifikatCount = pegawaiList.reduce((acc, p) => acc + (p.filteredSertifikasi?.length || 0), 0);
-
-                // IDP Stats
-                let pendingIdp = 0;
-                let approvedIdp = 0;
-                rawPegawaiList.forEach(p => {
-                  (p.idp || []).forEach((item: any) => {
-                    if (item.status === 'Menunggu Persetujuan Admin' || item.status === 'Diajukan') pendingIdp++;
-                    else if (item.status === 'Disetujui') approvedIdp++;
-                  });
-                });
-
-                // Rentang JP
-                const count0Jp = pegawaiList.filter(p => p.jp === 0).length;
-                const count1to9Jp = pegawaiList.filter(p => p.jp >= 1 && p.jp <= 9).length;
-                const count10to19Jp = pegawaiList.filter(p => p.jp >= 10 && p.jp <= 19).length;
-                const count20PlusJp = pegawaiList.filter(p => p.jp >= 20).length;
-
-                // Top 5 OPD Capaian Tertinggi
-                const topOpds = [...opdTrendData].map(item => {
-                  const stats = item.yearlyStats[currentYear] || { lulus: 0, persentase: 0, totalJp: 0, avgJp: 0 };
-                  return {
-                    opd: item.opd,
-                    totalMembers: item.totalMembers,
-                    lulus: stats.lulus,
-                    persentase: stats.persentase,
-                    avgJp: stats.avgJp,
-                    statusTren: item.statusTren
-                  };
-                }).sort((a, b) => b.persentase - a.persentase || b.lulus - a.lulus).slice(0, 5);
-
-                // Top 5 Pegawai Teraktif (sudah tersortir descending by jp)
-                const topLearners = pegawaiList.slice(0, 5);
 
                 const pieData = [
                   { name: 'Memenuhi Syarat', value: lulus, color: '#10b981' },
@@ -1295,90 +1247,43 @@ export default function AdminPage() {
 
                 return (
                 <div>
-                  {/* HERO BANNER EKSEKUTIF */}
-                  <div className="dash-hero">
-                    <div className="row align-items-center g-4 position-relative" style={{ zIndex: 1 }}>
-                      <div className="col-xl-8 col-lg-7">
-                        <div className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white bg-opacity-10 text-cyan border border-white border-opacity-20 mb-3" style={{ fontSize: '0.8rem', backdropFilter: 'blur(6px)' }}>
-                          <i className="bi bi-building-check text-info"></i>
-                          <span>Pemerintah Kabupaten Bangka Barat &bull; BKPSDM</span>
-                        </div>
-                        <h2 className="fw-bold mb-2 text-white" style={{ letterSpacing: '-0.5px' }}>
-                          Executive Dashboard Pemenuhan 20 JP ASN
-                        </h2>
-                        <p className="text-white text-opacity-80 mb-4" style={{ fontSize: '0.95rem', maxWidth: '620px', lineHeight: 1.6 }}>
-                          Monitoring terpadu kewajiban pengembangan kompetensi aparatur sipil negara (Target 20 JP untuk PNS & 24 JP untuk PPPK) secara berkala dan akuntabel.
-                        </p>
-                        
-                        {/* Filter Tahun Pill Group */}
-                        <div className="d-flex align-items-center flex-wrap gap-2">
-                          <span className="text-white text-opacity-75 small fw-semibold me-1">
-                            <i className="bi bi-funnel me-1"></i>Periode:
-                          </span>
-                          <button 
-                            className={`year-pill-btn ${tahunFilter === 'all' ? 'active' : ''}`}
-                            onClick={() => setTahunFilter('all')}
-                          >
-                            Semua Tahun
-                          </button>
-                          {availableYears.map(yr => (
-                            <button
-                              key={yr}
-                              className={`year-pill-btn ${tahunFilter === yr ? 'active' : ''}`}
-                              onClick={() => setTahunFilter(yr)}
-                            >
-                              {yr}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                  {/* Header Bar dengan Filter Periode Tahun */}
+                  <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                      <h4 className="fw-bold text-dark mb-1">
+                        <i className="bi bi-graph-up-arrow text-primary me-2"></i>
+                        Grafik Capaian &amp; Pemenuhan JP ASN
+                      </h4>
+                      <p className="text-muted small mb-0">
+                        Visualisasi tren kelulusan tahunan dan rasio pemenuhan standar 20 JP Pemerintah Kabupaten Bangka Barat
+                      </p>
+                    </div>
 
-                      <div className="col-xl-4 col-lg-5">
-                        <div className="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-20 text-white" style={{ backdropFilter: 'blur(8px)' }}>
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <span className="small text-white text-opacity-80 fw-semibold">
-                              <i className="bi bi-pie-chart-fill me-1 text-info"></i> Rata-rata Capaian Kabupaten
-                            </span>
-                            <span className="badge bg-success bg-opacity-75 text-white px-2 py-1 rounded-pill small">
-                              {tahunFilter === 'all' ? 'Semua Periode' : `Tahun ${tahunFilter}`}
-                            </span>
-                          </div>
-                          <div className="d-flex align-items-baseline gap-2 mb-2">
-                            <span className="fs-1 fw-bold text-white lh-1">{percentLulus}%</span>
-                            <span className="text-white text-opacity-75 small">ASN Memenuhi Target</span>
-                          </div>
-                          <div className="progress mb-2" style={{ height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-success" style={{ width: `${percentLulus}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="d-flex justify-content-between text-white text-opacity-75" style={{ fontSize: '0.75rem' }}>
-                            <span>PNS Lulus: <b>{percentPNS}%</b> ({lulusPNS}/{totalPNS})</span>
-                            <span>PPPK Lulus: <b>{percentPPPK}%</b> ({lulusPPPK}/{totalPPPK})</span>
-                          </div>
-                        </div>
-                      </div>
+                    {/* Filter Periode Pills */}
+                    <div className="d-flex align-items-center flex-wrap gap-2 bg-white p-2 rounded-4 border shadow-sm">
+                      <span className="text-secondary small fw-semibold me-1 ps-1">
+                        <i className="bi bi-funnel me-1"></i>Periode:
+                      </span>
+                      <button 
+                        className={`btn btn-sm ${tahunFilter === 'all' ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary'} rounded-pill px-3 py-1 fw-semibold`}
+                        onClick={() => setTahunFilter('all')}
+                      >
+                        Semua Tahun
+                      </button>
+                      {availableYears.map(yr => (
+                        <button
+                          key={yr}
+                          className={`btn btn-sm ${tahunFilter === yr ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary'} rounded-pill px-3 py-1 fw-semibold`}
+                          onClick={() => setTahunFilter(yr)}
+                        >
+                          {yr}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* ALERT PENDING IDP NOTIFIKASI */}
-                  {pendingIdp > 0 && (
-                    <div className="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style={{ background: 'linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%)', borderLeft: '5px solid #f59e0b' }}>
-                      <div className="d-flex align-items-center gap-3">
-                        <div className="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
-                          <i className="bi bi-bell-fill fs-5"></i>
-                        </div>
-                        <div>
-                          <div className="fw-bold text-dark">Perhatian: {pendingIdp} Rencana Pengembangan (IDP) Menunggu Persetujuan</div>
-                          <div className="text-secondary small">Terdapat pengajuan kompetensi pegawai yang perlu ditinjau oleh Administrator Utama.</div>
-                        </div>
-                      </div>
-                      <button className="btn btn-sm btn-warning text-dark fw-bold px-3 py-1 rounded-pill shadow-sm" onClick={() => setActiveTab('view-idp')}>
-                        Verifikasi IDP Sekarang <i className="bi bi-arrow-right ms-1"></i>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* CHARTS ROW (TREN & PROPORSI) - DI BAGIAN ATAS */}
-                  <div className="row g-4 mb-4">
+                  {/* CHARTS ROW (TREN & PROPORSI) */}
+                  <div className="row g-4">
                     {/* GRAFIK 1: TREN KELULUSAN PER TAHUN */}
                     <div className="col-lg-8">
                       <div className="dash-card h-100">
@@ -1397,7 +1302,7 @@ export default function AdminPage() {
                           </div>
                         </div>
 
-                        <div style={{ width: '100%', height: 350 }}>
+                        <div style={{ width: '100%', height: 380 }}>
                           {chartData.length > 0 ? (
                             <ResponsiveContainer>
                               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -1491,7 +1396,7 @@ export default function AdminPage() {
                         </div>
 
                         {/* Rangkuman breakdown di bawah donat */}
-                        <div className="row g-2 mt-1">
+                        <div className="row g-2 mt-3">
                           <div className="col-6">
                             <div className="p-2 rounded-3 border bg-light text-center">
                               <div className="d-flex align-items-center justify-content-center gap-1 mb-1">
@@ -1511,370 +1416,6 @@ export default function AdminPage() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 5 KPI METRIC CARDS ROW */}
-                  <div className="row g-3 mb-4">
-                    {/* KPI 1: TOTAL ASN */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('view-pegawai')}>
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Total ASN Terdata</span>
-                            <h3 className="fw-bold text-dark mb-0 mt-1">{totalPegawai.toLocaleString('id-ID')}</h3>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
-                            <i className="bi bi-people-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="d-flex gap-2 mb-1">
-                            <span className="badge bg-primary-subtle text-primary border border-primary-subtle" style={{ fontSize: '0.72rem' }}>PNS: {totalPNS}</span>
-                            <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle" style={{ fontSize: '0.72rem' }}>PPPK: {totalPPPK}</span>
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.76rem' }}>Klik untuk kelola data master</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 2: MEMENUHI SYARAT */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Memenuhi Syarat</span>
-                            <div className="d-flex align-items-baseline gap-2 mt-1">
-                              <h3 className="fw-bold text-success mb-0">{lulus.toLocaleString('id-ID')}</h3>
-                              <span className="badge bg-success text-white px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem' }}>{percentLulus}%</span>
-                            </div>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #10b981, #047857)' }}>
-                            <i className="bi bi-patch-check-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="progress mb-2" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-success" style={{ width: `${percentLulus}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="text-muted d-flex justify-content-between" style={{ fontSize: '0.75rem' }}>
-                            <span>PNS: <b>{lulusPNS}</b></span>
-                            <span>PPPK: <b>{lulusPPPK}</b></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 3: BELUM MEMENUHI */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Belum Memenuhi</span>
-                            <div className="d-flex align-items-baseline gap-2 mt-1">
-                              <h3 className="fw-bold text-warning-emphasis mb-0">{belum.toLocaleString('id-ID')}</h3>
-                              <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem' }}>{percentBelum}%</span>
-                            </div>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)' }}>
-                            <i className="bi bi-clock-history"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="progress mb-2" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-warning" style={{ width: `${percentBelum}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                            Perlu percepatan keikutsertaan diklat
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 4: AKUMULASI JP */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card">
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Akumulasi Jam Pelajaran</span>
-                            <h3 className="fw-bold text-dark mb-0 mt-1">{totalJpTerkumpul.toLocaleString('id-ID')} <span className="fs-6 fw-normal text-muted">JP</span></h3>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0e7490)' }}>
-                            <i className="bi bi-mortarboard-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="d-flex align-items-center justify-content-between mb-1">
-                            <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle" style={{ fontSize: '0.72rem' }}>Rata-rata: {avgJp} JP / ASN</span>
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>Dari {totalSertifikatCount.toLocaleString('id-ID')} sertifikat tercatat</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* KPI 5: REKAP SERTIFIKASI & IDP */}
-                    <div className="col-xl col-md-6">
-                      <div className="dash-kpi-card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('view-idp')}>
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div>
-                            <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>Approval & IDP</span>
-                            <h3 className="fw-bold text-dark mb-0 mt-1">{pendingIdp > 0 ? `${pendingIdp} Pending` : `${approvedIdp} Selesai`}</h3>
-                          </div>
-                          <div className="dash-kpi-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)' }}>
-                            <i className="bi bi-calendar2-check-fill"></i>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="d-flex align-items-center gap-1 mb-1">
-                            {pendingIdp > 0 ? (
-                              <span className="badge bg-danger-subtle text-danger border border-danger-subtle" style={{ fontSize: '0.72rem' }}>⚠️ Butuh Verifikasi</span>
-                            ) : (
-                              <span className="badge bg-success-subtle text-success border border-success-subtle" style={{ fontSize: '0.72rem' }}>✅ Terverifikasi Rapi</span>
-                            )}
-                          </div>
-                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>Klik untuk modul verifikasi IDP</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* POLICY & COMPLIANCE DEEP DIVE ROW (PNS vs PPPK & JP BRACKETS) */}
-                  <div className="row g-4 mb-4">
-                    {/* KOMPARASI PNS vs PPPK */}
-                    <div className="col-lg-6">
-                      <div className="dash-card h-100">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                          <div>
-                            <h5 className="fw-bold text-dark mb-1">
-                              <i className="bi bi-shield-check text-success me-2"></i>
-                              Kepatuhan Standar Regulasi ASN
-                            </h5>
-                            <span className="text-muted small">Target 20 JP (PNS) & 24 JP (PPPK) sesuai PP 11/2017 & UU 20/2023</span>
-                          </div>
-                        </div>
-
-                        {/* PNS Card */}
-                        <div className="p-3 rounded-4 border bg-light mb-3">
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                              <span className="badge bg-primary text-white me-2">Pegawai Negeri Sipil (PNS)</span>
-                              <span className="text-muted small">Target minimal: <b>20 JP/tahun</b></span>
-                            </div>
-                            <span className="fw-bold text-primary fs-6">{percentPNS}% Memenuhi</span>
-                          </div>
-                          <div className="progress mb-2" style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-primary" style={{ width: `${percentPNS}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="d-flex justify-content-between text-muted small">
-                            <span>Lulus: <b>{lulusPNS}</b> dari {totalPNS} ASN</span>
-                            <span>Belum: <b>{belumPNS}</b> ASN</span>
-                          </div>
-                        </div>
-
-                        {/* PPPK Card */}
-                        <div className="p-3 rounded-4 border bg-light">
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                              <span className="badge bg-info text-dark me-2">PPPK</span>
-                              <span className="text-muted small">Target maksimal: <b>24 JP/tahun</b></span>
-                            </div>
-                            <span className="fw-bold text-info-emphasis fs-6">{percentPPPK}% Memenuhi</span>
-                          </div>
-                          <div className="progress mb-2" style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
-                            <div className="progress-bar bg-info" style={{ width: `${percentPPPK}%`, borderRadius: '10px' }}></div>
-                          </div>
-                          <div className="d-flex justify-content-between text-muted small">
-                            <span>Lulus: <b>{lulusPPPK}</b> dari {totalPPPK} ASN</span>
-                            <span>Belum: <b>{belumPPPK}</b> ASN</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* SEBARAN RENTANG JAM PELAJARAN */}
-                    <div className="col-lg-6">
-                      <div className="dash-card h-100">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                          <div>
-                            <h5 className="fw-bold text-dark mb-1">
-                              <i className="bi bi-bar-chart-steps text-info me-2"></i>
-                              Distribusi Perolehan Jam Pelajaran (JP)
-                            </h5>
-                            <span className="text-muted small">Sebaran akumulasi jam pembelajaran seluruh pegawai</span>
-                          </div>
-                          <span className="badge bg-secondary-subtle text-secondary border px-2 py-1">
-                            {totalPegawai} Total
-                          </span>
-                        </div>
-
-                        {/* Segmented Bar */}
-                        <div className="progress mb-4" style={{ height: '14px', borderRadius: '8px', overflow: 'hidden' }}>
-                          <div className="progress-bar bg-danger" style={{ width: `${totalPegawai > 0 ? (count0Jp / totalPegawai) * 100 : 0}%` }} title={`0 JP: ${count0Jp}`}></div>
-                          <div className="progress-bar bg-warning" style={{ width: `${totalPegawai > 0 ? (count1to9Jp / totalPegawai) * 100 : 0}%` }} title={`1-9 JP: ${count1to9Jp}`}></div>
-                          <div className="progress-bar bg-info" style={{ width: `${totalPegawai > 0 ? (count10to19Jp / totalPegawai) * 100 : 0}%` }} title={`10-19 JP: ${count10to19Jp}`}></div>
-                          <div className="progress-bar bg-success" style={{ width: `${totalPegawai > 0 ? (count20PlusJp / totalPegawai) * 100 : 0}%` }} title={`≥20 JP: ${count20PlusJp}`}></div>
-                        </div>
-
-                        {/* 4 Bracket Cards */}
-                        <div className="row g-2">
-                          <div className="col-6">
-                            <div className="p-2 border rounded-3 bg-light d-flex align-items-center gap-2">
-                              <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#ef4444' }}></div>
-                              <div className="small">
-                                <div className="text-muted">0 JP (Belum Diklat)</div>
-                                <div className="fw-bold text-dark">{count0Jp} ASN ({totalPegawai > 0 ? Math.round((count0Jp / totalPegawai) * 100) : 0}%)</div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="p-2 border rounded-3 bg-light d-flex align-items-center gap-2">
-                              <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#f59e0b' }}></div>
-                              <div className="small">
-                                <div className="text-muted">1 - 9 JP (Awal)</div>
-                                <div className="fw-bold text-dark">{count1to9Jp} ASN ({totalPegawai > 0 ? Math.round((count1to9Jp / totalPegawai) * 100) : 0}%)</div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="p-2 border rounded-3 bg-light d-flex align-items-center gap-2">
-                              <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#06b6d4' }}></div>
-                              <div className="small">
-                                <div className="text-muted">10 - 19 JP (Mendekati)</div>
-                                <div className="fw-bold text-dark">{count10to19Jp} ASN ({totalPegawai > 0 ? Math.round((count10to19Jp / totalPegawai) * 100) : 0}%)</div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="p-2 border rounded-3 bg-light d-flex align-items-center gap-2">
-                              <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#10b981' }}></div>
-                              <div className="small">
-                                <div className="text-muted">≥ 20 JP (Tuntas)</div>
-                                <div className="fw-bold text-success">{count20PlusJp} ASN ({totalPegawai > 0 ? Math.round((count20PlusJp / totalPegawai) * 100) : 0}%)</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* LEADERBOARD & HIGHLIGHTS ROW */}
-                  <div className="row g-4">
-                    {/* TOP 5 OPD / UNIT KERJA */}
-                    <div className="col-lg-6">
-                      <div className="dash-card h-100">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                          <div>
-                            <h5 className="fw-bold text-dark mb-1">
-                              <i className="bi bi-trophy-fill text-warning me-2"></i>
-                              Top 5 OPD / Unit Kerja Berprestasi
-                            </h5>
-                            <span className="text-muted small">Capaian persentase kelulusan tertinggi ({currentYear})</span>
-                          </div>
-                          <button 
-                            className="btn btn-sm btn-outline-primary rounded-pill px-3"
-                            onClick={() => setActiveTab('view-tren')}
-                          >
-                            Semua OPD <i className="bi bi-arrow-right ms-1"></i>
-                          </button>
-                        </div>
-
-                        {topOpds.length > 0 ? (
-                          topOpds.map((item, idx) => {
-                            const badgeColors = ['bg-warning text-dark', 'bg-secondary text-white', 'bg-warning-subtle text-warning-emphasis', 'bg-light text-secondary border', 'bg-light text-secondary border'];
-                            const medalIcons = ['🥇', '🥈', '🥉', '4', '5'];
-                            return (
-                              <div key={idx} className="dash-podium-item">
-                                <div className={`dash-rank-badge ${badgeColors[idx] || 'bg-light text-dark'}`}>
-                                  {medalIcons[idx]}
-                                </div>
-                                <div className="flex-grow-1 me-2" style={{ minWidth: 0 }}>
-                                  <div className="fw-bold text-dark text-truncate" style={{ fontSize: '0.88rem' }} title={item.opd}>
-                                    {item.opd}
-                                  </div>
-                                  <div className="text-muted small">
-                                    {item.lulus} dari {item.totalMembers} pegawai lulus &bull; Rata-rata {item.avgJp} JP
-                                  </div>
-                                </div>
-                                <div className="text-end flex-shrink-0">
-                                  <span className={`badge ${item.persentase >= 60 ? 'bg-success' : item.persentase >= 30 ? 'bg-primary' : 'bg-warning text-dark'} px-2 py-1 rounded-pill`} style={{ fontSize: '0.8rem' }}>
-                                    {item.persentase}% Lulus
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="text-muted text-center py-4">Belum ada data OPD untuk periode ini.</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* TOP 5 PEGAWAI DENGAN JP TERTINGGI */}
-                    <div className="col-lg-6">
-                      <div className="dash-card h-100">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                          <div>
-                            <h5 className="fw-bold text-dark mb-1">
-                              <i className="bi bi-award-fill text-danger me-2"></i>
-                              Top 5 ASN Pembelajar Teraktif
-                            </h5>
-                            <span className="text-muted small">Akumulasi Jam Pelajaran (JP) terbanyak</span>
-                          </div>
-                          <button 
-                            className="btn btn-sm btn-outline-primary rounded-pill px-3"
-                            onClick={() => setActiveTab('view-pegawai')}
-                          >
-                            Data Pegawai <i className="bi bi-arrow-right ms-1"></i>
-                          </button>
-                        </div>
-
-                        {topLearners.length > 0 ? (
-                          topLearners.map((p, idx) => {
-                            const initials = (p.nama || 'A').split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
-                            const avatarGradients = [
-                              'linear-gradient(135deg, #f59e0b, #d97706)',
-                              'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                              'linear-gradient(135deg, #10b981, #047857)',
-                              'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-                              'linear-gradient(135deg, #ec4899, #be185d)'
-                            ];
-                            return (
-                              <div key={p.nip || idx} className="dash-podium-item">
-                                <div className="dash-avatar" style={{ background: avatarGradients[idx] || '#64748b' }}>
-                                  {initials}
-                                </div>
-                                <div className="flex-grow-1 me-2" style={{ minWidth: 0 }}>
-                                  <div className="fw-bold text-dark text-truncate" style={{ fontSize: '0.88rem' }}>
-                                    {p.nama}
-                                  </div>
-                                  <div className="text-muted small text-truncate" style={{ fontSize: '0.75rem' }}>
-                                    NIP: {p.nip} &bull; <span className="text-secondary">{p.unit_kerja || 'OPD'}</span>
-                                  </div>
-                                </div>
-                                <div className="text-end flex-shrink-0 d-flex align-items-center gap-2">
-                                  <span className="badge bg-primary px-3 py-2 rounded-pill fs-6 fw-bold">
-                                    {p.jp || 0} JP
-                                  </span>
-                                  <button 
-                                    className="btn btn-sm btn-light border text-primary rounded-circle"
-                                    style={{ width: '32px', height: '32px', padding: 0 }}
-                                    title="Lihat Detail Pegawai"
-                                    onClick={() => {
-                                      setSelectedPegawai(p);
-                                      setShowModal(true);
-                                    }}
-                                  >
-                                    <i className="bi bi-eye"></i>
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="text-muted text-center py-4">Belum ada data pegawai.</div>
-                        )}
                       </div>
                     </div>
                   </div>
