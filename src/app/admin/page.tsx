@@ -76,6 +76,9 @@ export default function AdminPage() {
   const [pagePegawaiPerOPD, setPagePegawaiPerOPD] = useState<Record<string, number>>({});
   const [expandedTrenOpd, setExpandedTrenOpd] = useState<string | null>(null);
   const [pageTrenPegawai, setPageTrenPegawai] = useState<number>(1);
+  const [trenViewMode, setTrenViewMode] = useState<'pegawai' | 'opd'>('pegawai');
+  const [currentPageTrenPegawai, setCurrentPageTrenPegawai] = useState<number>(1);
+  const [filterTrenOpd, setFilterTrenOpd] = useState<string>('all');
 
   // Reset pagination on filter change
   useEffect(() => {
@@ -83,7 +86,8 @@ export default function AdminPage() {
     setCurrentPageSert(1);
     setCurrentPageIdp(1);
     setCurrentPageTren(1);
-  }, [filterMode, statusFilter, tahunFilter, searchPegawai, searchSertifikasi, searchIdp, searchTren, filterTrenStatus]);
+    setCurrentPageTrenPegawai(1);
+  }, [filterMode, statusFilter, tahunFilter, searchPegawai, searchSertifikasi, searchIdp, searchTren, filterTrenStatus, filterTrenOpd, trenViewMode]);
 
   // Pagination UI Component
   const PaginationControls = ({ currentPage, setCurrentPage, totalItems, itemsPerPage = ITEMS_PER_PAGE }: { currentPage: number, setCurrentPage: (p: number) => void, totalItems: number, itemsPerPage?: number }) => {
@@ -610,6 +614,33 @@ export default function AdminPage() {
   };
 
   const exportTrenToExcel = () => {
+    if (trenViewMode === 'pegawai') {
+      const excelRows = filteredPegawaiTrendList.map((p: any, idx: number) => {
+        const row: any = {
+          "No": idx + 1,
+          "Nama Pegawai": p.nama || '-',
+          "NIP": p.nip || '-',
+          "Status ASN": p.status_pegawai || 'ASN',
+          "OPD / Unit Kerja": p.unit_kerja || '-',
+        };
+        trendYears.forEach(year => {
+          const jp = p.yearlyJp?.[year] || 0;
+          const lulus = p.yearlyLulus?.[year];
+          row[`${year} (JP)`] = jp;
+          row[`${year} (Status)`] = lulus ? 'Memenuhi Syarat' : 'Belum Memenuhi';
+        });
+        row["Status Tren"] = 
+          p.statusTren === 'naik' ? 'Naik (Meningkat)' :
+          p.statusTren === 'turun' ? 'Turun (Menurun)' : 'Stabil';
+        return row;
+      });
+      const worksheet = XLSX.utils.json_to_sheet(excelRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Tren_Tahunan_Pegawai");
+      XLSX.writeFile(workbook, "Rekap_Tren_Tahunan_Pegawai.xlsx");
+      return;
+    }
+
     const excelRows = opdTrendData.map((item, idx) => {
       const row: any = {
         "No": idx + 1,
@@ -855,6 +886,59 @@ export default function AdminPage() {
     const start = (currentPageTren - 1) * ITEMS_PER_PAGE_TREN;
     return filteredOpdTrendList.slice(start, start + ITEMS_PER_PAGE_TREN);
   }, [filteredOpdTrendList, currentPageTren]);
+
+  const pegawaiTrendList = useMemo(() => {
+    return rawPegawaiList.map(p => {
+      const yearlyJp: Record<string, number> = {};
+      const yearlyLulus: Record<string, boolean> = {};
+      trendYears.forEach(yr => {
+        const yrSerts = (p.sertifikasi || []).filter((s: any) => String(s.tahun) === String(yr));
+        const jp = yrSerts.reduce((acc: number, curr: any) => acc + (Number(curr.jumlah_jp) || 0), 0);
+        yearlyJp[yr] = jp;
+        yearlyLulus[yr] = checkLulusJP({ ...p, jp });
+      });
+
+      let statusTren: 'naik' | 'turun' | 'fluktuatif' | 'stabil' = 'stabil';
+      if (trendYears.length >= 2) {
+        const prevJp = yearlyJp[trendYears[trendYears.length - 2]] || 0;
+        const lastJp = yearlyJp[trendYears[trendYears.length - 1]] || 0;
+        if (lastJp > prevJp) statusTren = 'naik';
+        else if (lastJp < prevJp) statusTren = 'turun';
+        else statusTren = 'stabil';
+      }
+
+      return {
+        ...p,
+        yearlyJp,
+        yearlyLulus,
+        statusTren
+      };
+    });
+  }, [rawPegawaiList, trendYears]);
+
+  const filteredPegawaiTrendList = useMemo(() => {
+    return pegawaiTrendList.filter(p => {
+      if (filterTrenOpd !== 'all' && (p.unit_kerja || '-') !== filterTrenOpd) {
+        return false;
+      }
+      if (filterTrenStatus !== 'all' && p.statusTren !== filterTrenStatus) {
+        return false;
+      }
+      if (searchTren) {
+        const query = searchTren.toLowerCase();
+        const nama = (p.nama || '').toLowerCase();
+        const nip = (p.nip || '').toLowerCase();
+        const opd = (p.unit_kerja || '').toLowerCase();
+        return nama.includes(query) || nip.includes(query) || opd.includes(query);
+      }
+      return true;
+    });
+  }, [pegawaiTrendList, filterTrenOpd, filterTrenStatus, searchTren]);
+
+  const paginatedPegawaiTrend = useMemo(() => {
+    const start = (currentPageTrenPegawai - 1) * ITEMS_PER_PAGE_PEGAWAI;
+    return filteredPegawaiTrendList.slice(start, start + ITEMS_PER_PAGE_PEGAWAI);
+  }, [filteredPegawaiTrendList, currentPageTrenPegawai]);
 
   return (
     <>
@@ -2319,288 +2403,433 @@ export default function AdminPage() {
 
                   {/* Matriks Table Card */}
                   <div className="table-card">
-                    <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
                       <div>
                         <h5 className="fw-bold mb-1">
                           <i className="bi bi-table text-primary me-2"></i>
-                          Matriks Rekapitulasi Tahunan per OPD
+                          Matriks Rekapitulasi Tahunan (5 per Halaman)
                         </h5>
                         <p className="text-muted small mb-0">
-                          Membandingkan persentase pegawai yang memenuhi minimal 20 JP (PNS) / 24 JP (PPPK) dari tahun ke tahun.
+                          Membandingkan capaian pemenuhan jam pelajaran (JP) ASN antar tahun (Target 20 JP PNS / 24 JP PPPK).
                         </p>
                       </div>
 
-                      <div className="d-flex flex-wrap gap-2 align-items-center">
-                        <div className="position-relative">
+                      {/* Mode Switcher: Rekap per Pegawai vs Rekap per OPD */}
+                      <div className="btn-group p-1 bg-light rounded-pill border shadow-sm" role="group">
+                        <button 
+                          type="button" 
+                          className={`btn btn-sm rounded-pill px-3 fw-bold ${trenViewMode === 'pegawai' ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary border-0'}`}
+                          onClick={() => setTrenViewMode('pegawai')}
+                        >
+                          <i className="bi bi-people-fill me-1"></i> Rekap per Pegawai (5/Hal)
+                        </button>
+                        <button 
+                          type="button" 
+                          className={`btn btn-sm rounded-pill px-3 fw-bold ${trenViewMode === 'opd' ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary border-0'}`}
+                          onClick={() => setTrenViewMode('opd')}
+                        >
+                          <i className="bi bi-buildings-fill me-1"></i> Rekap per OPD (5/Hal)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Filter Bar */}
+                    <div className="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4 p-3 bg-light rounded-4 border">
+                      <div className="d-flex flex-wrap gap-2 align-items-center flex-grow-1">
+                        <div className="position-relative" style={{ minWidth: '220px', maxWidth: '300px' }}>
                           <input 
                             type="text" 
                             className="form-control form-control-sm pe-4" 
-                            placeholder="Cari Nama OPD..." 
+                            placeholder={trenViewMode === 'pegawai' ? "Cari Nama Pegawai, NIP, OPD..." : "Cari Nama OPD..."}
                             value={searchTren}
                             onChange={e => setSearchTren(e.target.value)}
                           />
                           <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                         </div>
 
+                        {trenViewMode === 'pegawai' && (
+                          <select 
+                            className="form-select form-select-sm border-secondary shadow-sm"
+                            style={{ maxWidth: '240px', cursor: 'pointer' }}
+                            value={filterTrenOpd}
+                            onChange={(e: any) => setFilterTrenOpd(e.target.value)}
+                          >
+                            <option value="all">Semua OPD / Unit Kerja</option>
+                            {sortedOPDs.map((opd, i) => (
+                              <option key={i} value={opd}>{opd}</option>
+                            ))}
+                          </select>
+                        )}
+
                         <select 
                           className="form-select form-select-sm border-secondary shadow-sm"
-                          style={{ width: '170px', cursor: 'pointer' }}
+                          style={{ width: '175px', cursor: 'pointer' }}
                           value={filterTrenStatus}
                           onChange={(e: any) => setFilterTrenStatus(e.target.value)}
                         >
                           <option value="all">Semua Status Tren</option>
                           <option value="naik">📈 Tren Naik (Meningkat)</option>
                           <option value="turun">📉 Tren Turun (Menurun)</option>
-                          <option value="fluktuatif">〰️ Fluktuatif</option>
+                          {trenViewMode === 'opd' && <option value="fluktuatif">〰️ Fluktuatif</option>}
                           <option value="stabil">➡️ Stabil</option>
                         </select>
-
-                        <button className="btn btn-sm btn-success shadow-sm" onClick={exportTrenToExcel}>
-                          <i className="bi bi-file-earmark-excel me-1"></i> Export Excel Rekap Tren
-                        </button>
                       </div>
+
+                      <button className="btn btn-sm btn-success shadow-sm" onClick={exportTrenToExcel}>
+                        <i className="bi bi-file-earmark-excel me-1"></i> {trenViewMode === 'pegawai' ? 'Export Excel Pegawai' : 'Export Excel Rekap OPD'}
+                      </button>
                     </div>
 
-                    <div className="table-responsive">
-                      <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.88rem' }}>
-                        <thead className="table-light">
-                          <tr>
-                            <th style={{ width: '50px' }}>No</th>
-                            <th>Perangkat Daerah (OPD)</th>
-                            <th className="text-center" style={{ width: '110px' }}>Pegawai</th>
-                            {trendYears.map(year => (
-                              <th key={year} className="text-center" style={{ minWidth: '130px' }}>
-                                Capaian {year}
-                              </th>
-                            ))}
-                            <th className="text-center" style={{ width: '140px' }}>Status Tren</th>
-                            <th className="text-center" style={{ width: '110px' }}>Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedOpdTrend.length === 0 ? (
-                            <tr>
-                              <td colSpan={5 + trendYears.length} className="text-center py-4 text-muted">
-                                <i className="bi bi-inbox fs-4 d-block mb-1"></i>
-                                Tidak ada data OPD yang cocok dengan pencarian.
-                              </td>
-                            </tr>
-                          ) : (
-                            paginatedOpdTrend.map((item, idx) => {
-                              const rowNumber = (currentPageTren - 1) * ITEMS_PER_PAGE_TREN + idx + 1;
-                              const isExpanded = expandedTrenOpd === item.opd;
-
-                              return (
-                                <Fragment key={idx}>
-                                  <tr className={selectedOpdChart === item.opd ? 'table-primary' : ''}>
-                                    <td>{rowNumber}</td>
-                                    <td>
-                                      <div className="fw-bold text-dark">{item.opd}</div>
-                                    </td>
-                                    <td className="text-center">
-                                      <button 
-                                        type="button"
-                                        className={`btn btn-sm ${isExpanded ? 'btn-primary text-white' : 'btn-light border text-dark'} py-0 px-2 shadow-none`}
-                                        style={{ fontSize: '0.8rem' }}
-                                        onClick={() => {
-                                          if (isExpanded) {
-                                            setExpandedTrenOpd(null);
-                                          } else {
-                                            setExpandedTrenOpd(item.opd);
-                                            setPageTrenPegawai(1);
-                                          }
-                                        }}
-                                        title="Klik untuk membuka daftar 5 pegawai per halaman di OPD ini"
-                                      >
-                                        <i className="bi bi-people-fill me-1"></i>
-                                        {item.totalMembers} org
-                                        <i className={`bi bi-chevron-${isExpanded ? 'up' : 'down'} ms-1`} style={{ fontSize: '0.68rem' }}></i>
-                                      </button>
-                                    </td>
-                                    {trendYears.map(year => {
-                                      const stats = item.yearlyStats[year] || { lulus: 0, persentase: 0 };
-                                      const pct = stats.persentase;
-                                      const badgeColor = pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning text-dark' : pct > 0 ? 'bg-info text-dark' : 'bg-secondary';
-                                      return (
-                                        <td key={year} className="text-center">
-                                          <div className="d-flex flex-column align-items-center">
-                                            <div className="d-flex align-items-center gap-1">
-                                              <span className="fw-bold small">{stats.lulus}</span>
-                                              <span className="text-muted" style={{fontSize: '0.75rem'}}>/{item.totalMembers}</span>
-                                              <span className={`badge ${badgeColor} ms-1`} style={{ fontSize: '0.75rem' }}>
-                                                {pct}%
-                                              </span>
-                                            </div>
-                                            <div className="progress w-100 mt-1" style={{ height: '4px', maxWidth: '80px', background: '#e2e8f0' }}>
-                                              <div 
-                                                className={`progress-bar ${pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning' : 'bg-primary'}`} 
-                                                style={{ width: `${Math.min(100, pct)}%` }}
-                                              ></div>
-                                            </div>
-                                          </div>
-                                        </td>
-                                      );
-                                    })}
-                                    <td className="text-center">
-                                      {item.statusTren === 'naik' && (
-                                        <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                          <i className="bi bi-arrow-up-right me-1"></i> Naik
+                    {/* TAMPILAN 1: REKAP PER PEGAWAI (5 PER HALAMAN) */}
+                    {trenViewMode === 'pegawai' && (
+                      <>
+                        <div className="table-responsive">
+                          <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.88rem' }}>
+                            <thead className="table-light">
+                              <tr>
+                                <th style={{ width: '50px' }}>No</th>
+                                <th>Nama Pegawai & NIP</th>
+                                <th>Unit Kerja / OPD</th>
+                                <th className="text-center" style={{ width: '90px' }}>Status</th>
+                                {trendYears.map(year => (
+                                  <th key={year} className="text-center" style={{ minWidth: '120px' }}>
+                                    Capaian {year}
+                                  </th>
+                                ))}
+                                <th className="text-center" style={{ width: '130px' }}>Status Tren</th>
+                                <th className="text-center" style={{ width: '100px' }}>Aksi</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {paginatedPegawaiTrend.length === 0 ? (
+                                <tr>
+                                  <td colSpan={6 + trendYears.length} className="text-center py-5 text-muted">
+                                    <i className="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    Tidak ada data pegawai yang sesuai dengan filter.
+                                  </td>
+                                </tr>
+                              ) : (
+                                paginatedPegawaiTrend.map((p: any, idx: number) => {
+                                  const rowNumber = (currentPageTrenPegawai - 1) * ITEMS_PER_PAGE_PEGAWAI + idx + 1;
+                                  return (
+                                    <tr key={p.nip || idx}>
+                                      <td>{rowNumber}</td>
+                                      <td>
+                                        <div className="fw-bold text-dark">{p.nama || '-'}</div>
+                                        <div className="text-muted small">NIP: {p.nip || '-'}</div>
+                                      </td>
+                                      <td>
+                                        <div className="text-secondary small fw-medium">{p.unit_kerja || '-'}</div>
+                                      </td>
+                                      <td className="text-center">
+                                        <span className={`badge ${p.status_pegawai === 'PNS' ? 'bg-primary-subtle text-primary' : 'bg-info-subtle text-info-emphasis'}`} style={{ fontSize: '0.75rem' }}>
+                                          {p.status_pegawai || 'ASN'}
                                         </span>
-                                      )}
-                                      {item.statusTren === 'turun' && (
-                                        <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
-                                          <i className="bi bi-arrow-down-right me-1"></i> Turun
-                                        </span>
-                                      )}
-                                      {item.statusTren === 'fluktuatif' && (
-                                        <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
-                                          <i className="bi bi-arrow-left-right me-1"></i> Fluktuatif
-                                        </span>
-                                      )}
-                                      {item.statusTren === 'stabil' && (
-                                        <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
-                                          <i className="bi bi-dash me-1"></i> Stabil
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td className="text-center">
-                                      <button 
-                                        className={`btn btn-sm ${selectedOpdChart === item.opd ? 'btn-primary' : 'btn-outline-primary'}`}
-                                        onClick={() => {
-                                          setSelectedOpdChart(item.opd);
-                                          window.scrollTo({ top: 120, behavior: 'smooth' });
-                                        }}
-                                        title="Fokus grafik pada OPD ini"
-                                      >
-                                        <i className="bi bi-graph-up me-1"></i> Grafik
-                                      </button>
-                                    </td>
-                                  </tr>
-
-                                  {isExpanded && (() => {
-                                    const opdMembers = groupedByOPD[item.opd] || [];
-                                    const totalMembersCount = opdMembers.length;
-                                    const totalPagesMembers = Math.ceil(totalMembersCount / ITEMS_PER_PAGE_PEGAWAI);
-                                    const pagedMembers = opdMembers.slice((pageTrenPegawai - 1) * ITEMS_PER_PAGE_PEGAWAI, pageTrenPegawai * ITEMS_PER_PAGE_PEGAWAI);
-
-                                    return (
-                                      <tr className="table-light">
-                                        <td colSpan={5 + trendYears.length} className="p-3 bg-white border">
-                                          <div className="d-flex justify-content-between align-items-center mb-2">
-                                            <div className="fw-bold text-dark small">
-                                              <i className="bi bi-person-lines-fill text-primary me-2"></i>
-                                              Daftar Pegawai di {item.opd} (5 per halaman)
-                                            </div>
-                                            <span className="badge bg-secondary-subtle text-secondary border small">
-                                              Total {totalMembersCount} Pegawai
+                                      </td>
+                                      {trendYears.map(year => {
+                                        const jp = p.yearlyJp?.[year] || 0;
+                                        const isLulus = p.yearlyLulus?.[year];
+                                        const badgeBg = isLulus ? 'bg-success' : jp > 0 ? 'bg-warning text-dark' : 'bg-light text-muted border';
+                                        return (
+                                          <td key={year} className="text-center">
+                                            <span className={`badge ${badgeBg} px-2 py-1`} style={{ fontSize: '0.78rem' }}>
+                                              {jp} JP
                                             </span>
-                                          </div>
-
-                                          <div className="table-responsive">
-                                            <table className="table table-sm table-bordered table-hover align-middle mb-2 bg-white" style={{ fontSize: '0.82rem' }}>
-                                              <thead className="table-light">
-                                                <tr>
-                                                  <th style={{ width: '40px' }}>No</th>
-                                                  <th>Nama Pegawai</th>
-                                                  <th>NIP</th>
-                                                  <th>Status</th>
-                                                  {trendYears.map(yr => (
-                                                    <th key={yr} className="text-center">JP {yr}</th>
-                                                  ))}
-                                                  <th className="text-center">Aksi</th>
-                                                </tr>
-                                              </thead>
-                                              <tbody>
-                                                {pagedMembers.length === 0 ? (
-                                                  <tr>
-                                                    <td colSpan={5 + trendYears.length} className="text-center py-3 text-muted">Belum ada data pegawai di OPD ini.</td>
-                                                  </tr>
-                                                ) : (
-                                                  pagedMembers.map((m, mIdx) => {
-                                                    const rowNo = (pageTrenPegawai - 1) * ITEMS_PER_PAGE_PEGAWAI + mIdx + 1;
-                                                    return (
-                                                      <tr key={m.nip || mIdx}>
-                                                        <td>{rowNo}</td>
-                                                        <td className="fw-semibold text-dark">{m.nama || '-'}</td>
-                                                        <td className="text-muted">{m.nip || '-'}</td>
-                                                        <td>
-                                                          <span className={`badge ${m.status_pegawai === 'PNS' ? 'bg-primary-subtle text-primary' : 'bg-info-subtle text-info-emphasis'}`} style={{ fontSize: '0.72rem' }}>
-                                                            {m.status_pegawai || 'ASN'}
-                                                          </span>
-                                                        </td>
-                                                        {trendYears.map(yr => {
-                                                          const yrSerts = m.sertifikasi?.filter((s: any) => String(s.tahun) === String(yr)) || [];
-                                                          const yrJp = yrSerts.reduce((acc: number, curr: any) => acc + (Number(curr.jumlah_jp) || 0), 0);
-                                                          const isLulus = checkLulusJP({ ...m, jp: yrJp });
-                                                          return (
-                                                            <td key={yr} className="text-center">
-                                                              <span className={`badge ${isLulus ? 'bg-success' : yrJp > 0 ? 'bg-warning text-dark' : 'bg-light text-muted border'}`} style={{ fontSize: '0.75rem' }}>
-                                                                {yrJp} JP
-                                                              </span>
-                                                            </td>
-                                                          );
-                                                        })}
-                                                        <td className="text-center">
-                                                          <button 
-                                                            className="btn btn-sm btn-outline-info py-0 px-2"
-                                                            style={{ fontSize: '0.75rem' }}
-                                                            onClick={() => { setSelectedPegawai(m); setShowModal(true); }}
-                                                            title="Lihat Detail Pegawai"
-                                                          >
-                                                            <i className="bi bi-eye"></i> Detail
-                                                          </button>
-                                                        </td>
-                                                      </tr>
-                                                    );
-                                                  })
-                                                )}
-                                              </tbody>
-                                            </table>
-                                          </div>
-
-                                          {totalPagesMembers > 1 && (
-                                            <div className="d-flex justify-content-between align-items-center pt-2">
-                                              <span className="small text-muted fw-semibold">
-                                                Halaman {pageTrenPegawai} dari {totalPagesMembers} ({totalMembersCount} Pegawai - 5 per halaman)
-                                              </span>
-                                              <div className="d-flex gap-1">
-                                                <button 
-                                                  className="btn btn-outline-secondary btn-sm py-1 px-2" 
-                                                  style={{ fontSize: '0.78rem' }}
-                                                  disabled={pageTrenPegawai === 1}
-                                                  onClick={() => setPageTrenPegawai(p => p - 1)}
-                                                >
-                                                  Prev
-                                                </button>
-                                                <button 
-                                                  className="btn btn-outline-secondary btn-sm py-1 px-2" 
-                                                  style={{ fontSize: '0.78rem' }}
-                                                  disabled={pageTrenPegawai === totalPagesMembers}
-                                                  onClick={() => setPageTrenPegawai(p => p + 1)}
-                                                >
-                                                  Next
-                                                </button>
-                                              </div>
+                                            <div className="text-muted mt-1" style={{ fontSize: '0.7rem' }}>
+                                              {isLulus ? 'Memenuhi' : jp > 0 ? 'Belum' : '0 JP'}
                                             </div>
+                                          </td>
+                                        );
+                                      })}
+                                      <td className="text-center">
+                                        {p.statusTren === 'naik' && (
+                                          <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                            <i className="bi bi-arrow-up-right me-1"></i> Naik
+                                          </span>
+                                        )}
+                                        {p.statusTren === 'turun' && (
+                                          <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                            <i className="bi bi-arrow-down-right me-1"></i> Turun
+                                          </span>
+                                        )}
+                                        {p.statusTren === 'stabil' && (
+                                          <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                            <i className="bi bi-dash me-1"></i> Stabil
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="text-center">
+                                        <button 
+                                          className="btn btn-sm btn-outline-info py-1 px-2"
+                                          style={{ fontSize: '0.78rem' }}
+                                          onClick={() => { setSelectedPegawai(p); setShowModal(true); }}
+                                          title="Lihat Detail Pegawai"
+                                        >
+                                          <i className="bi bi-eye me-1"></i> Detail
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <PaginationControls 
+                          currentPage={currentPageTrenPegawai} 
+                          setCurrentPage={setCurrentPageTrenPegawai} 
+                          totalItems={filteredPegawaiTrendList.length} 
+                          itemsPerPage={ITEMS_PER_PAGE_PEGAWAI}
+                        />
+                      </>
+                    )}
+
+                    {/* TAMPILAN 2: REKAP PER OPD (5 PER HALAMAN) */}
+                    {trenViewMode === 'opd' && (
+                      <>
+                        <div className="table-responsive">
+                          <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.88rem' }}>
+                            <thead className="table-light">
+                              <tr>
+                                <th style={{ width: '50px' }}>No</th>
+                                <th>Perangkat Daerah (OPD)</th>
+                                <th className="text-center" style={{ width: '110px' }}>Pegawai</th>
+                                {trendYears.map(year => (
+                                  <th key={year} className="text-center" style={{ minWidth: '130px' }}>
+                                    Capaian {year}
+                                  </th>
+                                ))}
+                                <th className="text-center" style={{ width: '140px' }}>Status Tren</th>
+                                <th className="text-center" style={{ width: '110px' }}>Aksi</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {paginatedOpdTrend.length === 0 ? (
+                                <tr>
+                                  <td colSpan={5 + trendYears.length} className="text-center py-4 text-muted">
+                                    <i className="bi bi-inbox fs-4 d-block mb-1"></i>
+                                    Tidak ada data OPD yang cocok dengan pencarian.
+                                  </td>
+                                </tr>
+                              ) : (
+                                paginatedOpdTrend.map((item, idx) => {
+                                  const rowNumber = (currentPageTren - 1) * ITEMS_PER_PAGE_TREN + idx + 1;
+                                  const isExpanded = expandedTrenOpd === item.opd;
+
+                                  return (
+                                    <Fragment key={idx}>
+                                      <tr className={selectedOpdChart === item.opd ? 'table-primary' : ''}>
+                                        <td>{rowNumber}</td>
+                                        <td>
+                                          <div className="fw-bold text-dark">{item.opd}</div>
+                                        </td>
+                                        <td className="text-center">
+                                          <button 
+                                            type="button"
+                                            className={`btn btn-sm ${isExpanded ? 'btn-primary text-white' : 'btn-light border text-dark'} py-0 px-2 shadow-none`}
+                                            style={{ fontSize: '0.8rem' }}
+                                            onClick={() => {
+                                              if (isExpanded) {
+                                                setExpandedTrenOpd(null);
+                                              } else {
+                                                setExpandedTrenOpd(item.opd);
+                                                setPageTrenPegawai(1);
+                                              }
+                                            }}
+                                            title="Klik untuk membuka daftar 5 pegawai per halaman di OPD ini"
+                                          >
+                                            <i className="bi bi-people-fill me-1"></i>
+                                            {item.totalMembers} org
+                                            <i className={`bi bi-chevron-${isExpanded ? 'up' : 'down'} ms-1`} style={{ fontSize: '0.68rem' }}></i>
+                                          </button>
+                                        </td>
+                                        {trendYears.map(year => {
+                                          const stats = item.yearlyStats[year] || { lulus: 0, persentase: 0 };
+                                          const pct = stats.persentase;
+                                          const badgeColor = pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning text-dark' : pct > 0 ? 'bg-info text-dark' : 'bg-secondary';
+                                          return (
+                                            <td key={year} className="text-center">
+                                              <div className="d-flex flex-column align-items-center">
+                                                <div className="d-flex align-items-center gap-1">
+                                                  <span className="fw-bold small">{stats.lulus}</span>
+                                                  <span className="text-muted" style={{fontSize: '0.75rem'}}>/{item.totalMembers}</span>
+                                                  <span className={`badge ${badgeColor} ms-1`} style={{ fontSize: '0.75rem' }}>
+                                                    {pct}%
+                                                  </span>
+                                                </div>
+                                                <div className="progress w-100 mt-1" style={{ height: '4px', maxWidth: '80px', background: '#e2e8f0' }}>
+                                                  <div 
+                                                    className={`progress-bar ${pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning' : 'bg-primary'}`} 
+                                                    style={{ width: `${Math.min(100, pct)}%` }}
+                                                  ></div>
+                                                </div>
+                                              </div>
+                                            </td>
+                                          );
+                                        })}
+                                        <td className="text-center">
+                                          {item.statusTren === 'naik' && (
+                                            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                              <i className="bi bi-arrow-up-right me-1"></i> Naik
+                                            </span>
+                                          )}
+                                          {item.statusTren === 'turun' && (
+                                            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                              <i className="bi bi-arrow-down-right me-1"></i> Turun
+                                            </span>
+                                          )}
+                                          {item.statusTren === 'fluktuatif' && (
+                                            <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                              <i className="bi bi-arrow-left-right me-1"></i> Fluktuatif
+                                            </span>
+                                          )}
+                                          {item.statusTren === 'stabil' && (
+                                            <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                              <i className="bi bi-dash me-1"></i> Stabil
+                                            </span>
                                           )}
                                         </td>
+                                        <td className="text-center">
+                                          <button 
+                                            className={`btn btn-sm ${selectedOpdChart === item.opd ? 'btn-primary' : 'btn-outline-primary'}`}
+                                            onClick={() => {
+                                              setSelectedOpdChart(item.opd);
+                                              window.scrollTo({ top: 120, behavior: 'smooth' });
+                                            }}
+                                            title="Fokus grafik pada OPD ini"
+                                          >
+                                            <i className="bi bi-graph-up me-1"></i> Grafik
+                                          </button>
+                                        </td>
                                       </tr>
-                                    );
-                                  })()}
-                                </Fragment>
-                              );
-                            })
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
 
-                    <PaginationControls 
-                      currentPage={currentPageTren} 
-                      setCurrentPage={setCurrentPageTren} 
-                      totalItems={filteredOpdTrendList.length} 
-                      itemsPerPage={ITEMS_PER_PAGE_TREN}
-                    />
+                                      {isExpanded && (() => {
+                                        const opdMembers = groupedByOPD[item.opd] || [];
+                                        const totalMembersCount = opdMembers.length;
+                                        const totalPagesMembers = Math.ceil(totalMembersCount / ITEMS_PER_PAGE_PEGAWAI);
+                                        const pagedMembers = opdMembers.slice((pageTrenPegawai - 1) * ITEMS_PER_PAGE_PEGAWAI, pageTrenPegawai * ITEMS_PER_PAGE_PEGAWAI);
+
+                                        return (
+                                          <tr className="table-light">
+                                            <td colSpan={5 + trendYears.length} className="p-3 bg-white border">
+                                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                                <div className="fw-bold text-dark small">
+                                                  <i className="bi bi-person-lines-fill text-primary me-2"></i>
+                                                  Daftar Pegawai di {item.opd} (5 per halaman)
+                                                </div>
+                                                <span className="badge bg-secondary-subtle text-secondary border small">
+                                                  Total {totalMembersCount} Pegawai
+                                                </span>
+                                              </div>
+
+                                              <div className="table-responsive">
+                                                <table className="table table-sm table-bordered table-hover align-middle mb-2 bg-white" style={{ fontSize: '0.82rem' }}>
+                                                  <thead className="table-light">
+                                                    <tr>
+                                                      <th style={{ width: '40px' }}>No</th>
+                                                      <th>Nama Pegawai</th>
+                                                      <th>NIP</th>
+                                                      <th>Status</th>
+                                                      {trendYears.map(yr => (
+                                                        <th key={yr} className="text-center">JP {yr}</th>
+                                                      ))}
+                                                      <th className="text-center">Aksi</th>
+                                                    </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                    {pagedMembers.length === 0 ? (
+                                                      <tr>
+                                                        <td colSpan={5 + trendYears.length} className="text-center py-3 text-muted">Belum ada data pegawai di OPD ini.</td>
+                                                      </tr>
+                                                    ) : (
+                                                      pagedMembers.map((m, mIdx) => {
+                                                        const rowNo = (pageTrenPegawai - 1) * ITEMS_PER_PAGE_PEGAWAI + mIdx + 1;
+                                                        return (
+                                                          <tr key={m.nip || mIdx}>
+                                                            <td>{rowNo}</td>
+                                                            <td className="fw-semibold text-dark">{m.nama || '-'}</td>
+                                                            <td className="text-muted">{m.nip || '-'}</td>
+                                                            <td>
+                                                              <span className={`badge ${m.status_pegawai === 'PNS' ? 'bg-primary-subtle text-primary' : 'bg-info-subtle text-info-emphasis'}`} style={{ fontSize: '0.72rem' }}>
+                                                                {m.status_pegawai || 'ASN'}
+                                                              </span>
+                                                            </td>
+                                                            {trendYears.map(yr => {
+                                                              const yrSerts = m.sertifikasi?.filter((s: any) => String(s.tahun) === String(yr)) || [];
+                                                              const yrJp = yrSerts.reduce((acc: number, curr: any) => acc + (Number(curr.jumlah_jp) || 0), 0);
+                                                              const isLulus = checkLulusJP({ ...m, jp: yrJp });
+                                                              return (
+                                                                <td key={yr} className="text-center">
+                                                                  <span className={`badge ${isLulus ? 'bg-success' : yrJp > 0 ? 'bg-warning text-dark' : 'bg-light text-muted border'}`} style={{ fontSize: '0.75rem' }}>
+                                                                    {yrJp} JP
+                                                                  </span>
+                                                                </td>
+                                                              );
+                                                            })}
+                                                            <td className="text-center">
+                                                              <button 
+                                                                className="btn btn-sm btn-outline-info py-0 px-2"
+                                                                style={{ fontSize: '0.75rem' }}
+                                                                onClick={() => { setSelectedPegawai(m); setShowModal(true); }}
+                                                                title="Lihat Detail Pegawai"
+                                                              >
+                                                                <i className="bi bi-eye"></i> Detail
+                                                              </button>
+                                                            </td>
+                                                          </tr>
+                                                        );
+                                                      })
+                                                    )}
+                                                  </tbody>
+                                                </table>
+                                              </div>
+
+                                              {totalPagesMembers > 1 && (
+                                                <div className="d-flex justify-content-between align-items-center pt-2">
+                                                  <span className="small text-muted fw-semibold">
+                                                    Halaman {pageTrenPegawai} dari {totalPagesMembers} ({totalMembersCount} Pegawai - 5 per halaman)
+                                                  </span>
+                                                  <div className="d-flex gap-1">
+                                                    <button 
+                                                      className="btn btn-outline-secondary btn-sm py-1 px-2" 
+                                                      style={{ fontSize: '0.78rem' }}
+                                                      disabled={pageTrenPegawai === 1}
+                                                      onClick={() => setPageTrenPegawai(p => p - 1)}
+                                                    >
+                                                      Prev
+                                                    </button>
+                                                    <button 
+                                                      className="btn btn-outline-secondary btn-sm py-1 px-2" 
+                                                      style={{ fontSize: '0.78rem' }}
+                                                      disabled={pageTrenPegawai === totalPagesMembers}
+                                                      onClick={() => setPageTrenPegawai(p => p + 1)}
+                                                    >
+                                                      Next
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </td>
+                                          </tr>
+                                        );
+                                      })()}
+                                    </Fragment>
+                                  );
+                                })
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <PaginationControls 
+                          currentPage={currentPageTren} 
+                          setCurrentPage={setCurrentPageTren} 
+                          totalItems={filteredOpdTrendList.length} 
+                          itemsPerPage={ITEMS_PER_PAGE_TREN}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               )}
