@@ -8,6 +8,27 @@ export default function LoginPage() {
   const [nip, setNip] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [profilWeb, setProfilWeb] = useState({
+    bupati_nama: 'MARKUS, S.H.',
+    bupati_jabatan: 'BUPATI BANGKA BARAT',
+    bupati_foto: '/img/bupati1.png',
+    wakil_nama: 'H. YUS DERAHMAN',
+    wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
+    wakil_foto: '/img/bupati2.png',
+    hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
+    hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN.',
+  });
+
+  useEffect(() => {
+    fetch('/api/profil-web')
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) {
+          setProfilWeb(prev => ({ ...prev, ...res.data }));
+        }
+      })
+      .catch(err => console.error('Gagal memuat profil web:', err));
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -482,27 +503,43 @@ export default function LoginPage() {
             <div className="hero-content">
                 <div className="hero-text">
                     <h1>Sistem Informasi<br/><span>Pengembangan</span> Kompetensi</h1>
-                    <p>Wadah digital terpadu untuk pencatatan, pemantauan, <br/>dan evaluasi pemenuhan <br/>kewajiban Jam Pelajaran (JP) <br/>bagi seluruh ASN.</p>
+                    <p style={{ whiteSpace: 'pre-line' }}>{profilWeb.hero_subjudul}</p>
                 </div>
             </div>
 
             <div className="hero-image-container new-layout">
                 <div className="bupati-item">
-                    <img src="/img/bupati1.png" alt="Bupati Bangka Barat" />
+                    <img 
+                      src={profilWeb.bupati_foto || '/img/bupati1.png'} 
+                      alt={profilWeb.bupati_jabatan || 'Bupati Bangka Barat'} 
+                      onError={(e: any) => { e.currentTarget.src = '/img/bupati1.png'; }}
+                    />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10, width: '100%' }}>
                         <div style={{ minHeight: '2.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase', lineHeight: '1.2' }}>BUPATI BANGKA BARAT</p>
+                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase', lineHeight: '1.2' }}>
+                              {profilWeb.bupati_jabatan || 'BUPATI BANGKA BARAT'}
+                            </p>
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>MARKUS, S.H.</h3>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>
+                          {profilWeb.bupati_nama || 'MARKUS, S.H.'}
+                        </h3>
                     </div>
                 </div>
                 <div className="bupati-item">
-                    <img src="/img/bupati2.png" alt="Wakil Bupati Bangka Barat" />
+                    <img 
+                      src={profilWeb.wakil_foto || '/img/bupati2.png'} 
+                      alt={profilWeb.wakil_jabatan || 'Wakil Bupati Bangka Barat'} 
+                      onError={(e: any) => { e.currentTarget.src = '/img/bupati2.png'; }}
+                    />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10, width: '100%' }}>
                         <div style={{ minHeight: '2.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase', lineHeight: '1.2' }}>WAKIL BUPATI BANGKA BARAT</p>
+                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#f3ca20', fontWeight: '600', textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textTransform: 'uppercase', lineHeight: '1.2' }}>
+                              {profilWeb.wakil_jabatan || 'WAKIL BUPATI BANGKA BARAT'}
+                            </p>
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>H. YUS DERAHMAN</h3>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>
+                          {profilWeb.wakil_nama || 'H. YUS DERAHMAN'}
+                        </h3>
                     </div>
                 </div>
             </div>

@@ -80,6 +80,117 @@ export default function AdminPage() {
   const [currentPageTrenPegawai, setCurrentPageTrenPegawai] = useState<number>(1);
   const [filterTrenOpd, setFilterTrenOpd] = useState<string>('all');
 
+  // State Profil Pimpinan Web
+  const [profilWebData, setProfilWebData] = useState({
+    bupati_nama: 'MARKUS, S.H.',
+    bupati_jabatan: 'BUPATI BANGKA BARAT',
+    bupati_foto: '/img/bupati1.png',
+    wakil_nama: 'H. YUS DERAHMAN',
+    wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
+    wakil_foto: '/img/bupati2.png',
+    hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
+    hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN.',
+  });
+  const [loadingProfilWeb, setLoadingProfilWeb] = useState(false);
+  const [savingProfilWeb, setSavingProfilWeb] = useState(false);
+  const [uploadingBupatiFoto, setUploadingBupatiFoto] = useState(false);
+  const [uploadingWakilFoto, setUploadingWakilFoto] = useState(false);
+  const [profilWebSuccessMsg, setProfilWebSuccessMsg] = useState('');
+  const [profilWebErrorMsg, setProfilWebErrorMsg] = useState('');
+
+  const fetchProfilWeb = async () => {
+    setLoadingProfilWeb(true);
+    setProfilWebErrorMsg('');
+    try {
+      const res = await fetch('/api/profil-web', { cache: 'no-store' });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setProfilWebData(json.data);
+      }
+    } catch (e: any) {
+      console.error('Error fetch profil web:', e);
+    } finally {
+      setLoadingProfilWeb(false);
+    }
+  };
+
+  const handleUploadProfilFoto = async (file: File, target: 'bupati' | 'wakil') => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Hanya file gambar yang diperbolehkan (PNG, JPG, WEBP)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file maksimal 5MB');
+      return;
+    }
+
+    if (target === 'bupati') setUploadingBupatiFoto(true);
+    else setUploadingWakilFoto(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload-profil', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setProfilWebData(prev => ({
+          ...prev,
+          [target === 'bupati' ? 'bupati_foto' : 'wakil_foto']: data.url
+        }));
+      } else {
+        alert('Gagal upload foto: ' + (data.error || 'Terjadi kesalahan'));
+      }
+    } catch (err: any) {
+      alert('Terjadi kesalahan saat mengunggah foto: ' + err.message);
+    } finally {
+      if (target === 'bupati') setUploadingBupatiFoto(false);
+      else setUploadingWakilFoto(false);
+    }
+  };
+
+  const handleSaveProfilWeb = async () => {
+    setSavingProfilWeb(true);
+    setProfilWebSuccessMsg('');
+    setProfilWebErrorMsg('');
+    try {
+      const res = await fetch('/api/profil-web', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profilWebData),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setProfilWebSuccessMsg('Profil Pimpinan Web berhasil disimpan ke database Google Sheets!');
+        setTimeout(() => setProfilWebSuccessMsg(''), 6000);
+      } else {
+        setProfilWebErrorMsg(json.error || 'Gagal menyimpan profil');
+      }
+    } catch (err: any) {
+      setProfilWebErrorMsg('Gagal menyimpan profil: ' + err.message);
+    } finally {
+      setSavingProfilWeb(false);
+    }
+  };
+
+  const handleResetProfilWeb = () => {
+    if (confirm('Apakah Anda yakin ingin mengembalikan profil pimpinan ke data default (MARKUS, S.H. & H. YUS DERAHMAN)?')) {
+      setProfilWebData({
+        bupati_nama: 'MARKUS, S.H.',
+        bupati_jabatan: 'BUPATI BANGKA BARAT',
+        bupati_foto: '/img/bupati1.png',
+        wakil_nama: 'H. YUS DERAHMAN',
+        wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
+        wakil_foto: '/img/bupati2.png',
+        hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
+        hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN.',
+      });
+    }
+  };
+
   // Reset pagination on filter change
   useEffect(() => {
     setCurrentPagePegawai(1);
@@ -133,6 +244,7 @@ export default function AdminPage() {
     }
     setUserRole(role);
     fetchData();
+    fetchProfilWeb();
   }, [router]);
 
   useEffect(() => {
@@ -427,6 +539,7 @@ export default function AdminPage() {
     if (activeTab === 'view-sertifikasi') return 'Manajemen Rekap Sertifikasi';
     if (activeTab === 'view-tren') return 'Analisis Tren Tahunan Pemenuhan JP per OPD';
     if (activeTab === 'view-idp') return 'Approval Individual Development Plan (IDP)';
+    if (activeTab === 'view-profil-web') return 'Pengaturan Profil Pimpinan Web (Bupati & Wakil Bupati)';
     return '';
   };
 
@@ -1198,6 +1311,9 @@ export default function AdminPage() {
               <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
               <li><a onClick={() => setActiveTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
               <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
+              {(userRole === 'super_admin' || userRole === 'admin') && (
+                <li><a onClick={() => { setActiveTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
+              )}
               <li className="mt-5"><a onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-left"></i> Logout</a></li>
             </ul>
           </div>
@@ -2482,6 +2598,436 @@ export default function AdminPage() {
                   })()}
                 </div>
               )}
+
+              {/* TAB PROFIL PIMPINAN WEB */}
+              {activeTab === 'view-profil-web' && (
+                <div className="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom gap-3">
+                    <div>
+                      <h4 className="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                        <i className="bi bi-person-badge-fill text-primary"></i> Pengaturan Profil Pimpinan Web
+                      </h4>
+                      <p className="text-muted small mb-0">
+                        Ubah foto, nama, gelar, dan sebutan jabatan Bupati serta Wakil Bupati yang tampil di halaman login/depan website.
+                      </p>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <a 
+                        href="/login" 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1 shadow-sm"
+                        title="Buka halaman login di tab baru"
+                      >
+                        <i className="bi bi-box-arrow-up-right"></i> Lihat Halaman Login
+                      </a>
+                      <button 
+                        type="button" 
+                        onClick={fetchProfilWeb} 
+                        disabled={loadingProfilWeb} 
+                        className="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1"
+                        title="Muat ulang dari database"
+                      >
+                        <i className={`bi bi-arrow-clockwise ${loadingProfilWeb ? 'spinLoader' : ''}`}></i> Muat Ulang
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Alert Sukses / Gagal */}
+                  {profilWebSuccessMsg && (
+                    <div className="alert alert-success alert-dismissible fade show rounded-3 d-flex align-items-center gap-2 shadow-sm" role="alert">
+                      <i className="bi bi-check-circle-fill fs-5 text-success"></i>
+                      <div className="fw-medium">{profilWebSuccessMsg}</div>
+                      <button type="button" className="btn-close" onClick={() => setProfilWebSuccessMsg('')}></button>
+                    </div>
+                  )}
+                  {profilWebErrorMsg && (
+                    <div className="alert alert-danger alert-dismissible fade show rounded-3 d-flex align-items-center gap-2 shadow-sm" role="alert">
+                      <i className="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
+                      <div className="fw-medium">{profilWebErrorMsg}</div>
+                      <button type="button" className="btn-close" onClick={() => setProfilWebErrorMsg('')}></button>
+                    </div>
+                  )}
+
+                  {/* KOTAK LIVE PREVIEW (Tampilan Halaman Depan) */}
+                  <div className="mb-4">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <span className="fw-bold text-dark small text-uppercase tracking-wider">
+                        <i className="bi bi-eye-fill text-primary me-1"></i> Pratinjau Langsung (Live Preview di Halaman Depan)
+                      </span>
+                      <span className="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 small">
+                        Posisi dan tata letak tidak berubah
+                      </span>
+                    </div>
+
+                    <div 
+                      className="rounded-4 p-4 text-white position-relative overflow-hidden shadow-sm"
+                      style={{
+                        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0369a1 100%)',
+                        minHeight: '260px'
+                      }}
+                    >
+                      <div className="row align-items-end g-4">
+                        {/* Kolom Teks Pengantar */}
+                        <div className="col-md-5">
+                          <span className="badge bg-warning text-dark fw-bold mb-2">SIMULATOR HERO</span>
+                          <h4 className="fw-bold text-white mb-2" style={{ lineHeight: 1.3 }}>
+                            Sistem Informasi<br/><span style={{ color: '#38bdf8' }}>Pengembangan</span> Kompetensi
+                          </h4>
+                          <p className="small text-white-50 mb-0" style={{ whiteSpace: 'pre-line' }}>
+                            {profilWebData.hero_subjudul}
+                          </p>
+                        </div>
+
+                        {/* Kolom Kartu Bupati & Wakil */}
+                        <div className="col-md-7">
+                          <div className="d-flex justify-content-center align-items-end gap-3 flex-wrap">
+                            {/* Kartu Bupati */}
+                            <div className="text-center" style={{ width: '45%', maxWidth: '200px' }}>
+                              <div 
+                                className="bg-white bg-opacity-10 rounded-3 p-2 mb-2 shadow"
+                                style={{ backdropFilter: 'blur(5px)', border: '1px solid rgba(255,255,255,0.2)' }}
+                              >
+                                <img 
+                                  src={profilWebData.bupati_foto || '/img/bupati1.png'} 
+                                  alt="Bupati" 
+                                  style={{ width: '100%', height: '170px', objectFit: 'contain' }}
+                                  onError={(e: any) => { e.currentTarget.src = '/img/bupati1.png'; }}
+                                />
+                              </div>
+                              <p className="m-0 text-uppercase fw-bold" style={{ fontSize: '0.72rem', color: '#f3ca20', letterSpacing: '0.5px' }}>
+                                {profilWebData.bupati_jabatan || 'BUPATI BANGKA BARAT'}
+                              </p>
+                              <h6 className="m-0 fw-bold text-white text-uppercase" style={{ fontSize: '0.88rem', textShadow: '1px 1px 3px rgba(0,0,0,0.6)' }}>
+                                {profilWebData.bupati_nama || 'MARKUS, S.H.'}
+                              </h6>
+                            </div>
+
+                            {/* Kartu Wakil Bupati */}
+                            <div className="text-center" style={{ width: '45%', maxWidth: '200px' }}>
+                              <div 
+                                className="bg-white bg-opacity-10 rounded-3 p-2 mb-2 shadow"
+                                style={{ backdropFilter: 'blur(5px)', border: '1px solid rgba(255,255,255,0.2)' }}
+                              >
+                                <img 
+                                  src={profilWebData.wakil_foto || '/img/bupati2.png'} 
+                                  alt="Wakil Bupati" 
+                                  style={{ width: '100%', height: '170px', objectFit: 'contain' }}
+                                  onError={(e: any) => { e.currentTarget.src = '/img/bupati2.png'; }}
+                                />
+                              </div>
+                              <p className="m-0 text-uppercase fw-bold" style={{ fontSize: '0.72rem', color: '#f3ca20', letterSpacing: '0.5px' }}>
+                                {profilWebData.wakil_jabatan || 'WAKIL BUPATI BANGKA BARAT'}
+                              </p>
+                              <h6 className="m-0 fw-bold text-white text-uppercase" style={{ fontSize: '0.88rem', textShadow: '1px 1px 3px rgba(0,0,0,0.6)' }}>
+                                {profilWebData.wakil_nama || 'H. YUS DERAHMAN'}
+                              </h6>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FORM EDITOR BUPATI & WAKIL BUPATI (2 KOLOM) */}
+                  <div className="row g-4 mb-4">
+                    
+                    {/* KOLOM 1: FORM BUPATI */}
+                    <div className="col-lg-6">
+                      <div className="card h-100 border rounded-4 shadow-sm">
+                        <div className="card-header bg-primary bg-opacity-10 border-0 pt-3 pb-2 px-3 d-flex align-items-center justify-content-between">
+                          <span className="fw-bold text-primary d-flex align-items-center gap-2">
+                            <span className="badge bg-primary text-white rounded-pill px-2 py-1">1</span>
+                            Profil Bupati (Posisi Kiri)
+                          </span>
+                          <span className="badge bg-white text-secondary border rounded-pill px-2 py-1 small">Kepala Daerah</span>
+                        </div>
+                        <div className="card-body p-4">
+                          
+                          {/* Upload / Ganti Foto Bupati */}
+                          <div className="text-center mb-4 pb-3 border-bottom">
+                            <div className="position-relative d-inline-block">
+                              <div 
+                                className="rounded-4 overflow-hidden border border-2 border-primary border-opacity-25 shadow-sm bg-light d-flex align-items-center justify-content-center mx-auto"
+                                style={{ width: '150px', height: '190px' }}
+                              >
+                                {uploadingBupatiFoto ? (
+                                  <div className="text-center p-2">
+                                    <div className="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                                    <div className="small text-muted">Mengunggah foto...</div>
+                                  </div>
+                                ) : (
+                                  <img 
+                                    src={profilWebData.bupati_foto || '/img/bupati1.png'} 
+                                    alt="Foto Bupati" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    onError={(e: any) => { e.currentTarget.src = '/img/bupati1.png'; }}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="mt-3">
+                              <label className="btn btn-primary btn-sm rounded-pill px-3 shadow-sm mb-1" style={{ cursor: 'pointer' }}>
+                                <i className="bi bi-upload me-1"></i> Unggah Foto Bupati Baru
+                                <input 
+                                  type="file" 
+                                  accept="image/png,image/jpeg,image/jpg,image/webp" 
+                                  className="d-none"
+                                  disabled={uploadingBupatiFoto}
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      handleUploadProfilFoto(e.target.files[0], 'bupati');
+                                    }
+                                  }}
+                                />
+                              </label>
+                              <div className="form-text small" style={{ fontSize: '0.75rem' }}>
+                                Format disarankan: PNG transparan atau JPG/WEBP (Maksimal 5MB)
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Input Nama & Gelar Bupati */}
+                          <div className="mb-3">
+                            <label className="form-label fw-semibold text-secondary small mb-1">
+                              Nama Lengkap & Gelar Bupati <span className="text-danger">*</span>
+                            </label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-light text-muted border-end-0">
+                                <i className="bi bi-person-fill"></i>
+                              </span>
+                              <input 
+                                type="text" 
+                                className="form-control border-start-0" 
+                                placeholder="Contoh: MARKUS, S.H."
+                                value={profilWebData.bupati_nama}
+                                onChange={(e) => setProfilWebData({ ...profilWebData, bupati_nama: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-text small" style={{ fontSize: '0.75rem' }}>
+                              Nama ini akan ditampilkan tebal di bawah foto Bupati.
+                            </div>
+                          </div>
+
+                          {/* Input Sebutan Jabatan */}
+                          <div className="mb-3">
+                            <label className="form-label fw-semibold text-secondary small mb-1">
+                              Sebutan Jabatan <span className="text-danger">*</span>
+                            </label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-light text-muted border-end-0">
+                                <i className="bi bi-award-fill"></i>
+                              </span>
+                              <input 
+                                type="text" 
+                                className="form-control border-start-0" 
+                                placeholder="Contoh: BUPATI BANGKA BARAT"
+                                value={profilWebData.bupati_jabatan}
+                                onChange={(e) => setProfilWebData({ ...profilWebData, bupati_jabatan: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-text small" style={{ fontSize: '0.75rem' }}>
+                              Teks kuning keemasan di atas nama (huruf kapital).
+                            </div>
+                          </div>
+
+                          {/* Input URL Foto (Opsional / Manual) */}
+                          <div className="mb-0">
+                            <label className="form-label fw-semibold text-secondary small mb-1">
+                              Path / Link URL Foto Bupati
+                            </label>
+                            <input 
+                              type="text" 
+                              className="form-control form-control-sm text-muted bg-light" 
+                              placeholder="/img/bupati1.png atau URL Drive"
+                              value={profilWebData.bupati_foto}
+                              onChange={(e) => setProfilWebData({ ...profilWebData, bupati_foto: e.target.value })}
+                            />
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* KOLOM 2: FORM WAKIL BUPATI */}
+                    <div className="col-lg-6">
+                      <div className="card h-100 border rounded-4 shadow-sm">
+                        <div className="card-header bg-info bg-opacity-10 border-0 pt-3 pb-2 px-3 d-flex align-items-center justify-content-between">
+                          <span className="fw-bold text-info-emphasis d-flex align-items-center gap-2">
+                            <span className="badge bg-info text-white rounded-pill px-2 py-1">2</span>
+                            Profil Wakil Bupati (Posisi Kanan)
+                          </span>
+                          <span className="badge bg-white text-secondary border rounded-pill px-2 py-1 small">Wakil Kepala Daerah</span>
+                        </div>
+                        <div className="card-body p-4">
+                          
+                          {/* Upload / Ganti Foto Wakil Bupati */}
+                          <div className="text-center mb-4 pb-3 border-bottom">
+                            <div className="position-relative d-inline-block">
+                              <div 
+                                className="rounded-4 overflow-hidden border border-2 border-info border-opacity-25 shadow-sm bg-light d-flex align-items-center justify-content-center mx-auto"
+                                style={{ width: '150px', height: '190px' }}
+                              >
+                                {uploadingWakilFoto ? (
+                                  <div className="text-center p-2">
+                                    <div className="spinner-border text-info spinner-border-sm mb-2" role="status"></div>
+                                    <div className="small text-muted">Mengunggah foto...</div>
+                                  </div>
+                                ) : (
+                                  <img 
+                                    src={profilWebData.wakil_foto || '/img/bupati2.png'} 
+                                    alt="Foto Wakil Bupati" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    onError={(e: any) => { e.currentTarget.src = '/img/bupati2.png'; }}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="mt-3">
+                              <label className="btn btn-info text-white btn-sm rounded-pill px-3 shadow-sm mb-1" style={{ cursor: 'pointer' }}>
+                                <i className="bi bi-upload me-1"></i> Unggah Foto Wakil Bupati Baru
+                                <input 
+                                  type="file" 
+                                  accept="image/png,image/jpeg,image/jpg,image/webp" 
+                                  className="d-none"
+                                  disabled={uploadingWakilFoto}
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      handleUploadProfilFoto(e.target.files[0], 'wakil');
+                                    }
+                                  }}
+                                />
+                              </label>
+                              <div className="form-text small" style={{ fontSize: '0.75rem' }}>
+                                Format disarankan: PNG transparan atau JPG/WEBP (Maksimal 5MB)
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Input Nama & Gelar Wakil Bupati */}
+                          <div className="mb-3">
+                            <label className="form-label fw-semibold text-secondary small mb-1">
+                              Nama Lengkap & Gelar Wakil Bupati <span className="text-danger">*</span>
+                            </label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-light text-muted border-end-0">
+                                <i className="bi bi-person-fill"></i>
+                              </span>
+                              <input 
+                                type="text" 
+                                className="form-control border-start-0" 
+                                placeholder="Contoh: H. YUS DERAHMAN"
+                                value={profilWebData.wakil_nama}
+                                onChange={(e) => setProfilWebData({ ...profilWebData, wakil_nama: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-text small" style={{ fontSize: '0.75rem' }}>
+                              Nama ini akan ditampilkan tebal di bawah foto Wakil Bupati.
+                            </div>
+                          </div>
+
+                          {/* Input Sebutan Jabatan */}
+                          <div className="mb-3">
+                            <label className="form-label fw-semibold text-secondary small mb-1">
+                              Sebutan Jabatan <span className="text-danger">*</span>
+                            </label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-light text-muted border-end-0">
+                                <i className="bi bi-award-fill"></i>
+                              </span>
+                              <input 
+                                type="text" 
+                                className="form-control border-start-0" 
+                                placeholder="Contoh: WAKIL BUPATI BANGKA BARAT"
+                                value={profilWebData.wakil_jabatan}
+                                onChange={(e) => setProfilWebData({ ...profilWebData, wakil_jabatan: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-text small" style={{ fontSize: '0.75rem' }}>
+                              Teks kuning keemasan di atas nama (huruf kapital).
+                            </div>
+                          </div>
+
+                          {/* Input URL Foto (Opsional / Manual) */}
+                          <div className="mb-0">
+                            <label className="form-label fw-semibold text-secondary small mb-1">
+                              Path / Link URL Foto Wakil Bupati
+                            </label>
+                            <input 
+                              type="text" 
+                              className="form-control form-control-sm text-muted bg-light" 
+                              placeholder="/img/bupati2.png atau URL Drive"
+                              value={profilWebData.wakil_foto}
+                              onChange={(e) => setProfilWebData({ ...profilWebData, wakil_foto: e.target.value })}
+                            />
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* PENGATURAN TAMBAHAN (DESKRIPSI WEBSITE) */}
+                  <div className="card border rounded-4 mb-4 shadow-sm">
+                    <div className="card-header bg-light border-0 py-3 px-4">
+                      <h6 className="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                        <i className="bi bi-card-text text-primary"></i> Teks Sambutan / Deskripsi Halaman Login (Opsional)
+                      </h6>
+                    </div>
+                    <div className="card-body p-4">
+                      <div className="mb-0">
+                        <label className="form-label fw-semibold text-secondary small mb-1">
+                          Deskripsi Singkat Sistem di Bawah Judul
+                        </label>
+                        <textarea 
+                          className="form-control" 
+                          rows={3}
+                          value={profilWebData.hero_subjudul}
+                          onChange={(e) => setProfilWebData({ ...profilWebData, hero_subjudul: e.target.value })}
+                          placeholder="Wadah digital terpadu untuk pencatatan, pemantauan, dan evaluasi pemenuhan kewajiban Jam Pelajaran (JP) bagi seluruh ASN."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 border-top">
+                    <button 
+                      type="button" 
+                      onClick={handleResetProfilWeb} 
+                      className="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1"
+                    >
+                      <i className="bi bi-arrow-counterclockwise"></i> Reset ke Default (Semula)
+                    </button>
+
+                    <div className="d-flex gap-2">
+                      <button 
+                        type="button" 
+                        onClick={handleSaveProfilWeb} 
+                        disabled={savingProfilWeb} 
+                        className="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow d-flex align-items-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, #1d4ed8, #0284c7)' }}
+                      >
+                        {savingProfilWeb ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Menyimpan ke Google Sheets...
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-cloud-check-fill fs-6"></i> Simpan Perubahan Profil
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
 
             </div>
           </div>
