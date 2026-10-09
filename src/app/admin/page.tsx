@@ -117,6 +117,51 @@ export default function AdminPage() {
     }
   };
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 450;
+          const MAX_HEIGHT = 600;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(e.target?.result as string);
+            return;
+          }
+
+          const isPng = file.type === 'image/png';
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.85);
+          resolve(dataUrl);
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleUploadProfilFoto = async (file: File, target: 'bupati' | 'wakil') => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -132,34 +177,32 @@ export default function AdminPage() {
     else setUploadingWakilFoto(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload-profil', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        const updated = {
-          ...profilWebData,
-          [target === 'bupati' ? 'bupati_foto' : 'wakil_foto']: data.url
-        };
-        setProfilWebData(updated);
+      // Kompresi otomatis di browser menjadi resolusi proporsional dan ukuran sangat ringan (<35KB)
+      const compressedDataUrl = await compressImage(file);
+      const dataUrl = compressedDataUrl || (await new Promise<string>((res) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.readAsDataURL(file);
+      }));
 
-        // Otomatis langsung simpan ke Google Sheets agar perubahan tidak hilang!
-        try {
-          await fetch('/api/profil-web', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updated),
-          });
-          setProfilWebSuccessMsg('Foto baru berhasil diunggah dan disimpan otomatis ke Google Sheets!');
-          setTimeout(() => setProfilWebSuccessMsg(''), 6000);
-        } catch (saveErr) {
-          console.error('Auto save error:', saveErr);
-        }
+      const updated = {
+        ...profilWebData,
+        [target === 'bupati' ? 'bupati_foto' : 'wakil_foto']: dataUrl
+      };
+      setProfilWebData(updated);
+
+      // Simpan langsung ke database Google Sheets
+      const res = await fetch('/api/profil-web', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setProfilWebSuccessMsg('Foto baru berhasil diunggah dan disimpan ke database Google Sheets!');
+        setTimeout(() => setProfilWebSuccessMsg(''), 6000);
       } else {
-        alert('Gagal upload foto: ' + (data.error || 'Terjadi kesalahan'));
+        alert('Gagal menyimpan foto ke database: ' + (json.error || 'Terjadi kesalahan'));
       }
     } catch (err: any) {
       alert('Terjadi kesalahan saat mengunggah foto: ' + err.message);

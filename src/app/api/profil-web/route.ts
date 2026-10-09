@@ -122,24 +122,75 @@ export async function POST(request: Request) {
       hero_subjudul: (body.hero_subjudul ?? DEFAULT_PROFIL.hero_subjudul).trim(),
     };
 
-    // 1. Simpan ke local cache JSON
+    // 1. Simpan ke local cache JSON (abaikan jika serverless read-only)
     saveLocalData(updatedData);
 
     // 2. Simpan ke Google Sheets
     try {
       const sheets = getGoogleSheets();
 
-      // Cek apakah sheet profil_web sudah ada
+      // Cek apakah sheet profil_web dan foto_chunks sudah ada
       const meta = await sheets.spreadsheets.get({ spreadsheetId: GOOGLE_SHEET_ID });
       const titles = meta.data.sheets?.map(s => s.properties?.title) || [];
 
-      if (!titles.includes('profil_web')) {
+      const sheetsToAdd = [];
+      if (!titles.includes('profil_web')) sheetsToAdd.push('profil_web');
+      if (!titles.includes('foto_chunks')) sheetsToAdd.push('foto_chunks');
+
+      if (sheetsToAdd.length > 0) {
         await sheets.spreadsheets.batchUpdate({
           spreadsheetId: GOOGLE_SHEET_ID,
           requestBody: {
-            requests: [{ addSheet: { properties: { title: 'profil_web' } } }]
+            requests: sheetsToAdd.map(title => ({ addSheet: { properties: { title } } }))
           }
         });
+      }
+
+      // 2a. Jika ada gambar Base64, pecah menjadi potongan-potongan (chunks) agar tidak terkena limit 50.000 karakter per sel
+      if (updatedData.bupati_foto.startsWith('data:image/') || updatedData.wakil_foto.startsWith('data:image/')) {
+        try {
+          const chunkRes = await sheets.spreadsheets.values.get({
+            spreadsheetId: GOOGLE_SHEET_ID,
+            range: 'foto_chunks!A:C',
+          });
+          let existingRows = chunkRes.data.values || [];
+          const CHUNK_SIZE = 30000;
+
+          if (updatedData.bupati_foto.startsWith('data:image/')) {
+            existingRows = existingRows.filter(r => r[0] !== 'bupati');
+            const strB = updatedData.bupati_foto;
+            let idx = 0;
+            for (let i = 0; i < strB.length; i += CHUNK_SIZE) {
+              existingRows.push(['bupati', String(idx++), strB.substring(i, i + CHUNK_SIZE)]);
+            }
+            updatedData.bupati_foto = '/api/profil-web/image?target=bupati';
+          }
+
+          if (updatedData.wakil_foto.startsWith('data:image/')) {
+            existingRows = existingRows.filter(r => r[0] !== 'wakil');
+            const strW = updatedData.wakil_foto;
+            let idx = 0;
+            for (let i = 0; i < strW.length; i += CHUNK_SIZE) {
+              existingRows.push(['wakil', String(idx++), strW.substring(i, i + CHUNK_SIZE)]);
+            }
+            updatedData.wakil_foto = '/api/profil-web/image?target=wakil';
+          }
+
+          await sheets.spreadsheets.values.clear({
+            spreadsheetId: GOOGLE_SHEET_ID,
+            range: 'foto_chunks!A1:Z500',
+          });
+          if (existingRows.length > 0) {
+            await sheets.spreadsheets.values.update({
+              spreadsheetId: GOOGLE_SHEET_ID,
+              range: `foto_chunks!A1:C${existingRows.length}`,
+              valueInputOption: 'USER_ENTERED',
+              requestBody: { values: existingRows },
+            });
+          }
+        } catch (chunkErr) {
+          console.error('Error handling foto_chunks:', chunkErr);
+        }
       }
 
       const rowsToWrite = [
@@ -162,7 +213,6 @@ export async function POST(request: Request) {
       });
     } catch (sheetErr) {
       console.error('Error saving profil_web to Google Sheets:', sheetErr);
-      // Data sudah tersimpan di local JSON, jadi tetap return success dengan peringatan jika perlu
     }
 
     return NextResponse.json({
