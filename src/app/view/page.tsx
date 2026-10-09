@@ -15,7 +15,10 @@ function DocumentViewer() {
     );
   }
 
-  const isImage = url.match(/\.(jpeg|jpg|gif|png)$/i) || url.startsWith('data:image');
+  const cleanUrl = url.split('?')[0].split('#')[0];
+  const isImage = cleanUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) || 
+                  url.match(/[?&]name=[^&]+\.(jpeg|jpg|gif|png|webp)/i) || 
+                  url.startsWith('data:image');
 
   return (
     <div className="d-flex flex-column vh-100 bg-dark text-white">
