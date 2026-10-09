@@ -2710,7 +2710,6 @@ export default function AdminPage() {
                                   src={profilWebData.bupati_foto || '/img/bupati1.png'} 
                                   alt="Bupati" 
                                   style={{ width: '100%', height: '170px', objectFit: 'contain' }}
-                                  onError={(e: any) => { e.currentTarget.src = '/img/bupati1.png'; }}
                                 />
                               </div>
                               <p className="m-0 text-uppercase fw-bold" style={{ fontSize: '0.72rem', color: '#f3ca20', letterSpacing: '0.5px' }}>
@@ -2731,7 +2730,6 @@ export default function AdminPage() {
                                   src={profilWebData.wakil_foto || '/img/bupati2.png'} 
                                   alt="Wakil Bupati" 
                                   style={{ width: '100%', height: '170px', objectFit: 'contain' }}
-                                  onError={(e: any) => { e.currentTarget.src = '/img/bupati2.png'; }}
                                 />
                               </div>
                               <p className="m-0 text-uppercase fw-bold" style={{ fontSize: '0.72rem', color: '#f3ca20', letterSpacing: '0.5px' }}>
@@ -2779,7 +2777,6 @@ export default function AdminPage() {
                                     src={profilWebData.bupati_foto || '/img/bupati1.png'} 
                                     alt="Foto Bupati" 
                                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                    onError={(e: any) => { e.currentTarget.src = '/img/bupati1.png'; }}
                                   />
                                 )}
                               </div>
@@ -2897,7 +2894,6 @@ export default function AdminPage() {
                                     src={profilWebData.wakil_foto || '/img/bupati2.png'} 
                                     alt="Foto Wakil Bupati" 
                                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                    onError={(e: any) => { e.currentTarget.src = '/img/bupati2.png'; }}
                                   />
                                 )}
                               </div>

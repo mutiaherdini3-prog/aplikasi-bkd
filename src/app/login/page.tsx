@@ -516,9 +516,8 @@ export default function LoginPage() {
             <div className="hero-image-container new-layout">
                 <div className="bupati-item">
                     <img 
-                      src={profilWeb.bupati_foto || '/img/bupati1.png'} 
+                      src={`/api/profil-web/image?target=bupati&v=${encodeURIComponent(profilWeb.bupati_foto || 'default')}`} 
                       alt={profilWeb.bupati_jabatan || 'Bupati Bangka Barat'} 
-                      onError={(e: any) => { e.currentTarget.src = '/img/bupati1.png'; }}
                     />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10, width: '100%' }}>
                         <div style={{ minHeight: '2.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -533,9 +532,8 @@ export default function LoginPage() {
                 </div>
                 <div className="bupati-item">
                     <img 
-                      src={profilWeb.wakil_foto || '/img/bupati2.png'} 
+                      src={`/api/profil-web/image?target=wakil&v=${encodeURIComponent(profilWeb.wakil_foto || 'default')}`} 
                       alt={profilWeb.wakil_jabatan || 'Wakil Bupati Bangka Barat'} 
-                      onError={(e: any) => { e.currentTarget.src = '/img/bupati2.png'; }}
                     />
                     <div style={{ textAlign: 'center', marginTop: '1rem', color: 'white', zIndex: 10, width: '100%' }}>
                         <div style={{ minHeight: '2.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
