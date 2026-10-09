@@ -173,12 +173,27 @@ export default function AdminPage() {
     setSavingProfilWeb(true);
     setProfilWebSuccessMsg('');
     setProfilWebErrorMsg('');
-    const payload = customPayload || profilWebData;
+
+    // Pastikan payload berupa data murni, bukan React SyntheticEvent
+    const isValidCustomData = customPayload && typeof customPayload === 'object' && !customPayload.nativeEvent && !customPayload.target && 'bupati_nama' in customPayload;
+    const source = isValidCustomData ? customPayload : profilWebData;
+
+    const cleanPayload = {
+      bupati_nama: source.bupati_nama || '',
+      bupati_jabatan: source.bupati_jabatan || '',
+      bupati_foto: source.bupati_foto || '',
+      wakil_nama: source.wakil_nama || '',
+      wakil_jabatan: source.wakil_jabatan || '',
+      wakil_foto: source.wakil_foto || '',
+      hero_judul: source.hero_judul || '',
+      hero_subjudul: source.hero_subjudul || '',
+    };
+
     try {
       const res = await fetch('/api/profil-web', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanPayload),
       });
       const json = await res.json();
       if (json.success) {
@@ -3011,7 +3026,7 @@ export default function AdminPage() {
                   <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 border-top">
                     <button 
                       type="button" 
-                      onClick={handleResetProfilWeb} 
+                      onClick={() => handleResetProfilWeb()} 
                       className="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1"
                     >
                       <i className="bi bi-arrow-counterclockwise"></i> Reset ke Default (Semula)
@@ -3020,7 +3035,7 @@ export default function AdminPage() {
                     <div className="d-flex gap-2">
                       <button 
                         type="button" 
-                        onClick={handleSaveProfilWeb} 
+                        onClick={() => handleSaveProfilWeb()} 
                         disabled={savingProfilWeb} 
                         className="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow d-flex align-items-center gap-2"
                         style={{ background: 'linear-gradient(135deg, #1d4ed8, #0284c7)' }}
