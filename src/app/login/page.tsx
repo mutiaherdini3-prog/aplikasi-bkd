@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   const router = useRouter();
   const [nip, setNip] = useState('');
@@ -20,7 +22,11 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    fetch('/api/profil-web')
+    // Tambahkan timestamp anti-cache agar peramban selalu mengambil profil terbaru
+    fetch(`/api/profil-web?t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    })
       .then(res => res.json())
       .then(res => {
         if (res.success && res.data) {

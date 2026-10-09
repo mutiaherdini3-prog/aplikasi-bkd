@@ -102,7 +102,10 @@ export default function AdminPage() {
     setLoadingProfilWeb(true);
     setProfilWebErrorMsg('');
     try {
-      const res = await fetch('/api/profil-web', { cache: 'no-store' });
+      const res = await fetch(`/api/profil-web?t=${Date.now()}`, { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+      });
       const json = await res.json();
       if (json.success && json.data) {
         setProfilWebData(json.data);
@@ -120,8 +123,8 @@ export default function AdminPage() {
       alert('Hanya file gambar yang diperbolehkan (PNG, JPG, WEBP)');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Ukuran file maksimal 10MB');
       return;
     }
 
@@ -137,10 +140,24 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (data.success && data.url) {
-        setProfilWebData(prev => ({
-          ...prev,
+        const updated = {
+          ...profilWebData,
           [target === 'bupati' ? 'bupati_foto' : 'wakil_foto']: data.url
-        }));
+        };
+        setProfilWebData(updated);
+
+        // Otomatis langsung simpan ke Google Sheets agar perubahan tidak hilang!
+        try {
+          await fetch('/api/profil-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated),
+          });
+          setProfilWebSuccessMsg('Foto baru berhasil diunggah dan disimpan otomatis ke Google Sheets!');
+          setTimeout(() => setProfilWebSuccessMsg(''), 6000);
+        } catch (saveErr) {
+          console.error('Auto save error:', saveErr);
+        }
       } else {
         alert('Gagal upload foto: ' + (data.error || 'Terjadi kesalahan'));
       }
@@ -152,15 +169,16 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveProfilWeb = async () => {
+  const handleSaveProfilWeb = async (customPayload?: any) => {
     setSavingProfilWeb(true);
     setProfilWebSuccessMsg('');
     setProfilWebErrorMsg('');
+    const payload = customPayload || profilWebData;
     try {
       const res = await fetch('/api/profil-web', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profilWebData),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.success) {
