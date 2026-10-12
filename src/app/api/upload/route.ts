@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     let fileId = '';
     let driveUploaded = false;
 
+    let driveErrorMsg = '';
     // 1. Coba upload ke Google Drive terlebih dahulu
     try {
       const drive = await getGoogleDrive();
@@ -65,7 +66,8 @@ export async function POST(request: Request) {
         driveUploaded = true;
       }
     } catch (driveErr: any) {
-      console.warn('Google Drive error (' + (driveErr.message || 'Drive unavailable') + '). Beralih otomatis ke Dokumen Storage Database...');
+      driveErrorMsg = driveErr.message || 'Drive error';
+      console.warn('Google Drive error (' + driveErrorMsg + '). Beralih otomatis ke Dokumen Storage Database...');
     }
 
     // 2. Fallback Otomatis: Jika Google Drive gagal (invalid_grant/quota/token expired),
@@ -107,7 +109,7 @@ export async function POST(request: Request) {
       fileId = docId;
     }
 
-    return NextResponse.json({ success: true, url: fileUrl, fileId: fileId });
+    return NextResponse.json({ success: true, url: fileUrl, fileId: fileId, driveError: driveErrorMsg || undefined });
   } catch (error: any) {
     console.error('Upload error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
