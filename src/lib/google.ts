@@ -17,13 +17,31 @@ const getAuth = () => {
   });
 };
 
-export function getGoogleDrive() {
+export async function getGoogleDrive() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  let refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+  // Jika token di env kosong atau token lama yang expired, ambil token aktif dari Google Sheets
+  if (!refreshToken || refreshToken.includes('0g75ZtfLDqgo')) {
+    try {
+      const sheets = getGoogleSheets();
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: 'profil_web!A:B',
+      });
+      const rows = res.data.values || [];
+      const tokenRow = rows.find((r: any) => r[0]?.trim() === 'google_refresh_token');
+      if (tokenRow && tokenRow[1]) {
+        refreshToken = tokenRow[1].trim();
+      }
+    } catch (sheetErr) {
+      console.warn('Gagal membaca token cadangan dari sheet:', sheetErr);
+    }
+  }
 
   if (!clientId || !clientSecret || !refreshToken) {
-    throw new Error('OAuth2 credentials for Google Drive are not set in .env.local');
+    throw new Error('OAuth2 credentials for Google Drive are not set');
   }
 
   const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);

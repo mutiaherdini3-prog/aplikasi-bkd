@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     // 1. Coba upload ke Google Drive terlebih dahulu
     try {
-      const drive = getGoogleDrive();
+      const drive = await getGoogleDrive();
       const stream = new Readable();
       stream.push(buffer);
       stream.push(null);
