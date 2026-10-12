@@ -26,10 +26,10 @@ let inMemoryDriveToken: string | undefined = undefined;
 export async function getGoogleDrive() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  let refreshToken = inMemoryDriveToken || process.env.GOOGLE_REFRESH_TOKEN;
+  let refreshToken = inMemoryDriveToken;
 
-  // Jika token di env kosong atau token lama yang expired, ambil token aktif dari Google Sheets
-  if (!refreshToken || refreshToken.includes('0g75ZtfLDqgo')) {
+  // Selalu prioritaskan token aktif dari database Google Sheets
+  if (!refreshToken) {
     try {
       const sheets = getGoogleSheets();
       const res = await sheets.spreadsheets.values.get({
@@ -45,6 +45,11 @@ export async function getGoogleDrive() {
     } catch (sheetErr) {
       console.warn('Gagal membaca token cadangan dari sheet:', sheetErr);
     }
+  }
+
+  // Jika di database belum ada, baru gunakan env
+  if (!refreshToken) {
+    refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
   }
 
   if (!clientId || !clientSecret || !refreshToken) {
