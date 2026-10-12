@@ -93,7 +93,7 @@ async function deleteAttachedFile(rawLink: string) {
 }
 
 async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: any[] | null = null, prePegRows: any[] | null = null) {
-  // 1. Get sertifikasi data (selalu fresh agar data yang baru dihapus tidak ikut terhitung)
+  // 1. Get sertifikasi data
   let sertRows = preSertRows;
   if (!sertRows) {
     sertRows = await getFreshSheetData('sertifikasi!A:Z');
@@ -103,10 +103,19 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
   
   const nipIdx = sertHeaders.indexOf('nip');
   const jpIdxSert = sertHeaders.indexOf('jumlah jp');
+  const namaSertIdx = sertHeaders.indexOf('nama kursus') !== -1 ? sertHeaders.indexOf('nama kursus') : sertHeaders.indexOf('jenis sertifikasi');
+  const linkSertIdx = sertHeaders.indexOf('link sertifikat');
+  const jenisKursusIdx = sertHeaders.indexOf('jenis kursus');
+  const klasifikasiIdx = sertHeaders.indexOf('klasifikasi kursus');
+  const penandaTanganIdx = sertHeaders.indexOf('penanda tangan') !== -1 ? sertHeaders.indexOf('penanda tangan') : sertHeaders.indexOf('pejabat');
+  const biayaIdx = sertHeaders.indexOf('biaya pelatihan');
 
+  const userCerts: any[] = [];
   let totalJp = 0;
+
   for (let i = 1; i < sertRows.length; i++) {
     if (sertRows[i][nipIdx]?.trim() === nip.trim()) {
+      userCerts.push(sertRows[i]);
       totalJp += parseInt(sertRows[i][jpIdxSert] || '0', 10) || 0;
     }
   }
@@ -114,19 +123,20 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
   // 2. Get pegawai data
   let pegRows = prePegRows;
   if (!pegRows) {
-    pegRows = await getFreshSheetData('pegawai!A:Z');
+    pegRows = await getFreshSheetData('pegawai!A:ZZ');
   }
   if (!pegRows || pegRows.length === 0) return;
   
-  const pegHeaders = pegRows[0].map((h: string) => h.trim().toLowerCase());
-  const pegNipIdx = pegHeaders.indexOf('nip');
-  const pegJpIdx = pegHeaders.indexOf('jumlah jp');
+  const pegHeaders = [...pegRows[0].map((h: string) => (h || '').toString().trim())];
+  const pegHeadersLower = pegHeaders.map(h => h.toLowerCase());
+  const pegNipIdx = pegHeadersLower.indexOf('nip');
+  const pegJpIdx = pegHeadersLower.indexOf('jumlah jp');
 
   if (pegNipIdx === -1 || pegJpIdx === -1) return;
 
   let pegRowIndex = -1;
   for (let i = 1; i < pegRows.length; i++) {
-    if (pegRows[i][pegNipIdx]?.trim() === nip.trim()) {
+    if ((pegRows[i][pegNipIdx] || '').toString().trim() === nip.trim()) {
       pegRowIndex = i + 1; // 1-based index in sheet
       break;
     }
@@ -134,13 +144,62 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
 
   if (pegRowIndex === -1) return; // NIP tidak ditemukan
 
-  // 3. Update HANYA sel kolom jumlah jp di baris pegawai
-  const colLetter = getColumnName(pegJpIdx);
-  await sheets.spreadsheets.values.update({
+  const currentRow = [...pegRows[pegRowIndex - 1]];
+  currentRow[pegJpIdx] = totalJp.toString();
+
+  // Hitung jumlah sertifikat maksimum yang ada di header saat ini
+  let maxCertIdxInHeaders = 0;
+  pegHeadersLower.forEach((h: string) => {
+    const match = h.match(/nama sertifikat (\d+)/i);
+    if (match) {
+      const idx = parseInt(match[1], 10);
+      if (idx > maxCertIdxInHeaders) maxCertIdxInHeaders = idx;
+    }
+  });
+
+  const maxCertsToProcess = Math.max(userCerts.length, maxCertIdxInHeaders, 1);
+  let headersChanged = false;
+
+  for (let certIdx = 1; certIdx <= maxCertsToProcess; certIdx++) {
+    const cert = userCerts[certIdx - 1];
+
+    const mappings = [
+      { header: `Nama Sertifikat ${certIdx}`, value: cert ? (cert[namaSertIdx] || '-') : '-' },
+      { header: `Link Sertifikat ${certIdx}`, value: cert ? (cert[linkSertIdx] || '-') : '-' },
+      { header: `Jenis Kursus ${certIdx}`, value: cert ? (cert[jenisKursusIdx] || '-') : '-' },
+      { header: `Klasifikasi Kursus ${certIdx}`, value: cert ? (cert[klasifikasiIdx] || '-') : '-' },
+      { header: `Penanda Tangan ${certIdx}`, value: cert ? (cert[penandaTanganIdx] || '-') : '-' },
+      { header: `Biaya Pelatihan ${certIdx}`, value: cert ? (cert[biayaIdx] || '-') : '-' },
+    ];
+
+    for (const map of mappings) {
+      let hIdx = pegHeadersLower.indexOf(map.header.toLowerCase());
+      if (hIdx === -1) {
+        hIdx = pegHeaders.length;
+        pegHeaders.push(map.header);
+        pegHeadersLower.push(map.header.toLowerCase());
+        headersChanged = true;
+      }
+      while (currentRow.length <= hIdx) currentRow.push('');
+      currentRow[hIdx] = map.value;
+    }
+  }
+
+  const maxColName = getColumnName(pegHeaders.length - 1);
+  const batchRequests = [
+    { range: `pegawai!A${pegRowIndex}:${maxColName}${pegRowIndex}`, values: [currentRow] }
+  ];
+
+  if (headersChanged) {
+    batchRequests.unshift({ range: `pegawai!A1:${maxColName}1`, values: [pegHeaders] });
+  }
+
+  await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: GOOGLE_SHEET_ID,
-    range: `pegawai!${colLetter}${pegRowIndex}`,
-    valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [[totalJp.toString()]] }
+    requestBody: {
+      valueInputOption: 'USER_ENTERED',
+      data: batchRequests
+    }
   });
 }
 

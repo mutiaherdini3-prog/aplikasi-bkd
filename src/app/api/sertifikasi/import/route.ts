@@ -118,45 +118,132 @@ export async function POST(request: Request) {
 
     console.log(`✅ Berhasil menambahkan ${newSertifikasiRows.length} baris ke sheet sertifikasi.`);
 
-    // 4. Batch update ke sheet pegawai untuk semua NIP yang terdampak (hanya kolom jumlah jp)
+    // 4. Batch update ke sheet pegawai untuk semua NIP yang terdampak (JP dan kolom horizontal sertifikasi)
     const updatedSertRows = await getFreshSheetData('sertifikasi!A:Z');
-    const updatedPegRows = await getFreshSheetData('pegawai!A:Z');
+    const updatedPegRows = await getFreshSheetData('pegawai!A:ZZ');
 
     if (updatedSertRows && updatedPegRows && updatedSertRows.length > 0 && updatedPegRows.length > 0) {
       const sHeaders = updatedSertRows[0].map((h: string) => (h || '').toString().trim().toLowerCase().replace(/_/g, ' '));
       const nipIdxS = sHeaders.indexOf('nip');
       const jpIdxS = sHeaders.indexOf('jumlah jp');
+      const namaSertIdxS = sHeaders.indexOf('nama kursus') !== -1 ? sHeaders.indexOf('nama kursus') : sHeaders.indexOf('jenis sertifikasi');
+      const linkSertIdxS = sHeaders.indexOf('link sertifikat');
+      const jenisKursusIdxS = sHeaders.indexOf('jenis kursus');
+      const klasifikasiIdxS = sHeaders.indexOf('klasifikasi kursus');
+      const penandaTanganIdxS = sHeaders.indexOf('penanda tangan') !== -1 ? sHeaders.indexOf('penanda tangan') : sHeaders.indexOf('pejabat');
+      const biayaIdxS = sHeaders.indexOf('biaya pelatihan');
 
-      // Hitung total JP per NIP
-      const totalJpByNip = new Map<string, number>();
+      // Kelompokkan sertifikasi per NIP
+      const certsByNip = new Map<string, any[]>();
       for (let i = 1; i < updatedSertRows.length; i++) {
         const row = updatedSertRows[i];
         const rNip = (row[nipIdxS] || '').toString().trim();
         if (!rNip) continue;
-        const currentTotal = totalJpByNip.get(rNip) || 0;
-        totalJpByNip.set(rNip, currentTotal + (parseInt(row[jpIdxS] || '0', 10) || 0));
+        if (!certsByNip.has(rNip)) {
+          certsByNip.set(rNip, []);
+        }
+        certsByNip.get(rNip)!.push(row);
       }
 
-      const pegHeaders = updatedPegRows[0].map((h: string) => (h || '').toString().trim().toLowerCase());
-      const pegNipIdx = pegHeaders.indexOf('nip');
-      const pegJpIdx = pegHeaders.indexOf('jumlah jp');
+      const pegHeaders = [...updatedPegRows[0].map((h: string) => (h || '').toString().trim())];
+      const pegHeadersLower = pegHeaders.map(h => h.toLowerCase());
+      const pegNipIdx = pegHeadersLower.indexOf('nip');
+      const pegJpIdx = pegHeadersLower.indexOf('jumlah jp');
 
       if (pegNipIdx !== -1 && pegJpIdx !== -1) {
-        const colLetter = getColumnName(pegJpIdx);
+        let maxCertIdxInHeaders = 0;
+        pegHeadersLower.forEach((h: string) => {
+          const match = h.match(/nama sertifikat (\d+)/i);
+          if (match) {
+            const idx = parseInt(match[1], 10);
+            if (idx > maxCertIdxInHeaders) maxCertIdxInHeaders = idx;
+          }
+        });
+
+        // Hitung max certs di seluruh NIP yang terdampak
+        let maxCertsNeeded = maxCertIdxInHeaders;
+        for (const nip of affectedNipsSet) {
+          const uCerts = certsByNip.get(nip) || [];
+          if (uCerts.length > maxCertsNeeded) maxCertsNeeded = uCerts.length;
+        }
+
+        let headersChanged = false;
+        for (let k = 1; k <= maxCertsNeeded; k++) {
+          const reqCols = [
+            `Nama Sertifikat ${k}`,
+            `Link Sertifikat ${k}`,
+            `Jenis Kursus ${k}`,
+            `Klasifikasi Kursus ${k}`,
+            `Penanda Tangan ${k}`,
+            `Biaya Pelatihan ${k}`
+          ];
+          for (const col of reqCols) {
+            if (!pegHeadersLower.includes(col.toLowerCase())) {
+              pegHeaders.push(col);
+              pegHeadersLower.push(col.toLowerCase());
+              headersChanged = true;
+            }
+          }
+        }
+
         const batchRequests: { range: string; values: any[][] }[] = [];
 
         for (const nip of affectedNipsSet) {
+          let pegRowIndex = -1;
           for (let i = 1; i < updatedPegRows.length; i++) {
             if ((updatedPegRows[i][pegNipIdx] || '').toString().trim() === nip) {
-              const sheetRowNumber = i + 1;
-              const newTotalJp = (totalJpByNip.get(nip) || 0).toString();
-              batchRequests.push({
-                range: `pegawai!${colLetter}${sheetRowNumber}`,
-                values: [[newTotalJp]]
-              });
+              pegRowIndex = i;
               break;
             }
           }
+
+          if (pegRowIndex === -1) continue;
+
+          const userCerts = certsByNip.get(nip) || [];
+          let totalJp = 0;
+          for (const c of userCerts) {
+            totalJp += parseInt(c[jpIdxS] || '0', 10) || 0;
+          }
+
+          const currentRow = [...updatedPegRows[pegRowIndex]];
+          currentRow[pegJpIdx] = totalJp.toString();
+
+          for (let k = 1; k <= maxCertsNeeded; k++) {
+            const cert = userCerts[k - 1];
+            const mappings = [
+              { header: `Nama Sertifikat ${k}`, value: cert ? (cert[namaSertIdxS] || '-') : '-' },
+              { header: `Link Sertifikat ${k}`, value: cert ? (cert[linkSertIdxS] || '-') : '-' },
+              { header: `Jenis Kursus ${k}`, value: cert ? (cert[jenisKursusIdxS] || '-') : '-' },
+              { header: `Klasifikasi Kursus ${k}`, value: cert ? (cert[klasifikasiIdxS] || '-') : '-' },
+              { header: `Penanda Tangan ${k}`, value: cert ? (cert[penandaTanganIdxS] || '-') : '-' },
+              { header: `Biaya Pelatihan ${k}`, value: cert ? (cert[biayaIdxS] || '-') : '-' },
+            ];
+
+            for (const map of mappings) {
+              const hIdx = pegHeadersLower.indexOf(map.header.toLowerCase());
+              if (hIdx !== -1) {
+                while (currentRow.length <= hIdx) currentRow.push('');
+                currentRow[hIdx] = map.value;
+              }
+            }
+          }
+
+          updatedPegRows[pegRowIndex] = currentRow;
+
+          const maxColName = getColumnName(pegHeaders.length - 1);
+          const sheetRowNumber = pegRowIndex + 1;
+          batchRequests.push({
+            range: `pegawai!A${sheetRowNumber}:${maxColName}${sheetRowNumber}`,
+            values: [currentRow]
+          });
+        }
+
+        if (headersChanged) {
+          const maxColName = getColumnName(pegHeaders.length - 1);
+          batchRequests.unshift({
+            range: `pegawai!A1:${maxColName}1`,
+            values: [pegHeaders]
+          });
         }
 
         if (batchRequests.length > 0) {
@@ -167,7 +254,7 @@ export async function POST(request: Request) {
               data: batchRequests
             }
           });
-          console.log(`✅ Berhasil memperbarui kolom JP untuk ${batchRequests.length} pegawai.`);
+          console.log(`✅ Berhasil memperbarui baris pegawai horizontal untuk ${batchRequests.length} pegawai.`);
         }
       }
     }
