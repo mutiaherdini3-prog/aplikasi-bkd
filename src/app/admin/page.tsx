@@ -48,6 +48,14 @@ export default function AdminPage() {
   const [exportJenisKursusFilter, setExportJenisKursusFilter] = useState('all');
   const [searchIdp, setSearchIdp] = useState('');
 
+  // State untuk Import Template Sertifikasi Massal (contoh: Rabu Bertamu)
+  const [showImportSertifikasiModal, setShowImportSertifikasiModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPreviewData, setImportPreviewData] = useState<any[]>([]);
+  const [importSearchPreview, setImportSearchPreview] = useState('');
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
+
   // State untuk Konfirmasi Hapus
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmData, setDeleteConfirmData] = useState<{
@@ -856,6 +864,195 @@ export default function AdminPage() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Tren_Tahunan_OPD");
     XLSX.writeFile(workbook, "Rekap_Tren_Tahunan_OPD.xlsx");
+  };
+
+  // Download Template Excel untuk Sertifikasi Massal (contoh: Rabu Bertamu)
+  const downloadTemplateSertifikasi = () => {
+    const templateData = [
+      {
+        "NIP": "197812042002122005",
+        "Nama Pegawai (Opsional)": "Contoh Pegawai 1",
+        "Jenis Sertifikasi": "Workshop",
+        "Nama Kursus": "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN",
+        "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
+        "Nomor Sertifikasi": "800/RB-01/BKPSDMD/2026",
+        "Tanggal Sertifikasi": "2026-10-14",
+        "Tahun": 2026,
+        "Jumlah JP": 4,
+        "Link Sertifikat": "https://drive.google.com/file/d/1A62LKXyUlhQt1QVajmeo_8RwjS8xJ4jU/preview",
+        "Jenis Kursus": "Sosialisasi",
+        "Klasifikasi Kursus": "Non-Klasikal",
+        "Penanda Tangan": "Kepala BKPSDMD Kab. Bangka Barat",
+        "Biaya Pelatihan": "APBD"
+      },
+      {
+        "NIP": "197610101996021004",
+        "Nama Pegawai (Opsional)": "Contoh Pegawai 2",
+        "Jenis Sertifikasi": "Webinar",
+        "Nama Kursus": "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN",
+        "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
+        "Nomor Sertifikasi": "800/RB-02/BKPSDMD/2026",
+        "Tanggal Sertifikasi": "2026-10-21",
+        "Tahun": 2026,
+        "Jumlah JP": 4,
+        "Link Sertifikat": "",
+        "Jenis Kursus": "Webinar",
+        "Klasifikasi Kursus": "Non-Klasikal",
+        "Penanda Tangan": "Kepala BKPSDMD Kab. Bangka Barat",
+        "Biaya Pelatihan": "0"
+      }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+
+    // Sheet 1: Template_Sertifikasi
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    worksheet['!cols'] = [
+      { wch: 22 }, // NIP
+      { wch: 26 }, // Nama Pegawai
+      { wch: 18 }, // Jenis Sertifikasi
+      { wch: 48 }, // Nama Kursus
+      { wch: 32 }, // Institusi Penyelenggara
+      { wch: 24 }, // Nomor Sertifikasi
+      { wch: 18 }, // Tanggal Sertifikasi
+      { wch: 10 }, // Tahun
+      { wch: 12 }, // Jumlah JP
+      { wch: 45 }, // Link Sertifikat
+      { wch: 25 }, // Jenis Kursus
+      { wch: 20 }, // Klasifikasi Kursus
+      { wch: 32 }, // Penanda Tangan
+      { wch: 16 }  // Biaya Pelatihan
+    ];
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Template_Sertifikasi");
+
+    // Sheet 2: Petunjuk_Pengisian
+    const petunjukData = [
+      { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit yang terdaftar di database." },
+      { "Kolom": "Nama Pegawai (Opsional)", "Keterangan": "Hanya sebagai referensi admin di file Excel. Sistem mencocokkan data berdasarkan NIP." },
+      { "Kolom": "Jenis Sertifikasi", "Keterangan": "Contoh: Workshop, Webinar, Bimtek, Seminar, Pelatihan, Diklat Teknis, Paten/Haki." },
+      { "Kolom": "Nama Kursus", "Keterangan": "WAJIB diisi. Nama kegiatan diklat (Contoh: Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK)." },
+      { "Kolom": "Institusi Penyelenggara", "Keterangan": "Instansi penyelenggara kegiatan (Contoh: BKPSDMD Kabupaten Bangka Barat)." },
+      { "Kolom": "Nomor Sertifikasi", "Keterangan": "Nomor sertifikat atau surat tugas / piagam (Jika belum ada nomor, isi '-')." },
+      { "Kolom": "Tanggal Sertifikasi", "Keterangan": "Tanggal pelaksanaan kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY)." },
+      { "Kolom": "Tahun", "Keterangan": "Tahun kegiatan (Contoh: 2026)." },
+      { "Kolom": "Jumlah JP", "Keterangan": "WAJIB angka. Jumlah Jam Pelajaran yang diperoleh (Contoh: 4 atau 20)." },
+      { "Kolom": "Link Sertifikat", "Keterangan": "Tautan file Google Drive, Google Docs, atau URL. Boleh dikosongkan jika fisik sertifikat belum diunggah." },
+      { "Kolom": "Jenis Kursus", "Keterangan": "Pilihan: Webinar, Workshop, Diklat teknis, Seminar, Bimbingan teknis, Sosialisasi, Pelatihan manajerial, Pelatihan sosial kultural, E-learning, dll." },
+      { "Kolom": "Klasifikasi Kursus", "Keterangan": "Pilihan: Non-Klasikal / Klasikal / Blended Learning." },
+      { "Kolom": "Penanda Tangan", "Keterangan": "Pejabat yang menandatangani (Contoh: Kepala BKPSDMD Kab. Bangka Barat)." },
+      { "Kolom": "Biaya Pelatihan", "Keterangan": "Sumber pembiayaan (Contoh: APBD, Mandiri, Kontribusi, atau 0)." },
+    ];
+    const wsPetunjuk = XLSX.utils.json_to_sheet(petunjukData);
+    wsPetunjuk['!cols'] = [{ wch: 25 }, { wch: 80 }];
+    XLSX.utils.book_append_sheet(workbook, wsPetunjuk, "Petunjuk_Pengisian");
+
+    XLSX.writeFile(workbook, "Template_Import_Sertifikasi_BKD.xlsx");
+  };
+
+  // Handler saat file Excel dipilih untuk diimpor
+  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportFile(file);
+    setImportResult(null);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const workbook = XLSX.read(bstr, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const rawJson: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        const mapped = rawJson.map((r, idx) => {
+          const nip = (r['NIP'] || r['nip'] || r['Nip'] || r['Nomor Induk Pegawai'] || '').toString().trim();
+          const namaInput = (r['Nama Pegawai (Opsional)'] || r['Nama Pegawai'] || r['Nama'] || r['nama'] || '').toString().trim();
+          const namaKursus = (r['Nama Kursus'] || r['Nama Kursus / Kegiatan'] || r['Nama Kegiatan'] || r['nama_kursus'] || r['Kegiatan'] || '').toString().trim();
+          const jenisSert = (r['Jenis Sertifikasi'] || r['jenis_sertifikasi'] || r['Jenis'] || 'Workshop').toString().trim();
+          const inst = (r['Institusi Penyelenggara'] || r['institusi_penyelenggara'] || r['Penyelenggara'] || 'BKPSDMD').toString().trim();
+          const noSert = (r['Nomor Sertifikasi'] || r['nomor_sertifikasi'] || r['Nomor'] || '-').toString().trim();
+          const tgl = (r['Tanggal Sertifikasi'] || r['tanggal_sertifikasi'] || r['Tanggal'] || '').toString().trim();
+          const thn = (r['Tahun'] || r['tahun'] || new Date().getFullYear()).toString().trim();
+          const rawJp = r['Jumlah JP'] !== undefined ? r['Jumlah JP'] : (r['jumlah_jp'] || r['JP'] || 0);
+          const jp = Number(rawJp) || 0;
+          const link = (r['Link Sertifikat'] || r['link_sertifikat'] || r['Link Drive'] || r['Link'] || '').toString().trim();
+          const jenisKursus = (r['Jenis Kursus'] || r['jenis_kursus'] || 'Pelatihan non-klasikal lainnya').toString().trim();
+          const klasifikasi = (r['Klasifikasi Kursus'] || r['klasifikasi_kursus'] || 'Non-Klasikal').toString().trim();
+          const ttd = (r['Penanda Tangan'] || r['penanda_tangan'] || r['Pejabat'] || '-').toString().trim();
+          const biaya = (r['Biaya Pelatihan'] || r['biaya_pelatihan'] || r['Biaya'] || 'APBD').toString().trim();
+
+          const pegFound = pegawaiList.find(p => p.nip === nip);
+
+          return {
+            rowNum: idx + 2,
+            nip,
+            nama_pegawai: pegFound?.nama || namaInput || '-',
+            opd: pegFound?.unit_kerja || '-',
+            isRegistered: !!pegFound,
+            jenis_sertifikasi: jenisSert,
+            nama_kursus: namaKursus,
+            institusi_penyelenggara: inst,
+            nomor_sertifikasi: noSert,
+            tanggal_sertifikasi: tgl,
+            tahun: thn,
+            jumlah_jp: jp,
+            link_sertifikat: link,
+            jenis_kursus: jenisKursus,
+            klasifikasi_kursus: klasifikasi,
+            penanda_tangan: ttd,
+            biaya_pelatihan: biaya
+          };
+        }).filter(item => item.nip && item.nama_kursus);
+
+        setImportPreviewData(mapped);
+      } catch (err: any) {
+        alert('Gagal membaca file Excel: ' + (err?.message || err));
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  // Kirim data batch sertifikasi ke backend
+  const handleProcessImport = async () => {
+    if (importPreviewData.length === 0) {
+      alert('Tidak ada data valid untuk diimpor.');
+      return;
+    }
+
+    setImportLoading(true);
+    setImportResult(null);
+
+    try {
+      const res = await fetch('/api/sertifikasi/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: importPreviewData })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setImportResult({
+          success: true,
+          message: data.message || `Berhasil mengimpor ${importPreviewData.length} data sertifikasi!`
+        });
+        await fetchData(); // Refresh list pegawai & akumulasi JP di admin
+        setImportFile(null);
+        setImportPreviewData([]);
+      } else {
+        setImportResult({
+          success: false,
+          message: data.error || 'Gagal menyimpan data ke database.'
+        });
+      }
+    } catch (err: any) {
+      setImportResult({
+        success: false,
+        message: 'Terjadi kesalahan jaringan saat mengirim data: ' + (err?.message || err)
+      });
+    } finally {
+      setImportLoading(false);
+    }
   };
 
   const { groupedByOPD, sortedOPDs } = useMemo(() => {
@@ -1861,7 +2058,7 @@ export default function AdminPage() {
                             <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
                           <div className="dropdown">
-                            <button className="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button className="btn btn-sm btn-success dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                               <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                             </button>
                             <ul className="dropdown-menu">
@@ -1870,6 +2067,20 @@ export default function AdminPage() {
                               <li><button className="dropdown-item" onClick={exportToExcelSertPPPK}>PPPK</button></li>
                             </ul>
                           </div>
+                          <button 
+                            className="btn btn-sm btn-outline-success shadow-sm" 
+                            onClick={downloadTemplateSertifikasi}
+                            title="Download format Excel untuk input massal kegiatan (misal: Rabu Bertamu)"
+                          >
+                            <i className="bi bi-download me-1"></i> Download Template
+                          </button>
+                          <button 
+                            className="btn btn-sm btn-primary shadow-sm" 
+                            onClick={() => { setShowImportSertifikasiModal(true); setImportResult(null); }}
+                            title="Upload file Excel sertifikasi massal"
+                          >
+                            <i className="bi bi-file-earmark-arrow-up me-1"></i> Upload Template Sertifikasi
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -3460,6 +3671,211 @@ export default function AdminPage() {
                   <><i className="bi bi-trash3-fill"></i> Ya, Hapus</>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Upload & Import Template Sertifikasi Massal */}
+      {showImportSertifikasiModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content border-0 shadow-lg">
+              <div className="modal-header bg-primary text-white border-0 py-3">
+                <div className="d-flex align-items-center">
+                  <div className="bg-white bg-opacity-25 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style={{ width: '38px', height: '38px' }}>
+                    <i className="bi bi-cloud-arrow-up-fill fs-5"></i>
+                  </div>
+                  <div>
+                    <h5 className="modal-title fw-bold mb-0">Upload Template Sertifikasi Massal (Rabu Bertamu)</h5>
+                    <small className="opacity-75">Tambahkan sertifikasi langsung dari file Excel dan terhubung otomatis ke Google Sheets & Drive</small>
+                  </div>
+                </div>
+                <button type="button" className="btn-close btn-close-white" onClick={() => { setShowImportSertifikasiModal(false); setImportFile(null); setImportPreviewData([]); setImportResult(null); }}></button>
+              </div>
+
+              <div className="modal-body p-4 bg-light">
+                {/* Banner Info & Download Template */}
+                <div className="alert alert-info border-0 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                  <div className="d-flex align-items-start gap-2">
+                    <i className="bi bi-info-circle-fill fs-5 text-primary mt-1"></i>
+                    <div>
+                      <div className="fw-bold">Format Kolom Terhubung dengan Google Sheets & Drive:</div>
+                      <div className="text-secondary small">
+                        Pastikan file Excel menggunakan template standar yang disediakan (termasuk kolom NIP, Nama Kursus, Jumlah JP, Jenis Kursus, dan Link Sertifikat).
+                      </div>
+                    </div>
+                  </div>
+                  <button className="btn btn-sm btn-success fw-bold px-3 shadow-sm" onClick={downloadTemplateSertifikasi}>
+                    <i className="bi bi-file-earmark-excel me-1"></i> Download Template Excel
+                  </button>
+                </div>
+
+                {/* Notifikasi Hasil Import */}
+                {importResult && (
+                  <div className={`alert ${importResult.success ? 'alert-success' : 'alert-danger'} border-0 shadow-sm d-flex align-items-center gap-2 mb-4`}>
+                    <i className={`bi ${importResult.success ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} fs-5`}></i>
+                    <div className="flex-grow-1">{importResult.message}</div>
+                    <button type="button" className="btn-close" onClick={() => setImportResult(null)}></button>
+                  </div>
+                )}
+
+                {/* Area Upload File */}
+                <div className="card border-0 shadow-sm mb-4">
+                  <div className="card-body p-4 text-center">
+                    <div className="mb-3">
+                      <i className="bi bi-file-earmark-spreadsheet-fill text-success display-4"></i>
+                    </div>
+                    <h6 className="fw-bold mb-1">Pilih File Excel Hasil Pengisian Template</h6>
+                    <p className="text-muted small mb-3">Mendukung format file <code>.xlsx</code>, <code>.xls</code>, atau <code>.csv</code></p>
+                    
+                    <div className="d-flex justify-content-center">
+                      <label className="btn btn-outline-primary px-4 py-2 cursor-pointer shadow-sm">
+                        <i className="bi bi-folder2-open me-2"></i>
+                        {importFile ? importFile.name : 'Pilih File Excel...'}
+                        <input 
+                          type="file" 
+                          accept=".xlsx, .xls, .csv" 
+                          className="d-none" 
+                          onChange={handleImportFileChange}
+                        />
+                      </label>
+                    </div>
+
+                    {importFile && (
+                      <div className="mt-3 text-success fw-bold small">
+                        <i className="bi bi-check2-circle me-1"></i> File terpilih: {importFile.name} ({(importFile.size / 1024).toFixed(1)} KB)
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Preview Data Jika Sudah Ada Baris */}
+                {importPreviewData.length > 0 && (
+                  <div className="card border-0 shadow-sm mb-3">
+                    <div className="card-header bg-white py-3 border-0">
+                      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div className="d-flex align-items-center gap-2 flex-wrap">
+                          <span className="badge bg-primary fs-6">Total: {importPreviewData.length} Baris</span>
+                          <span className="badge bg-success fs-6">Terdaftar di DB: {importPreviewData.filter(d => d.isRegistered).length}</span>
+                          {importPreviewData.some(d => !d.isRegistered) && (
+                            <span className="badge bg-warning text-dark fs-6">NIP Belum di DB: {importPreviewData.filter(d => !d.isRegistered).length}</span>
+                          )}
+                          <span className="badge bg-info text-dark fs-6">
+                            Total Tambahan JP: {importPreviewData.reduce((acc, c) => acc + (c.jumlah_jp || 0), 0)} JP
+                          </span>
+                        </div>
+                        <div className="position-relative" style={{ width: '250px' }}>
+                          <input 
+                            type="text" 
+                            className="form-control form-control-sm pe-4" 
+                            placeholder="Cari NIP / Nama / Kegiatan..." 
+                            value={importSearchPreview}
+                            onChange={(e) => setImportSearchPreview(e.target.value)}
+                          />
+                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="table-responsive" style={{ maxHeight: '350px' }}>
+                      <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.82rem' }}>
+                        <thead className="table-light sticky-top">
+                          <tr>
+                            <th className="text-center" style={{ width: '40px' }}>No</th>
+                            <th style={{ width: '160px' }}>NIP</th>
+                            <th style={{ width: '200px' }}>Nama & OPD</th>
+                            <th>Nama Kursus / Kegiatan</th>
+                            <th className="text-center" style={{ width: '70px' }}>JP</th>
+                            <th style={{ width: '100px' }}>Tahun</th>
+                            <th style={{ width: '140px' }}>Jenis Kursus</th>
+                            <th style={{ width: '120px' }}>Status Link</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importPreviewData
+                            .filter(d => {
+                              if (!importSearchPreview) return true;
+                              const q = importSearchPreview.toLowerCase();
+                              return (
+                                d.nip.toLowerCase().includes(q) ||
+                                d.nama_pegawai.toLowerCase().includes(q) ||
+                                d.nama_kursus.toLowerCase().includes(q) ||
+                                d.opd.toLowerCase().includes(q)
+                              );
+                            })
+                            .map((item, idx) => (
+                              <tr key={idx} className={item.isRegistered ? '' : 'table-warning'}>
+                                <td className="text-center text-muted">{idx + 1}</td>
+                                <td>
+                                  <div className="fw-bold">{item.nip}</div>
+                                  {item.isRegistered ? (
+                                    <span className="badge bg-success" style={{ fontSize: '0.65rem' }}>✓ Terdaftar</span>
+                                  ) : (
+                                    <span className="badge bg-warning text-dark" style={{ fontSize: '0.65rem' }}>⚠ Belum Ada di DB</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <div className="fw-bold text-dark">{item.nama_pegawai}</div>
+                                  <small className="text-muted d-block text-truncate" style={{ maxWidth: '190px' }} title={item.opd}>{item.opd}</small>
+                                </td>
+                                <td>
+                                  <div className="fw-bold text-primary">{item.nama_kursus}</div>
+                                  <small className="text-muted">{item.institusi_penyelenggara} • No: {item.nomor_sertifikasi}</small>
+                                </td>
+                                <td className="text-center">
+                                  <span className="badge bg-info text-dark fw-bold">{item.jumlah_jp} JP</span>
+                                </td>
+                                <td>{item.tahun}</td>
+                                <td>
+                                  <span className="badge bg-secondary" style={{ fontSize: '0.7rem' }}>{item.jenis_kursus}</span>
+                                </td>
+                                <td>
+                                  {item.link_sertifikat ? (
+                                    <span className="badge bg-primary text-truncate d-inline-block" style={{ maxWidth: '110px' }} title={item.link_sertifikat}>
+                                      <i className="bi bi-link-45deg me-1"></i> Ada Link
+                                    </span>
+                                  ) : (
+                                    <span className="badge bg-light text-muted border">Tanpa Link</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="modal-footer border-0 bg-light py-3">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary px-3" 
+                  onClick={() => { setShowImportSertifikasiModal(false); setImportFile(null); setImportPreviewData([]); setImportResult(null); }}
+                  disabled={importLoading}
+                >
+                  Batal
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary px-4 fw-bold shadow-sm" 
+                  onClick={handleProcessImport}
+                  disabled={importLoading || importPreviewData.length === 0}
+                >
+                  {importLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Menyinkronkan ke Google Sheet & Drive...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-cloud-arrow-up-fill me-2"></i>
+                      Simpan & Sinkronkan ke Database ({importPreviewData.length} Baris)
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
