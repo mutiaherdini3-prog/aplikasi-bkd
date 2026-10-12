@@ -876,10 +876,11 @@ export default function AdminPage() {
         "Nama Kursus": "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN",
         "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
         "Nomor Sertifikasi": "800/RB-01/BKPSDMD/2026",
-        "Tanggal Sertifikasi": "2026-10-14",
+        "Tanggal Mulai": "2026-10-14",
+        "Tanggal Akhir": "2026-10-14",
         "Tahun": 2026,
         "Jumlah JP": 4,
-        "Link Sertifikat": "https://drive.google.com/file/d/1A62LKXyUlhQt1QVajmeo_8RwjS8xJ4jU/preview",
+        "Link Sertifikat": "https://drive.google.com/file/d/contoh_link_sertifikat/view",
         "Jenis Kursus": "Sosialisasi",
         "Klasifikasi Kursus": "Non-Klasikal",
         "Penanda Tangan": "Kepala BKPSDMD Kab. Bangka Barat",
@@ -892,7 +893,8 @@ export default function AdminPage() {
         "Nama Kursus": "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN",
         "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
         "Nomor Sertifikasi": "800/RB-02/BKPSDMD/2026",
-        "Tanggal Sertifikasi": "2026-10-21",
+        "Tanggal Mulai": "2026-10-21",
+        "Tanggal Akhir": "2026-10-23",
         "Tahun": 2026,
         "Jumlah JP": 4,
         "Link Sertifikat": "",
@@ -914,7 +916,8 @@ export default function AdminPage() {
       { wch: 48 }, // Nama Kursus
       { wch: 32 }, // Institusi Penyelenggara
       { wch: 24 }, // Nomor Sertifikasi
-      { wch: 18 }, // Tanggal Sertifikasi
+      { wch: 16 }, // Tanggal Mulai
+      { wch: 16 }, // Tanggal Akhir
       { wch: 10 }, // Tahun
       { wch: 12 }, // Jumlah JP
       { wch: 45 }, // Link Sertifikat
@@ -933,7 +936,8 @@ export default function AdminPage() {
       { "Kolom": "Nama Kursus", "Keterangan": "WAJIB diisi. Nama kegiatan diklat (Contoh: Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK)." },
       { "Kolom": "Institusi Penyelenggara", "Keterangan": "Instansi penyelenggara kegiatan (Contoh: BKPSDMD Kabupaten Bangka Barat)." },
       { "Kolom": "Nomor Sertifikasi", "Keterangan": "Nomor sertifikat atau surat tugas / piagam (Jika belum ada nomor, isi '-')." },
-      { "Kolom": "Tanggal Sertifikasi", "Keterangan": "Tanggal pelaksanaan kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY)." },
+      { "Kolom": "Tanggal Mulai", "Keterangan": "Tanggal awal kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY, contoh: 2026-10-14)." },
+      { "Kolom": "Tanggal Akhir", "Keterangan": "Tanggal selesai kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY. Jika hanya 1 hari, isi sama dengan Tanggal Mulai)." },
       { "Kolom": "Tahun", "Keterangan": "Tahun kegiatan (Contoh: 2026)." },
       { "Kolom": "Jumlah JP", "Keterangan": "WAJIB angka. Jumlah Jam Pelajaran yang diperoleh (Contoh: 4 atau 20)." },
       { "Kolom": "Link Sertifikat", "Keterangan": "Tautan file Google Drive, Google Docs, atau URL. Boleh dikosongkan jika fisik sertifikat belum diunggah." },
@@ -972,7 +976,23 @@ export default function AdminPage() {
           const jenisSert = (r['Jenis Sertifikasi'] || r['jenis_sertifikasi'] || r['Jenis'] || 'Workshop').toString().trim();
           const inst = (r['Institusi Penyelenggara'] || r['institusi_penyelenggara'] || r['Penyelenggara'] || 'BKPSDMD').toString().trim();
           const noSert = (r['Nomor Sertifikasi'] || r['nomor_sertifikasi'] || r['Nomor'] || '-').toString().trim();
-          const tgl = (r['Tanggal Sertifikasi'] || r['tanggal_sertifikasi'] || r['Tanggal'] || '').toString().trim();
+
+          // Tanggal Mulai & Tanggal Akhir
+          const tglMulai = (r['Tanggal Mulai'] || r['tanggal_mulai'] || r['Tanggal Awal'] || r['Tgl Mulai'] || '').toString().trim();
+          const tglAkhir = (r['Tanggal Akhir'] || r['tanggal_akhir'] || r['Tanggal Selesai'] || r['Tgl Akhir'] || '').toString().trim();
+          const tglSert = (r['Tanggal Sertifikasi'] || r['tanggal_sertifikasi'] || r['Tanggal'] || '').toString().trim();
+
+          let finalTanggal = '';
+          if (tglMulai && tglAkhir) {
+            finalTanggal = tglMulai === tglAkhir ? tglMulai : `${tglMulai} s.d ${tglAkhir}`;
+          } else if (tglMulai) {
+            finalTanggal = tglMulai;
+          } else if (tglAkhir) {
+            finalTanggal = tglAkhir;
+          } else {
+            finalTanggal = tglSert;
+          }
+
           const thn = (r['Tahun'] || r['tahun'] || new Date().getFullYear()).toString().trim();
           const rawJp = r['Jumlah JP'] !== undefined ? r['Jumlah JP'] : (r['jumlah_jp'] || r['JP'] || 0);
           const jp = Number(rawJp) || 0;
@@ -994,7 +1014,9 @@ export default function AdminPage() {
             nama_kursus: namaKursus,
             institusi_penyelenggara: inst,
             nomor_sertifikasi: noSert,
-            tanggal_sertifikasi: tgl,
+            tanggal_mulai: tglMulai,
+            tanggal_akhir: tglAkhir,
+            tanggal_sertifikasi: finalTanggal,
             tahun: thn,
             jumlah_jp: jp,
             link_sertifikat: link,
@@ -3786,10 +3808,11 @@ export default function AdminPage() {
                             <th style={{ width: '160px' }}>NIP</th>
                             <th style={{ width: '200px' }}>Nama & OPD</th>
                             <th>Nama Kursus / Kegiatan</th>
+                            <th style={{ width: '140px' }}>Tanggal Pelaksanaan</th>
                             <th className="text-center" style={{ width: '70px' }}>JP</th>
-                            <th style={{ width: '100px' }}>Tahun</th>
-                            <th style={{ width: '140px' }}>Jenis Kursus</th>
-                            <th style={{ width: '120px' }}>Status Link</th>
+                            <th style={{ width: '80px' }}>Tahun</th>
+                            <th style={{ width: '130px' }}>Jenis Kursus</th>
+                            <th style={{ width: '110px' }}>Status Link</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3823,6 +3846,12 @@ export default function AdminPage() {
                                   <div className="fw-bold text-primary">{item.nama_kursus}</div>
                                   <small className="text-muted">{item.institusi_penyelenggara} • No: {item.nomor_sertifikasi}</small>
                                 </td>
+                                <td>
+                                  <span className="badge bg-light text-dark border" style={{ fontSize: '0.72rem' }}>
+                                    <i className="bi bi-calendar3 me-1 text-primary"></i>
+                                    {item.tanggal_sertifikasi || '-'}
+                                  </span>
+                                </td>
                                 <td className="text-center">
                                   <span className="badge bg-info text-dark fw-bold">{item.jumlah_jp} JP</span>
                                 </td>
@@ -3832,7 +3861,7 @@ export default function AdminPage() {
                                 </td>
                                 <td>
                                   {item.link_sertifikat ? (
-                                    <span className="badge bg-primary text-truncate d-inline-block" style={{ maxWidth: '110px' }} title={item.link_sertifikat}>
+                                    <span className="badge bg-primary text-truncate d-inline-block" style={{ maxWidth: '100px' }} title={item.link_sertifikat}>
                                       <i className="bi bi-link-45deg me-1"></i> Ada Link
                                     </span>
                                   ) : (

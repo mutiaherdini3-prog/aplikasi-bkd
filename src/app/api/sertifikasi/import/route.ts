@@ -92,7 +92,19 @@ export async function POST(request: Request) {
       setValue('Nama Kursus', item.nama_kursus || item.nama_kegiatan || item.kursus || '');
       setValue('Institusi Penyelenggara', item.institusi_penyelenggara || item.penyelenggara || 'BKPSDMD');
       setValue('Nomor Sertifikasi', item.nomor_sertifikasi || item.nomor || '-');
-      setValue('Tanggal Sertifikasi', item.tanggal_sertifikasi || item.tanggal || '');
+
+      let finalTgl = item.tanggal_sertifikasi || item.tanggal || '';
+      if (!finalTgl) {
+        const tglM = (item.tanggal_mulai || item.tgl_mulai || '').toString().trim();
+        const tglA = (item.tanggal_akhir || item.tgl_akhir || '').toString().trim();
+        if (tglM && tglA) {
+          finalTgl = tglM === tglA ? tglM : `${tglM} s.d ${tglA}`;
+        } else {
+          finalTgl = tglM || tglA || '';
+        }
+      }
+      setValue('Tanggal Sertifikasi', finalTgl);
+
       setValue('Tahun', item.tahun || new Date().getFullYear().toString());
       setValue('Jumlah JP', item.jumlah_jp !== undefined ? item.jumlah_jp.toString() : '0');
       setValue('Link Sertifikat', item.link_sertifikat || item.link_drive || item.link || '');
@@ -247,13 +259,17 @@ export async function POST(request: Request) {
         }
 
         if (batchRequests.length > 0) {
-          await sheets.spreadsheets.values.batchUpdate({
-            spreadsheetId: GOOGLE_SHEET_ID,
-            requestBody: {
-              valueInputOption: 'USER_ENTERED',
-              data: batchRequests
-            }
-          });
+          const CHUNK_SIZE = 300;
+          for (let i = 0; i < batchRequests.length; i += CHUNK_SIZE) {
+            const chunk = batchRequests.slice(i, i + CHUNK_SIZE);
+            await sheets.spreadsheets.values.batchUpdate({
+              spreadsheetId: GOOGLE_SHEET_ID,
+              requestBody: {
+                valueInputOption: 'USER_ENTERED',
+                data: chunk
+              }
+            });
+          }
           console.log(`✅ Berhasil memperbarui baris pegawai horizontal untuk ${batchRequests.length} pegawai.`);
         }
       }
