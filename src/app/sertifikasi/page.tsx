@@ -139,9 +139,22 @@ export default function SertifikasiPage() {
             method: 'POST',
             body: formData
           });
+          
+          if (!uploadRes.ok) {
+            const errText = await uploadRes.text();
+            let msg = 'Gagal mengupload dokumen (' + uploadRes.status + ')';
+            try {
+              const parsed = JSON.parse(errText);
+              if (parsed.error) msg = parsed.error;
+            } catch (_) {}
+            alert("Gagal mengupload dokumen: " + msg);
+            setIsSubmitting(false);
+            return;
+          }
+
           const uploadData = await uploadRes.json();
-          if (!uploadRes.ok || !uploadData.success) {
-            alert("Gagal mengupload dokumen: " + (uploadData.error || 'Unknown error'));
+          if (!uploadData.success) {
+            alert("Gagal mengupload dokumen: " + (uploadData.error || 'Terjadi kesalahan'));
             setIsSubmitting(false);
             return;
           }
@@ -174,15 +187,16 @@ export default function SertifikasiPage() {
       });
 
       if (!insertRes.ok) {
-        const json = await insertRes.json();
-        alert("Data gagal disimpan ke database: " + (json.error || 'Unknown error'));
+        const json = await insertRes.json().catch(() => ({}));
+        alert("Data gagal disimpan ke database: " + (json.error || json.message || 'Error ' + insertRes.status));
         setIsSubmitting(false);
         return;
       }
 
       router.push('/dashboard');
-    } catch (err) {
-      alert('Gagal menyimpan');
+    } catch (err: any) {
+      console.error('Error handleSubmit sertifikasi:', err);
+      alert('Gagal menyimpan: ' + (err?.message || 'Terjadi kesalahan'));
     }
     setIsSubmitting(false);
   };

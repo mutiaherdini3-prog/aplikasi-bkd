@@ -17,10 +17,16 @@ const getAuth = () => {
   });
 };
 
+export const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!;
+export const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID!;
+export const getGoogleSheets = () => google.sheets({ version: 'v4', auth: getAuth() });
+
+let inMemoryDriveToken: string | undefined = undefined;
+
 export async function getGoogleDrive() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  let refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  let refreshToken = inMemoryDriveToken || process.env.GOOGLE_REFRESH_TOKEN;
 
   // Jika token di env kosong atau token lama yang expired, ambil token aktif dari Google Sheets
   if (!refreshToken || refreshToken.includes('0g75ZtfLDqgo')) {
@@ -34,6 +40,7 @@ export async function getGoogleDrive() {
       const tokenRow = rows.find((r: any) => r[0]?.trim() === 'google_refresh_token');
       if (tokenRow && tokenRow[1]) {
         refreshToken = tokenRow[1].trim();
+        inMemoryDriveToken = refreshToken;
       }
     } catch (sheetErr) {
       console.warn('Gagal membaca token cadangan dari sheet:', sheetErr);
@@ -49,11 +56,6 @@ export async function getGoogleDrive() {
 
   return google.drive({ version: 'v3', auth: oauth2Client });
 }
-
-export const getGoogleSheets = () => google.sheets({ version: 'v4', auth: getAuth() });
-
-export const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!;
-export const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID!;
 
 export async function getFreshSheetData(range: string) {
   const sheets = getGoogleSheets();
