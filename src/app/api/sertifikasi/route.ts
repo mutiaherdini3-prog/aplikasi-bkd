@@ -103,27 +103,18 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
   
   const nipIdx = sertHeaders.indexOf('nip');
   const jpIdxSert = sertHeaders.indexOf('jumlah jp');
-  const namaSertIdx = sertHeaders.indexOf('nama kursus') !== -1 ? sertHeaders.indexOf('nama kursus') : sertHeaders.indexOf('jenis sertifikasi');
-  const linkSertIdx = sertHeaders.indexOf('link sertifikat');
-  const jenisKursusIdx = sertHeaders.indexOf('jenis kursus');
-  const klasifikasiIdx = sertHeaders.indexOf('klasifikasi kursus');
-  const penandaTanganIdx = sertHeaders.indexOf('penanda tangan') !== -1 ? sertHeaders.indexOf('penanda tangan') : sertHeaders.indexOf('pejabat');
-  const biayaIdx = sertHeaders.indexOf('biaya pelatihan');
 
-  const userCerts = [];
   let totalJp = 0;
-
   for (let i = 1; i < sertRows.length; i++) {
     if (sertRows[i][nipIdx]?.trim() === nip.trim()) {
-      userCerts.push(sertRows[i]);
-      totalJp += parseInt(sertRows[i][jpIdxSert] || '0');
+      totalJp += parseInt(sertRows[i][jpIdxSert] || '0', 10) || 0;
     }
   }
 
-  // 2. Get pegawai data (fresh)
+  // 2. Get pegawai data
   let pegRows = prePegRows;
   if (!pegRows) {
-    pegRows = await getFreshSheetData('pegawai!A:ZZ');
+    pegRows = await getFreshSheetData('pegawai!A:Z');
   }
   if (!pegRows || pegRows.length === 0) return;
   
@@ -131,75 +122,25 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
   const pegNipIdx = pegHeaders.indexOf('nip');
   const pegJpIdx = pegHeaders.indexOf('jumlah jp');
 
+  if (pegNipIdx === -1 || pegJpIdx === -1) return;
+
   let pegRowIndex = -1;
   for (let i = 1; i < pegRows.length; i++) {
     if (pegRows[i][pegNipIdx]?.trim() === nip.trim()) {
-      pegRowIndex = i + 1; // 1-based index
+      pegRowIndex = i + 1; // 1-based index in sheet
       break;
     }
   }
 
-  if (pegRowIndex === -1) return; // NIP not found
-  const currentRow = [...pegRows[pegRowIndex - 1]];
+  if (pegRowIndex === -1) return; // NIP tidak ditemukan
 
-  // 3. Update JP
-  if (pegJpIdx !== -1) currentRow[pegJpIdx] = totalJp.toString();
-
-  // 4. Update horizontal columns
-  let maxCertIdxInHeaders = 0;
-  pegHeaders.forEach((h: string) => {
-    const match = h.match(/nama sertifikat (\d+)/i);
-    if (match) {
-      const idx = parseInt(match[1]);
-      if (idx > maxCertIdxInHeaders) maxCertIdxInHeaders = idx;
-    }
-  });
-
-  const maxCertsToProcess = Math.max(userCerts.length, maxCertIdxInHeaders);
-  let headersChanged = false;
-
-  for (let certIdx = 1; certIdx <= maxCertsToProcess; certIdx++) {
-    const cert = userCerts[certIdx - 1];
-
-    const mappings = [
-      { header: `Nama Sertifikat ${certIdx}`, value: cert ? (cert[namaSertIdx] || '-') : '-' },
-      { header: `Link Sertifikat ${certIdx}`, value: cert ? (cert[linkSertIdx] || '-') : '-' },
-      { header: `Jenis Kursus ${certIdx}`, value: cert ? (cert[jenisKursusIdx] || '-') : '-' },
-      { header: `Klasifikasi Kursus ${certIdx}`, value: cert ? (cert[klasifikasiIdx] || '-') : '-' },
-      { header: `Penanda Tangan ${certIdx}`, value: cert ? (cert[penandaTanganIdx] || '-') : '-' },
-      { header: `Biaya Pelatihan ${certIdx}`, value: cert ? (cert[biayaIdx] || '-') : '-' },
-    ];
-
-    for (const map of mappings) {
-      let hIdx = pegHeaders.indexOf(map.header.toLowerCase());
-      if (hIdx === -1) {
-        if (!cert) continue; 
-        hIdx = pegHeaders.length;
-        pegHeaders.push(map.header.toLowerCase());
-        pegRows[0].push(map.header);
-        headersChanged = true;
-      }
-      while (currentRow.length <= hIdx) currentRow.push('');
-      currentRow[hIdx] = map.value;
-    }
-  }
-  
-  const maxColName = getColumnName(pegHeaders.length - 1);
-  
-  const batchRequests = [
-    { range: `pegawai!A${pegRowIndex}:${maxColName}${pegRowIndex}`, values: [currentRow] }
-  ];
-  
-  if (headersChanged) {
-    batchRequests.unshift({ range: `pegawai!A1:${maxColName}1`, values: [pegRows[0]] });
-  }
-
-  await sheets.spreadsheets.values.batchUpdate({
+  // 3. Update HANYA sel kolom jumlah jp di baris pegawai
+  const colLetter = getColumnName(pegJpIdx);
+  await sheets.spreadsheets.values.update({
     spreadsheetId: GOOGLE_SHEET_ID,
-    requestBody: {
-      valueInputOption: 'USER_ENTERED',
-      data: batchRequests
-    }
+    range: `pegawai!${colLetter}${pegRowIndex}`,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [[totalJp.toString()]] }
   });
 }
 

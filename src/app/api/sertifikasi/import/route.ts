@@ -118,137 +118,57 @@ export async function POST(request: Request) {
 
     console.log(`✅ Berhasil menambahkan ${newSertifikasiRows.length} baris ke sheet sertifikasi.`);
 
-    // 4. Batch update ke sheet pegawai untuk semua NIP yang terdampak
-    // Ambil data fresh dari sertifikasi dan pegawai
+    // 4. Batch update ke sheet pegawai untuk semua NIP yang terdampak (hanya kolom jumlah jp)
     const updatedSertRows = await getFreshSheetData('sertifikasi!A:Z');
-    const updatedPegRows = await getFreshSheetData('pegawai!A:ZZ');
+    const updatedPegRows = await getFreshSheetData('pegawai!A:Z');
 
     if (updatedSertRows && updatedPegRows && updatedSertRows.length > 0 && updatedPegRows.length > 0) {
       const sHeaders = updatedSertRows[0].map((h: string) => (h || '').toString().trim().toLowerCase().replace(/_/g, ' '));
       const nipIdxS = sHeaders.indexOf('nip');
       const jpIdxS = sHeaders.indexOf('jumlah jp');
-      const namaSertIdxS = sHeaders.indexOf('nama kursus') !== -1 ? sHeaders.indexOf('nama kursus') : sHeaders.indexOf('jenis sertifikasi');
-      const linkSertIdxS = sHeaders.indexOf('link sertifikat');
-      const jenisKursusIdxS = sHeaders.indexOf('jenis kursus');
-      const klasifikasiIdxS = sHeaders.indexOf('klasifikasi kursus');
-      const penandaTanganIdxS = sHeaders.indexOf('penanda tangan') !== -1 ? sHeaders.indexOf('penanda tangan') : sHeaders.indexOf('pejabat');
-      const biayaIdxS = sHeaders.indexOf('biaya pelatihan');
 
-      // Kelompokkan sertifikasi per NIP
-      const certsByNip = new Map<string, any[]>();
+      // Hitung total JP per NIP
+      const totalJpByNip = new Map<string, number>();
       for (let i = 1; i < updatedSertRows.length; i++) {
         const row = updatedSertRows[i];
         const rNip = (row[nipIdxS] || '').toString().trim();
         if (!rNip) continue;
-        if (!certsByNip.has(rNip)) {
-          certsByNip.set(rNip, []);
-        }
-        certsByNip.get(rNip)!.push(row);
+        const currentTotal = totalJpByNip.get(rNip) || 0;
+        totalJpByNip.set(rNip, currentTotal + (parseInt(row[jpIdxS] || '0', 10) || 0));
       }
 
-      // Olah sheet pegawai
-      const pegHeaders = [...updatedPegRows[0].map((h: string) => (h || '').toString().trim().toLowerCase())];
+      const pegHeaders = updatedPegRows[0].map((h: string) => (h || '').toString().trim().toLowerCase());
       const pegNipIdx = pegHeaders.indexOf('nip');
       const pegJpIdx = pegHeaders.indexOf('jumlah jp');
 
-      let pegHeadersOriginalLength = pegHeaders.length;
-      let pegHeadersChanged = false;
+      if (pegNipIdx !== -1 && pegJpIdx !== -1) {
+        const colLetter = getColumnName(pegJpIdx);
+        const batchRequests: { range: string; values: any[][] }[] = [];
 
-      const batchRequests: { range: string; values: any[][] }[] = [];
-
-      for (const nip of affectedNipsSet) {
-        let pegRowIndex = -1;
-        for (let i = 1; i < updatedPegRows.length; i++) {
-          if ((updatedPegRows[i][pegNipIdx] || '').toString().trim() === nip) {
-            pegRowIndex = i; // 0-based index in array, corresponding to sheet row (i + 1)
-            break;
-          }
-        }
-
-        if (pegRowIndex === -1) {
-          // NIP belum terdaftar di pegawai, lewati update horizontal
-          continue;
-        }
-
-        const userCerts = certsByNip.get(nip) || [];
-        let totalJp = 0;
-        for (const cert of userCerts) {
-          totalJp += parseInt(cert[jpIdxS] || '0', 10) || 0;
-        }
-
-        const currentRow = [...updatedPegRows[pegRowIndex]];
-
-        // Update JP
-        if (pegJpIdx !== -1) {
-          currentRow[pegJpIdx] = totalJp.toString();
-        }
-
-        // Cari max cert index yang ada di header saat ini
-        let maxCertIdxInHeaders = 0;
-        pegHeaders.forEach((h: string) => {
-          const match = h.match(/nama sertifikat (\d+)/i);
-          if (match) {
-            const idx = parseInt(match[1]);
-            if (idx > maxCertIdxInHeaders) maxCertIdxInHeaders = idx;
-          }
-        });
-
-        const maxCertsToProcess = Math.max(userCerts.length, maxCertIdxInHeaders);
-
-        for (let certIdx = 1; certIdx <= maxCertsToProcess; certIdx++) {
-          const cert = userCerts[certIdx - 1];
-
-          const mappings = [
-            { header: `Nama Sertifikat ${certIdx}`, value: cert ? (cert[namaSertIdxS] || '-') : '-' },
-            { header: `Link Sertifikat ${certIdx}`, value: cert ? (cert[linkSertIdxS] || '-') : '-' },
-            { header: `Jenis Kursus ${certIdx}`, value: cert ? (cert[jenisKursusIdxS] || '-') : '-' },
-            { header: `Klasifikasi Kursus ${certIdx}`, value: cert ? (cert[klasifikasiIdxS] || '-') : '-' },
-            { header: `Penanda Tangan ${certIdx}`, value: cert ? (cert[penandaTanganIdxS] || '-') : '-' },
-            { header: `Biaya Pelatihan ${certIdx}`, value: cert ? (cert[biayaIdxS] || '-') : '-' },
-          ];
-
-          for (const map of mappings) {
-            let hIdx = pegHeaders.indexOf(map.header.toLowerCase());
-            if (hIdx === -1) {
-              if (!cert) continue;
-              hIdx = pegHeaders.length;
-              pegHeaders.push(map.header.toLowerCase());
-              updatedPegRows[0].push(map.header);
-              pegHeadersChanged = true;
+        for (const nip of affectedNipsSet) {
+          for (let i = 1; i < updatedPegRows.length; i++) {
+            if ((updatedPegRows[i][pegNipIdx] || '').toString().trim() === nip) {
+              const sheetRowNumber = i + 1;
+              const newTotalJp = (totalJpByNip.get(nip) || 0).toString();
+              batchRequests.push({
+                range: `pegawai!${colLetter}${sheetRowNumber}`,
+                values: [[newTotalJp]]
+              });
+              break;
             }
-            while (currentRow.length <= hIdx) currentRow.push('');
-            currentRow[hIdx] = map.value;
           }
         }
 
-        updatedPegRows[pegRowIndex] = currentRow;
-
-        const maxColName = getColumnName(pegHeaders.length - 1);
-        const sheetRowNumber = pegRowIndex + 1;
-        batchRequests.push({
-          range: `pegawai!A${sheetRowNumber}:${maxColName}${sheetRowNumber}`,
-          values: [currentRow]
-        });
-      }
-
-      // Jika header baris 1 di sheet pegawai bertambah kolom, update juga baris header
-      if (pegHeadersChanged) {
-        const maxColName = getColumnName(pegHeaders.length - 1);
-        batchRequests.unshift({
-          range: `pegawai!A1:${maxColName}1`,
-          values: [updatedPegRows[0]]
-        });
-      }
-
-      if (batchRequests.length > 0) {
-        await sheets.spreadsheets.values.batchUpdate({
-          spreadsheetId: GOOGLE_SHEET_ID,
-          requestBody: {
-            valueInputOption: 'USER_ENTERED',
-            data: batchRequests
-          }
-        });
-        console.log(`✅ Berhasil memperbarui ${batchRequests.length} baris di sheet pegawai.`);
+        if (batchRequests.length > 0) {
+          await sheets.spreadsheets.values.batchUpdate({
+            spreadsheetId: GOOGLE_SHEET_ID,
+            requestBody: {
+              valueInputOption: 'USER_ENTERED',
+              data: batchRequests
+            }
+          });
+          console.log(`✅ Berhasil memperbarui kolom JP untuk ${batchRequests.length} pegawai.`);
+        }
       }
     }
 
