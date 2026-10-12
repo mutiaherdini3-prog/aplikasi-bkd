@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData, getFreshSheetData, getGoogleDrive } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
 
 // Helper for generating column letters (A, B, ..., Z, AA, AB, ...)
@@ -15,11 +15,88 @@ const getColumnName = (n: number) => {
   return s;
 };
 
+async function deleteFromDokumenStorage(docId: string, sheets: any) {
+  try {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: GOOGLE_SHEET_ID,
+      range: 'dokumen_storage!A:A'
+    });
+    const rows = res.data.values || [];
+    const sheetInfo = await sheets.spreadsheets.get({ spreadsheetId: GOOGLE_SHEET_ID });
+    const targetSheet = sheetInfo.data.sheets?.find((s: any) => s.properties?.title === 'dokumen_storage');
+    if (!targetSheet) return;
+
+    const matchingIndices: number[] = [];
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i][0] === docId) {
+        matchingIndices.push(i);
+      }
+    }
+
+    if (matchingIndices.length > 0) {
+      matchingIndices.sort((a, b) => b - a);
+      const requests = matchingIndices.map(idx => ({
+        deleteDimension: {
+          range: {
+            sheetId: targetSheet.properties?.sheetId,
+            dimension: 'ROWS',
+            startIndex: idx,
+            endIndex: idx + 1
+          }
+        }
+      }));
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        requestBody: { requests }
+      });
+      console.log(`✅ File ${docId} berhasil dihapus dari dokumen_storage`);
+    }
+  } catch (err) {
+    console.warn('Gagal menghapus dari dokumen_storage:', err);
+  }
+}
+
+async function deleteAttachedFile(rawLink: string) {
+  if (!rawLink) return;
+  try {
+    const decoded = decodeURIComponent(rawLink);
+
+    // 1. Dokumen Storage (fallback Google Sheets)
+    const docMatch = decoded.match(/(doc_[a-zA-Z0-9_]+)/);
+    if (docMatch) {
+      const docId = docMatch[1];
+      const sheets = getGoogleSheets();
+      await deleteFromDokumenStorage(docId, sheets);
+      return;
+    }
+
+    // 2. Google Drive
+    let driveFileId: string | null = null;
+    const fileDMatch = decoded.match(/\/file\/d\/([a-zA-Z0-9_-]{20,})/);
+    if (fileDMatch) {
+      driveFileId = fileDMatch[1];
+    } else {
+      const idMatch = decoded.match(/id=([a-zA-Z0-9_-]{20,})/);
+      if (idMatch && !idMatch[1].startsWith('doc_')) {
+        driveFileId = idMatch[1];
+      }
+    }
+
+    if (driveFileId) {
+      const drive = await getGoogleDrive();
+      await drive.files.delete({ fileId: driveFileId });
+      console.log('✅ File lampiran berhasil dihapus dari Google Drive:', driveFileId);
+    }
+  } catch (err: any) {
+    console.warn('Peringatan saat menghapus file lampiran Drive:', err?.message || err);
+  }
+}
+
 async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: any[] | null = null, prePegRows: any[] | null = null) {
-  // 1. Get sertifikasi data
+  // 1. Get sertifikasi data (selalu fresh agar data yang baru dihapus tidak ikut terhitung)
   let sertRows = preSertRows;
   if (!sertRows) {
-    sertRows = await getCachedSheetData('sertifikasi!A:Z');
+    sertRows = await getFreshSheetData('sertifikasi!A:Z');
   }
   if (!sertRows || sertRows.length === 0) return;
   const sertHeaders = sertRows[0].map((h: string) => h.trim().toLowerCase().replace(/_/g, ' '));
@@ -43,10 +120,10 @@ async function updatePegawaiSertifikasi(nip: string, sheets: any, preSertRows: a
     }
   }
 
-  // 2. Get pegawai data
+  // 2. Get pegawai data (fresh)
   let pegRows = prePegRows;
   if (!pegRows) {
-    pegRows = await getCachedSheetData('pegawai!A:ZZ');
+    pegRows = await getFreshSheetData('pegawai!A:ZZ');
   }
   if (!pegRows || pegRows.length === 0) return;
   
@@ -139,27 +216,50 @@ export async function DELETE(request: Request) {
     
     const rowIdx = parseInt(rowIndex, 10) - 1;
 
-    // We can fetch the deleted row AND pegawai in parallel to save time, but it's okay for DELETE to be slightly slower.
-    const allSertRows = await getCachedSheetData('sertifikasi!A:Z');
-    const headers = allSertRows[0]?.map((h:string)=>h.trim().toLowerCase().replace(/_/g, ' ')) || [];
+    // Ambil data fresh dari sheet
+    const allSertRows = await getFreshSheetData('sertifikasi!A:Z');
+    const headers = allSertRows[0]?.map((h: string) => h.trim().toLowerCase().replace(/_/g, ' ')) || [];
     const nipIdx = headers.indexOf('nip');
+    const linkSertIdx = headers.indexOf('link sertifikat');
     const deletedRow = allSertRows[rowIdx];
     const nip = (deletedRow && nipIdx !== -1) ? deletedRow[nipIdx] : null;
+    const fileLink = (deletedRow && linkSertIdx !== -1) ? deletedRow[linkSertIdx] : null;
 
-    // Delete row
+    // 1. Hapus file fisik dari Google Drive atau dokumen_storage jika ada
+    if (fileLink) {
+      await deleteAttachedFile(fileLink);
+    }
+
+    // 2. Hapus baris dari Google Sheet sertifikasi
     await sheets.spreadsheets.batchUpdate({
-        spreadsheetId: GOOGLE_SHEET_ID,
-        requestBody: { requests: [{ deleteDimension: { range: { sheetId: targetSheet.properties?.sheetId, dimension: 'ROWS', startIndex: rowIdx, endIndex: rowIdx + 1 } } }] }
+      spreadsheetId: GOOGLE_SHEET_ID,
+      requestBody: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId: targetSheet.properties?.sheetId,
+                dimension: 'ROWS',
+                startIndex: rowIdx,
+                endIndex: rowIdx + 1
+              }
+            }
+          }
+        ]
+      }
     });
 
-    // Resync (fetch all fresh since we just deleted a dimension)
+    // 3. Sinkronkan ulang data pegawai dengan data fresh (JP dan sertifikat horizontal)
     if (nip) {
-        await updatePegawaiSertifikasi(nip, sheets);
+      await updatePegawaiSertifikasi(nip, sheets);
     }
 
     revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
-  } catch (e: any) { return NextResponse.json({ success: false, error: e.message }, { status: 500 }); }
+  } catch (e: any) {
+    console.error('Error DELETE sertifikasi:', e);
+    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
