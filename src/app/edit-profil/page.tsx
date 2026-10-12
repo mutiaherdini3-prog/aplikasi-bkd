@@ -95,7 +95,11 @@ export default function EditProfilPage() {
       if (data.success) {
         let directUrl = data.url;
         if (data.fileId) {
-          directUrl = `https://drive.google.com/thumbnail?id=${data.fileId}&sz=w500`;
+          if (String(data.fileId).startsWith('doc_')) {
+            directUrl = `/api/dokumen?id=${data.fileId}`;
+          } else {
+            directUrl = `https://drive.google.com/thumbnail?id=${data.fileId}&sz=w500`;
+          }
         }
         setFormData({ ...formData, foto_profil: directUrl });
       } else {
@@ -110,6 +114,10 @@ export default function EditProfilPage() {
 
   const getImageUrl = (url: string) => {
     if (!url) return '';
+    if (url.includes('id=doc_')) {
+      const match = url.match(/id=(doc_[a-zA-Z0-9_]+)/);
+      if (match) return `/api/dokumen?id=${match[1]}`;
+    }
     if (url.includes('drive.google.com/uc?export=view&id=')) {
       return url.replace('uc?export=view&id=', 'thumbnail?id=') + '&sz=w500';
     }

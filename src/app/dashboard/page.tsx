@@ -223,7 +223,17 @@ export default function DashboardPage() {
           <div className="profile-banner">
             {pegawai?.foto_profil ? (
               <img 
-                src={pegawai.foto_profil.includes('drive.google.com/uc?export=view&id=') ? pegawai.foto_profil.replace('uc?export=view&id=', 'thumbnail?id=') + '&sz=w500' : pegawai.foto_profil} 
+                src={(() => {
+                  const url = pegawai.foto_profil;
+                  if (url.includes('id=doc_')) {
+                    const match = url.match(/id=(doc_[a-zA-Z0-9_]+)/);
+                    if (match) return `/api/dokumen?id=${match[1]}`;
+                  }
+                  if (url.includes('drive.google.com/uc?export=view&id=')) {
+                    return url.replace('uc?export=view&id=', 'thumbnail?id=') + '&sz=w500';
+                  }
+                  return url;
+                })()} 
                 alt="Foto Profil" 
                 className="profile-img-large" 
               />
