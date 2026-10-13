@@ -956,8 +956,8 @@ export default function AdminPage() {
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
-        const bstr = evt.target?.result;
-        const workbook = XLSX.read(bstr, { type: 'binary' });
+        const data = evt.target?.result;
+        const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const rawJson: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
@@ -1027,10 +1027,10 @@ export default function AdminPage() {
 
         setImportPreviewData(mapped);
       } catch (err: any) {
-        alert('Gagal membaca file Excel: ' + (err?.message || err));
+        alert('Gagal membaca file Excel/Numbers: ' + (err?.message || err));
       }
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
   // Kirim data batch sertifikasi ke backend
@@ -3763,16 +3763,16 @@ export default function AdminPage() {
                     <div className="mb-3">
                       <i className="bi bi-file-earmark-spreadsheet-fill text-success display-4"></i>
                     </div>
-                    <h6 className="fw-bold mb-1">Pilih File Excel Hasil Pengisian Template</h6>
-                    <p className="text-muted small mb-3">Mendukung format file <code>.xlsx</code>, <code>.xls</code>, atau <code>.csv</code></p>
+                    <h6 className="fw-bold mb-1">Pilih File Hasil Pengisian Template</h6>
+                    <p className="text-muted small mb-3">Mendukung format <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>, atau Apple Numbers (<code>.numbers</code>)</p>
                     
                     <div className="d-flex justify-content-center">
                       <label className="btn btn-outline-primary px-4 py-2 cursor-pointer shadow-sm">
                         <i className="bi bi-folder2-open me-2"></i>
-                        {importFile ? importFile.name : 'Pilih File Excel...'}
+                        {importFile ? importFile.name : 'Pilih File Excel / Numbers...'}
                         <input 
                           type="file" 
-                          accept=".xlsx, .xls, .csv" 
+                          accept=".xlsx, .xls, .csv, .numbers, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv, application/x-iwork-numbers-sffnumbers, application/vnd.apple.numbers" 
                           className="d-none" 
                           onChange={handleImportFileChange}
                         />
