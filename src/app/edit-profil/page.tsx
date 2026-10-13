@@ -46,7 +46,7 @@ export default function EditProfilPage() {
               : (data.golongan || ''),
             jenkel: data.jenkel || '',
             jabatan: data.jabatan || '',
-            unit_kerja: data.unit_kerja || '',
+            unit_kerja: UNIT_KERJA_OPTIONS.find(o => o.toLowerCase() === (data.unit_kerja || '').trim().toLowerCase()) || data.unit_kerja || '',
             foto_profil: data.foto_profil || ''
           });
         }
