@@ -5,31 +5,13 @@ import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const UNIT_KERJA_OPTIONS = ["Sekretariat Daerah","Asisten Pemerintahan dan Kesejahteraan Rakyat","Asisten Perekonomian dan Pembangunan","Asisten Administrasi Umum","Staf Ahli Bupati Bidang Hukum, Politik dan Pemerintahan","Staf Ahli Bupati Bidang Ekonomi dan Pembangunan","Staf Ahli Bupati Bidang Kemasyarakatan dan Sumber Daya Manusia","Bagian Kesejahteraan Rakyat","Bagian Tata Pemerintahan","Bagian Perekonomian dan Pembangunan","Bagian Pengadaan Barang dan Jasa","Bagian Hukum","Bagian Umum, Perlengkapan dan Protokol","Bagian Organisasi","Sekretariat DPRD","Inspektorat","Badan Pengelolaan Keuangan dan Aset Daerah","Badan Pengelolaan Pajak dan Retribusi Daerah","Badan Kepegawaian dan Pengembangan Sumber Daya Manusia Daerah","Badan Perencanaan Pembangunan, Riset dan Inovasi Daerah","Badan Penanggulangan Bencana Daerah","Badan Kesatuan Bangsa dan Politik","Dinas Perhubungan, Perumahan dan Kawasan Permukiman","Dinas Komunikasi dan Informatika","Dinas Kebudayaan dan Pariwisata","Dinas Perikanan","Dinas Koperasi, Usaha Kecil Menengah dan Perdagangan","Dinas Perindustrian dan Tenaga Kerja","Dinas Perpustakaan dan Kearsipan","Dinas Pekerjaan Umum dan Penataan Ruang","Dinas Pendidikan,kepemudaan & Olah Raga","SMP Negeri 1 Mentok","SMP Negeri 2 Mentok","SMP Negeri 3 Mentok","SMP Negeri 4 Mentok","SMP Negeri 5 Mentok","SMP Negeri 6 Mentok","SD Negeri 01 Mentok","SD Negeri 02 Mentok","SD Negeri 03 Mentok","SD Negeri 04 Mentok","SD Negeri 05 Mentok","SD Negeri 06 Mentok","SD Negeri 07 Mentok","SD Negeri 08 Mentok","SD Negeri 09 Mentok","SD Negeri 10 Mentok","SD Negeri 11 Mentok","SD Negeri 12 Mentok","SD Negeri 13 Mentok","SD Negeri 14 Mentok","SD Negeri 15 Mentok","SD Negeri 16 Mentok","SD Negeri 17 Mentok","SD Negeri 18 Mentok","SD Negeri 19 Mentok","SD Negeri 20 Mentok","SD Negeri 21 Mentok","SD Negeri 22 Mentok","SD Negeri 23 Mentok","SD Negeri 24 Mentok","TK Negeri Pembina Mentok","TK Negeri Sejiran Setason Mentok","SMP Negeri 1 Jebus","SMP Negeri 2 Jebus","SMP Negeri 3 Jebus","SD Negeri 01 Jebus","SD Negeri 02 Jebus","SD Negeri 03 Jebus","SD Negeri 04 Jebus","SD Negeri 05 Jebus","SD Negeri 06 Jebus","SD Negeri 07 Jebus","SD Negeri 08 Jebus","SD Negeri 09 Jebus","SD Negeri 10 Jebus","SD Negeri 11 Jebus","SD Negeri 12 Jebus","SD Negeri 13 Jebus","SD Negeri 14 Jebus","SD Negeri 15 Jebus","SD Negeri 16 Jebus","SD Negeri 17 Jebus","TK Negeri Pembina Jebus","SMP Negeri 1 Parittiga","SMP Negeri 2 Parittiga","SMP Negeri 3 Parittiga","SMP Negeri 4 Parittiga","SD Negeri 01 Parittiga","SD Negeri 02 Parittiga","SD Negeri 03 Parittiga","SD Negeri 04 Parittiga","SD Negeri 05 Parittiga","SD Negeri 06 Parittiga","SD Negeri 07 Parittiga","SD Negeri 08 Parittiga","SD Negeri 09 Parittiga","SD Negeri 10 Parittiga","SD Negeri 11 Parittiga","SD Negeri 12 Parittiga","SD Negeri 13 Parittiga","SD Negeri 14 Parittiga","SD Negeri 15 Parittiga","SD Negeri 16 Parittiga","SD Negeri 17 Parittiga","SD Negeri 18 Parittiga","SD Negeri 19 Parittiga","TK Negeri Pembina Parittiga","SMP Negeri 1 Kelapa","SMP Negeri 2 Kelapa","SMP Negeri 3 Kelapa","SMP Negeri 4 Kelapa","SMP Negeri 5 Kelapa","SD Negeri 1 Kelapa","SD Negeri 2 Kelapa","SD Negeri 3 Kelapa","SD Negeri 4 Kelapa","SD Negeri 5 Kelapa","SD Negeri 6 Kelapa","SD Negeri 7 Kelapa","SD Negeri 8 Kelapa","SD Negeri 9 Kelapa","SD Negeri 10 Kelapa","SD Negeri 11 Kelapa","SD Negeri 12 Kelapa","SD Negeri 13 Kelapa","SD Negeri 14 Kelapa","SD Negeri 15 Kelapa","SD Negeri 16 Kelapa","SD Negeri 17 Kelapa","SD Negeri 18 Kelapa","SD Negeri 19 Kelapa","SD Negeri 20 Kelapa","SD Negeri 21 Kelapa","SD Negeri 22 Kelapa","SD Negeri 23 Kelapa","SD Negeri 24 Kelapa","SD Negeri 25 Kelapa","SD Negeri 26 Kelapa","SD Negeri 27 Kelapa","TK Negeri Pembina Kelapa","SMP Negeri 1 Tempilang","SMP Negeri 2 Tempilang","SMP Negeri 3 Tempilang","SMP Negeri 4 Tempilang","SD Negeri 1 Tempilang","SD Negeri 2 Tempilang","SD Negeri 3 Tempilang","SD Negeri 4 Tempilang","SD Negeri 5 Tempilang","SD Negeri 6 Tempilang","SD Negeri 7 Tempilang","SD Negeri 8 Tempilang","SD Negeri 9 Tempilang","SD Negeri 10 Tempilang","SD Negeri 11 Tempilang","SD Negeri 12 Tempilang","SD Negeri 13 Tempilang","SD Negeri 14 Tempilang","SD Negeri 15 Tempilang","SD Negeri 16 Tempilang","SD Negeri 17 Tempilang","SD Negeri 18 Tempilang","SD Negeri 19 Tempilang","SD Negeri 20 Tempilang","SD Negeri 21 Tempilang","SD Negeri 22 Tempilang","TK Negeri Pembina Tempilang","SMP Negeri 1 Simpang Teritip","SMP Negeri 2 Simpang Teritip","SMP Negeri 3 Simpang Teritip","SMP Negeri 4 Simpang Teritip","SMP Negeri 5 Simpang Teritip","SMP Negeri 6 Simpang Teritip","SD Negeri 1 Simpang Teritip","SD Negeri 2 Simpang Teritip","SD Negeri 3 Simpang Teritip","SD Negeri 4 Simpang Teritip","SD Negeri 5 Simpang Teritip","SD Negeri 6 Simpang Teritip","SD Negeri 7 Simpang Teritip","SD Negeri 8 Simpang Teritip","SD Negeri 9 Simpang Teritip","SD Negeri 10 Simpang Teritip","SD Negeri 11 Simpang Teritip","SD Negeri 12 Simpang Teritip","SD Negeri 13 Simpang Teritip","SD Negeri 14 Simpang Teritip","SD Negeri 15 Simpang Teritip","SD Negeri 16 Simpang Teritip","SD Negeri 17 Simpang Teritip","SD Negeri 18 Simpang Teritip","SD Negeri 19 Simpang Teritip","TK Negeri Pembina Simpang Teritip","Dinas Ketahanan Pangan dan Pertanian","Dinas Kesehatan","Puskesmas Puput","Puskesmas Jebus","Puskesmas Sekar Biru","Puskesmas Tempilang","Puskesmas Kelapa","Puskesmas Mentok","Puskesmas Simpang Teritip","Puskesmas Kundi","Dinas Sosial, Pemberdayaan Masyarakat dan Desa","Dinas Penanaman Modal dan Pelayanan Satu Pintu","Dinas Lingkungan Hidup","Satuan Polisi Pamong Praja dan Pemadam Kebakaran","Dinas Kependudukan dan Pencatatan Sipil","Dinas Pemberdayaan Perempuan dan Perlindungan Anak, Pengendalian Penduduk dan Keluarga Berencana","Kecamatan Mentok","Kecamatan Jebus","Kecamatan Simpang Teritip","Kecamatan Kelapa","Kecamatan Tempilang","Kecamatan Parittiga","Kelurahan Tanjung","Kelurahan Sungai Daeng","Kelurahan Sungai Baru","Kelurahan Menjelang","Kelurahan Keranggan","Kelurahan Kelapa","UPT RSUD Sejiran Setason"];
-const getWords = (s: string) => {
-  if (!s) return [];
-  const cleaned = s.toUpperCase()
-          .replace(/&/g, ' DAN ')
-          .replace(/SDM/g, ' SUMBER DAYA MANUSIA ')
-          .replace(/MUNTOK/g, ' MENTOK ')
-          .replace(/ - PEMERINTAH.*/g, '')
-          .replace(/KABUPATEN BANGKA BARAT/g, '')
-          .replace(/KAB\. BANGKA BARAT/g, '')
-          .replace(/[^A-Z0-9\s]/g, ' ')
-          .trim();
-  return Array.from(new Set(cleaned.split(/\s+/).filter(w => w !== 'DAN' && w.length > 2)));
-};
-
-const matchScore = (w1: string[], w2: string[]) => {
-  if (w1.length === 0 || w2.length === 0) return 0;
-  const common = w1.filter(w => w2.includes(w)).length;
-  return common / Math.min(w1.length, w2.length);
-};
+import { UNIT_KERJA_OPTIONS, getUnitKerjaWords, wordMatchScore } from '@/lib/unit-kerja-match';
 
 const PARSED_UNIT_KERJA_OPTIONS = UNIT_KERJA_OPTIONS.map(opt => ({
   opt,
-  words: getWords(opt)
+  words: getUnitKerjaWords(opt)
 }));
+
 
 export default function AdminPage() {
   const router = useRouter();
@@ -1099,19 +1081,19 @@ export default function AdminPage() {
       let matchedOpd = 'Belum Diatur';
       if (p.unit_kerja) {
         const raw = p.unit_kerja.toUpperCase();
-        const rawWords = getWords(p.unit_kerja);
+        const rawWords = getUnitKerjaWords(p.unit_kerja);
         let bestMatch = null;
         let bestScore = 0;
 
         PARSED_UNIT_KERJA_OPTIONS.forEach(({opt, words}) => {
-          const score = matchScore(rawWords, words);
+          const score = wordMatchScore(rawWords, words);
           if (score > bestScore) {
             bestScore = score;
             bestMatch = opt;
           }
         });
 
-        let found = bestScore >= 0.7 ? bestMatch : null;
+        let found = bestScore >= 0.65 ? bestMatch : null;
         if (found) {
           matchedOpd = found;
         } else {
