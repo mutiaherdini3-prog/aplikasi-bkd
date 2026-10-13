@@ -853,21 +853,19 @@ export default function AdminPage() {
 
   // Download Template Excel untuk Sertifikasi Massal (Auto-fill NIP dari database Google Sheet)
   const downloadTemplateSertifikasi = async () => {
-    let sourcePegawai = semuaPegawai;
-    if (!sourcePegawai || sourcePegawai.length === 0) {
-      try {
-        const res = await fetch('/api/pegawai/all?all=true');
-        const j = await res.json();
-        if (j.success && j.data) {
-          sourcePegawai = j.data;
-          setSemuaPegawai(j.data);
-        }
-      } catch (e) {
-        sourcePegawai = pegawaiList;
+    let sourcePegawai: any[] = [];
+    try {
+      const res = await fetch(`/api/pegawai/all?all=true&t=${Date.now()}`, { cache: 'no-store' });
+      const j = await res.json();
+      if (j.success && j.data && j.data.length > 0) {
+        sourcePegawai = j.data;
+        setSemuaPegawai(j.data);
       }
+    } catch (e) {
+      sourcePegawai = semuaPegawai.length > 0 ? semuaPegawai : pegawaiList;
     }
     if (!sourcePegawai || sourcePegawai.length === 0) {
-      sourcePegawai = pegawaiList;
+      sourcePegawai = semuaPegawai.length > 0 ? semuaPegawai : pegawaiList;
     }
 
     const workbook = XLSX.utils.book_new();
