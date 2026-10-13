@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const reqNip = searchParams.get('nip');
+    const isAll = searchParams.get('all') === 'true';
 
     // Fetch Pegawai
     const pRows = await getCachedSheetData('pegawai!A:ZZ');
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
     // Determine admin's role and unit_kerja
     let adminRole = 'super_admin';
     let adminUnitKerja = '';
-    if (reqNip && reqNip !== 'admin') {
+    if (!isAll && reqNip && reqNip !== 'admin') {
       const adminRow = pRows.find((row: any) => row[nipIdx]?.toString().trim() === reqNip.trim());
       if (adminRow) {
         adminRole = roleIdx !== -1 && adminRow[roleIdx] && adminRow[roleIdx].trim() !== '' ? adminRow[roleIdx].trim() : 'pegawai';
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
       if (!row[nipIdx] || row[nipIdx] === 'admin') continue;
       
       const currentUnitKerja = row[unitKerjaIdx] || '';
-      if ((adminRole === 'admin_diklat' || adminRole === 'admin') && !isUnitKerjaMatch(currentUnitKerja, adminUnitKerja)) continue;
+      if (!isAll && (adminRole === 'admin_diklat' || adminRole === 'admin') && !isUnitKerjaMatch(currentUnitKerja, adminUnitKerja)) continue;
 
       const statusAktif = statusAktifIdx !== -1 ? (row[statusAktifIdx] || 'Aktif') : 'Aktif';
       

@@ -286,7 +286,7 @@ export default function AdminPage() {
       const userNip = localStorage.getItem('loggedInUser') || '';
       const [resData, resAll] = await Promise.all([
         fetch(`/api/admin/data?nip=${userNip}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
-        fetch(`/api/pegawai/all?nip=${userNip}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+        fetch(`/api/pegawai/all?all=true`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
       ]);
       
       const json = await resData.json();
@@ -852,16 +852,33 @@ export default function AdminPage() {
   };
 
   // Download Template Excel untuk Sertifikasi Massal (Auto-fill NIP dari database Google Sheet)
-  const downloadTemplateSertifikasi = () => {
+  const downloadTemplateSertifikasi = async () => {
+    let sourcePegawai = semuaPegawai;
+    if (!sourcePegawai || sourcePegawai.length === 0) {
+      try {
+        const res = await fetch('/api/pegawai/all?all=true');
+        const j = await res.json();
+        if (j.success && j.data) {
+          sourcePegawai = j.data;
+          setSemuaPegawai(j.data);
+        }
+      } catch (e) {
+        sourcePegawai = pegawaiList;
+      }
+    }
+    if (!sourcePegawai || sourcePegawai.length === 0) {
+      sourcePegawai = pegawaiList;
+    }
+
     const workbook = XLSX.utils.book_new();
 
-    // 1. Sheet Referensi Pegawai dari Google Sheet database terkini (pegawaiList)
+    // 1. Sheet Referensi Pegawai dari Google Sheet database terkini (semuaPegawai)
     const refData = [
       ["NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", "Unit Kerja"],
-      ...pegawaiList
-        .filter(p => p.nip && p.nip !== 'admin')
-        .map(p => [
-          p.nip,
+      ...sourcePegawai
+        .filter((p: any) => p.nip && p.nip !== 'admin')
+        .map((p: any) => [
+          p.nip?.toString().trim(),
           p.nama || '-',
           p.status_pegawai || '-',
           p.jabatan || '-',
@@ -879,13 +896,23 @@ export default function AdminPage() {
       "Jenis Kursus", "Klasifikasi Kursus", "Penanda Tangan", "Biaya Pelatihan"
     ];
 
-    const sampleP1 = pegawaiList.find(p => p.nip === '197610101996021004') || pegawaiList[1] || { nip: '197610101996021004' };
-    const sampleP2 = pegawaiList.find(p => p.nip === '197812042002122005') || pegawaiList[2] || { nip: '197812042002122005' };
+    const sampleZulfahmi = sourcePegawai.find((p: any) => p.nip === '197106072025211044') || {
+      nip: '197106072025211044',
+      nama: 'ZULFAHMI',
+      status_pegawai: 'PPPK Paruh Waktu',
+      jabatan: 'Operator Layanan Operasional'
+    };
+    const sampleMutia = sourcePegawai.find((p: any) => (p.nama || '').toLowerCase().includes('mutia')) || sourcePegawai[1] || {
+      nip: '197812042002122005',
+      nama: 'MUTIA HERDINI',
+      status_pegawai: 'PNS',
+      jabatan: 'Analis SDM Aparatur Ahli Pertama'
+    };
 
     const rowsAoa: any[][] = [
       headers,
-      [sampleP1.nip, null, null, null, "Workshop", "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-01/BKPSDMD/2026", "2026-10-14", "2026-10-14", 2026, 4, "https://drive.google.com/file/d/contoh_link_sertifikat/view", "Sosialisasi", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "APBD"],
-      [sampleP2.nip, null, null, null, "Webinar", "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-02/BKPSDMD/2026", "2026-10-21", "2026-10-23", 2026, 4, "", "Webinar", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "0"]
+      [sampleZulfahmi.nip, sampleZulfahmi.nama, sampleZulfahmi.status_pegawai, sampleZulfahmi.jabatan, "Workshop", "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-01/BKPSDMD/2026", "2026-10-14", "2026-10-14", 2026, 4, "https://drive.google.com/file/d/contoh_link_sertifikat/view", "Sosialisasi", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "APBD"],
+      [sampleMutia.nip, sampleMutia.nama, sampleMutia.status_pegawai, sampleMutia.jabatan, "Webinar", "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-02/BKPSDMD/2026", "2026-10-21", "2026-10-23", 2026, 4, "", "Webinar", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "0"]
     ];
 
     // Sediakan 500 baris kosong berformula agar saat NIP diketik langsung terisi otomatis
@@ -896,18 +923,26 @@ export default function AdminPage() {
     const worksheet = XLSX.utils.aoa_to_sheet(rowsAoa);
 
     // Pasang formula otomatis VLOOKUP ke tab Data_Referensi_Pegawai
+    // Sertakan property 'v' agar SheetJS menyertakan formula saat di-write ke file XLSX
     for (let r = 2; r <= 500; r++) {
+      const defaultValNama = r === 2 ? (sampleZulfahmi.nama || '') : r === 3 ? (sampleMutia.nama || '') : '';
+      const defaultValStatus = r === 2 ? (sampleZulfahmi.status_pegawai || '') : r === 3 ? (sampleMutia.status_pegawai || '') : '';
+      const defaultValJabatan = r === 2 ? (sampleZulfahmi.jabatan || '') : r === 3 ? (sampleMutia.jabatan || '') : '';
+
       worksheet[`B${r}`] = { 
         t: 's', 
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,2,FALSE),IFERROR(VLOOKUP(TEXT(A${r},"0"),Data_Referensi_Pegawai!$A:$E,2,FALSE),"NIP Tidak Ditemukan")))` 
+        v: defaultValNama,
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,2,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A:$E,2,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A:$E,2,FALSE),"NIP Tidak Ditemukan"))))` 
       };
       worksheet[`C${r}`] = { 
         t: 's', 
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,3,FALSE),IFERROR(VLOOKUP(TEXT(A${r},"0"),Data_Referensi_Pegawai!$A:$E,3,FALSE),"-")))` 
+        v: defaultValStatus,
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,3,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A:$E,3,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A:$E,3,FALSE),"NIP Tidak Ditemukan"))))` 
       };
       worksheet[`D${r}`] = { 
         t: 's', 
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,4,FALSE),IFERROR(VLOOKUP(TEXT(A${r},"0"),Data_Referensi_Pegawai!$A:$E,4,FALSE),"-")))` 
+        v: defaultValJabatan,
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,4,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A:$E,4,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A:$E,4,FALSE),"NIP Tidak Ditemukan"))))` 
       };
     }
 
@@ -939,7 +974,7 @@ export default function AdminPage() {
 
     // Sheet 3: Petunjuk_Pengisian
     const petunjukData = [
-      { "Fitur Otomatis": "AUTO-FILL NIP", "Keterangan": "Cukup masukkan atau paste NIP di Kolom A, maka kolom Nama Pegawai, Status Pegawai, dan Jabatan akan OTOMATIS TERISI dari database!" },
+      { "Fitur Otomatis": "AUTO-FILL NIP", "Keterangan": "Cukup masukkan atau paste NIP di Kolom A, maka kolom Nama Pegawai, Status Pegawai, dan Jabatan akan OTOMATIS TERISI dari database! Jika NIP salah / tidak terdaftar di database, otomatis muncul 'NIP Tidak Ditemukan'." },
       { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit yang terdaftar di database." },
       { "Kolom": "Nama Pegawai", "Keterangan": "OTOMATIS terisi lewat formula dari tab Data_Referensi_Pegawai." },
       { "Kolom": "Status Pegawai", "Keterangan": "OTOMATIS terisi (PNS / PPPK / PW)." },
@@ -1014,19 +1049,26 @@ export default function AdminPage() {
           const ttd = (r['Penanda Tangan'] || r['penanda_tangan'] || r['Pejabat'] || '-').toString().trim();
           const biaya = (r['Biaya Pelatihan'] || r['biaya_pelatihan'] || r['Biaya'] || 'APBD').toString().trim();
 
-          const pegFound = pegawaiList.find(p => p.nip === nip);
+          const sourceList = (semuaPegawai && semuaPegawai.length > 0) ? semuaPegawai : pegawaiList;
+          const pegFound = sourceList.find((p: any) => p.nip?.toString().trim() === nip);
 
           const statusPeg = (r['Status Pegawai'] || r['status_pegawai'] || r['Status'] || '').toString().trim();
           const jabatanPeg = (r['Jabatan'] || r['jabatan'] || '').toString().trim();
 
+          const isFound = !!pegFound;
+          const finalNama = isFound ? (pegFound.nama || namaInput || '-') : 'NIP Tidak Ditemukan';
+          const finalStatus = isFound ? (pegFound.status_pegawai || (statusPeg && statusPeg !== 'NIP Tidak Ditemukan' ? statusPeg : '-')) : 'NIP Tidak Ditemukan';
+          const finalJabatan = isFound ? (pegFound.jabatan || (jabatanPeg && jabatanPeg !== 'NIP Tidak Ditemukan' ? jabatanPeg : '-')) : 'NIP Tidak Ditemukan';
+          const finalOpd = isFound ? (pegFound.unit_kerja || '-') : 'Tidak Terdaftar';
+
           return {
             rowNum: idx + 2,
             nip,
-            nama_pegawai: pegFound?.nama || namaInput || '-',
-            status_pegawai: pegFound?.status_pegawai || statusPeg || '-',
-            jabatan: pegFound?.jabatan || jabatanPeg || '-',
-            opd: pegFound?.unit_kerja || '-',
-            isRegistered: !!pegFound,
+            nama_pegawai: finalNama,
+            status_pegawai: finalStatus,
+            jabatan: finalJabatan,
+            opd: finalOpd,
+            isRegistered: isFound,
             jenis_sertifikasi: jenisSert,
             nama_kursus: namaKursus,
             institusi_penyelenggara: inst,
@@ -1059,6 +1101,19 @@ export default function AdminPage() {
       return;
     }
 
+    const unregList = importPreviewData.filter(d => !d.isRegistered || d.nama_pegawai === 'NIP Tidak Ditemukan');
+    let itemsToImport = importPreviewData;
+
+    if (unregList.length > 0) {
+      const confirmImport = confirm(`Perhatian: Terdapat ${unregList.length} baris dengan NIP yang TIDAK DITEMUKAN di database.\n\nKlik OK untuk hanya mengimpor ${importPreviewData.length - unregList.length} data yang NIP-nya terdaftar, atau klik Batal untuk memeriksa kembali data Anda.`);
+      if (!confirmImport) return;
+      itemsToImport = importPreviewData.filter(d => d.isRegistered && d.nama_pegawai !== 'NIP Tidak Ditemukan');
+      if (itemsToImport.length === 0) {
+        alert('Tidak ada data dengan NIP valid untuk diimpor.');
+        return;
+      }
+    }
+
     setImportLoading(true);
     setImportResult(null);
 
@@ -1066,7 +1121,7 @@ export default function AdminPage() {
       const res = await fetch('/api/sertifikasi/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: importPreviewData })
+        body: JSON.stringify({ items: itemsToImport })
       });
       const data = await res.json();
 
@@ -3815,7 +3870,7 @@ export default function AdminPage() {
                           <span className="badge bg-primary fs-6">Total: {importPreviewData.length} Baris</span>
                           <span className="badge bg-success fs-6">Terdaftar di DB: {importPreviewData.filter(d => d.isRegistered).length}</span>
                           {importPreviewData.some(d => !d.isRegistered) && (
-                            <span className="badge bg-warning text-dark fs-6">NIP Belum di DB: {importPreviewData.filter(d => !d.isRegistered).length}</span>
+                            <span className="badge bg-danger fs-6">⚠ NIP Tidak Ditemukan: {importPreviewData.filter(d => !d.isRegistered).length} Baris</span>
                           )}
                           <span className="badge bg-info text-dark fs-6">
                             Total Tambahan JP: {importPreviewData.reduce((acc, c) => acc + (c.jumlah_jp || 0), 0)} JP
@@ -3866,27 +3921,31 @@ export default function AdminPage() {
                               );
                             })
                             .map((item, idx) => (
-                              <tr key={idx} className={item.isRegistered ? '' : 'table-warning'}>
+                              <tr key={idx} className={item.isRegistered ? '' : 'table-danger'}>
                                 <td className="text-center text-muted">{idx + 1}</td>
                                 <td>
                                   <div className="fw-bold">{item.nip}</div>
                                   {item.isRegistered ? (
                                     <span className="badge bg-success" style={{ fontSize: '0.65rem' }}>✓ Terdaftar</span>
                                   ) : (
-                                    <span className="badge bg-warning text-dark" style={{ fontSize: '0.65rem' }}>⚠ Belum Ada di DB</span>
+                                    <span className="badge bg-danger" style={{ fontSize: '0.65rem' }}>✕ NIP Tidak Ditemukan</span>
                                   )}
                                 </td>
                                 <td>
-                                  <div className="fw-bold text-dark">{item.nama_pegawai}</div>
+                                  <div className={`fw-bold ${item.isRegistered ? 'text-dark' : 'text-danger'}`}>{item.nama_pegawai}</div>
                                   <small className="text-muted d-block text-truncate" style={{ maxWidth: '190px' }} title={item.opd}>{item.opd}</small>
                                 </td>
                                 <td>
-                                  <span className={`badge ${item.status_pegawai?.toUpperCase()?.includes('PNS') ? 'bg-primary' : item.status_pegawai?.toUpperCase()?.includes('PPPK') ? 'bg-info text-dark' : 'bg-secondary'}`} style={{ fontSize: '0.72rem' }}>
-                                    {item.status_pegawai || '-'}
-                                  </span>
+                                  {item.isRegistered ? (
+                                    <span className={`badge ${item.status_pegawai?.toUpperCase()?.includes('PNS') ? 'bg-primary' : item.status_pegawai?.toUpperCase()?.includes('PPPK') ? 'bg-info text-dark' : 'bg-secondary'}`} style={{ fontSize: '0.72rem' }}>
+                                      {item.status_pegawai || '-'}
+                                    </span>
+                                  ) : (
+                                    <span className="badge bg-danger" style={{ fontSize: '0.72rem' }}>NIP Tidak Ditemukan</span>
+                                  )}
                                 </td>
                                 <td>
-                                  <small className="text-dark" title={item.jabatan}>{item.jabatan || '-'}</small>
+                                  <small className={item.isRegistered ? 'text-dark' : 'text-danger fw-bold'} title={item.jabatan}>{item.jabatan || '-'}</small>
                                 </td>
                                 <td>
                                   <div className="fw-bold text-primary">{item.nama_kursus}</div>
