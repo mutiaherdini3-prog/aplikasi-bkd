@@ -41,6 +41,10 @@ export async function GET(request: Request) {
       }
     }
 
+    const statusPegawaiIdx = headers.indexOf('status pegawai');
+    const golonganIdx = headers.indexOf('golongan');
+    const emailIdx = headers.indexOf('email');
+
     const result = [];
     for (let i = 1; i < pRows.length; i++) {
       const row = pRows[i];
@@ -63,11 +67,11 @@ export async function GET(request: Request) {
         }
       }
 
-      const emailIdx = headers.indexOf('email');
-
       result.push({
         nip: row[nipIdx]?.toString().trim() || '',
         nama: row[namaIdx] || '',
+        status_pegawai: statusPegawaiIdx !== -1 ? (row[statusPegawaiIdx] || '') : '',
+        golongan: golonganIdx !== -1 ? (row[golonganIdx] || '') : '',
         jabatan: jabatanIdx !== -1 ? (row[jabatanIdx] || '') : '',
         unit_kerja: currentUnitKerja,
         role: finalRole,

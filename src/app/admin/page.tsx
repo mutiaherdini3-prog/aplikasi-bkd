@@ -932,17 +932,17 @@ export default function AdminPage() {
       worksheet[`B${r}`] = { 
         t: 's', 
         v: defaultValNama,
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,2,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A:$E,2,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A:$E,2,FALSE),"NIP Tidak Ditemukan"))))` 
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),"NIP Tidak Ditemukan"))))` 
       };
       worksheet[`C${r}`] = { 
         t: 's', 
         v: defaultValStatus,
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,3,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A:$E,3,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A:$E,3,FALSE),"NIP Tidak Ditemukan"))))` 
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),"NIP Tidak Ditemukan"))))` 
       };
       worksheet[`D${r}`] = { 
         t: 's', 
         v: defaultValJabatan,
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,4,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A:$E,4,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A:$E,4,FALSE),"NIP Tidak Ditemukan"))))` 
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),"NIP Tidak Ditemukan"))))` 
       };
     }
 
