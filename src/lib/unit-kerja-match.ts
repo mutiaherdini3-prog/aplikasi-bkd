@@ -266,7 +266,115 @@ const ABBREVIATION_MAP: Record<string, string> = {
   "SETDA": "SEKRETARIAT DAERAH",
   "SETWAN": "SEKRETARIAT DPRD",
   "SDM": "SUMBER DAYA MANUSIA",
+  "DINSOS": "DINAS SOSIAL PEMBERDAYAAN MASYARAKAT DESA",
+  "DINSOSPMD": "DINAS SOSIAL PEMBERDAYAAN MASYARAKAT DESA",
+  "DISPERINDAG": "DINAS KOPERASI USAHA KECIL MENENGAH PERDAGANGAN",
+  "DISPERINDAGKOP": "DINAS KOPERASI USAHA KECIL MENENGAH PERDAGANGAN",
+  "DKUP": "DINAS KOPERASI USAHA KECIL MENENGAH PERDAGANGAN",
+  "DKPP": "DINAS KETAHANAN PANGAN PERTANIAN",
+  "DP2KBP3A": "DINAS PEMBERDAYAAN PEREMPUAN PERLINDUNGAN ANAK PENGENDALIAN PENDUDUK KELUARGA BERENCANA",
+  "DISPUSIP": "DINAS PERPUSTAKAAN KEARSIPAN",
+  "DISNAKER": "DINAS PERINDUSTRIAN TENAGA KERJA",
+  "DISKAN": "DINAS PERIKANAN",
 };
+
+export const ALLOWED_ADMIN_NAMES = [
+  "Helwanda", "Muhammad Ali", "Andi Tenri Ajeng", "Abimanyu", "Safrizal",
+  "Thanthowi", "Aidin Setiawan Putera", "Indra Cahaya", "Fachriansyah",
+  "Drs. Muhammad Soleh", "Miwani", "Aidi", "Farouk Yohansyah", "Novianto",
+  "Teni Wahyuni", "Azmal AZ", "Muhammad Sapi'i Rangkuti", "Achmad Nursyandi",
+  "Bertha", "Hendra Jaya", "Muhammad Kaidi", "Sarbudiono", "Yudi Hermanto",
+  "Dessy Sarilena Oktavia", "Ferdinan T", "Sanudin", "Joko Riswanto",
+  "Sri Mulyono Basuki", "Bastomi", "Harfiyan", "Sari Dwi Estari",
+  "Mustika Sari", "Ashan", "Rino Rizandi", "Winda", "Novaroly",
+  "Des Kurniawan", "Dekky Edward", "Muhammad Putra Kusuma", "Yulista",
+  "Amini", "Kamso", "Indra Saputra", "Sholihin", "Halimah", "Isfani",
+  "Ema Ratna Gustina", "Kerynna Meithesya", "Heroe Yoewono", "Yuliyen Maizar",
+  "Herlina", "Windy Arti Pratiwi", "Nora Ambarsari", "Fitri Milvayanti",
+  "Avan Yuandi", "Zahroni", "Maria Fuji Lestari", "Riko Agus Tridoyo",
+  "Ety Melyanti", "Ahmad Taufik", "Heriansyah", "Andrie Fitrayadi",
+  "Rita Andriani", "Dessy Susanty", "M. Irsal", "Bustanil Arifin", "Waldi",
+  "Edi Irawan", "Damhuri", "Meidiar", "M. Akib", "Andriansyah", "Amanda",
+  "Imam Wasana Putra", "Thomas Edison Regan", "Ir. Surya Mardiansyah",
+  "Heriyandi", "Hafsah", "Uli Nuha", "Meidiyan", "Juswardi",
+  "Muhammad Ferhad Irvan", "Erza Fistiawan", "Wiratmo", "Dody Sihono",
+  "Imam Dwi Feryanto", "Armizi", "Havita Dwi Anggasari", "Agus Setyadi",
+  "Sufidra", "Muhammad Amrullah", "Henry Firsanto", "Sandy Wijaya",
+  "Andi Hamzah", "Eka Octawianto", "Amar Sopi", "Hidayat",
+  "Undat P. Sihombing", "Anita", "Muhammad Satriansyah", "Mailan",
+  "Henky Wibawa", "Diah Sapitri", "Siemens Siloys", "Arni",
+  "Agung Ariwibowo", "Aryanto", "Benhard Batubara", "Pebri Harto",
+  "dr. Ratnosoppi", "Nurmala Anggraini", "Ns.Muria Idriakasih",
+  "Linda Yunita", "A'ad Tirta Fujaka", "Wahyudi Saputra", "Rini Indra Sari",
+  "Muhammad Fakhri", "Nurherodiyah", "Rohardi", "Ferri Ardami", "Idwin",
+  "Rina Mulyanti", "Bambang Yusdianto", "Zulkarnain", "Sapki Bahresi",
+  "Asrin Utiarahman", "Syahrul Effendi", "Jayu Noriska", "Herman Siswadi",
+  "Novi Eva Yanti", "Siska Silviana", "dr. Rudi Faizul Badri",
+  "Ns. Sri Hartati", "Arsul Sani"
+];
+
+/**
+ * Mendeteksi apakah pegawai merupakan pimpinan/petinggi OPD atau terdaftar di admin list
+ */
+export function isPetinggiOrAdmin(nama?: string, jabatan?: string): boolean {
+  if (!nama && !jabatan) return false;
+
+  // 1. Cek daftar admin legacy
+  if (nama) {
+    const normalizedNama = nama.toLowerCase().replace(/[,.\s]/g, '');
+    const inAllowed = ALLOWED_ADMIN_NAMES.some(allowed => {
+      const normAllowed = allowed.toLowerCase().replace(/[,.\s]/g, '');
+      return normalizedNama.includes(normAllowed);
+    });
+    if (inAllowed) return true;
+  }
+
+  // 2. Cek jabatan kepemimpinan (petinggi di setiap OPD)
+  if (jabatan) {
+    const j = jabatan.toLowerCase().trim();
+    if (
+      j.startsWith('kepala ') ||
+      j.startsWith('kasubbag ') ||
+      j.startsWith('kasi ') ||
+      j.startsWith('camat') ||
+      j.startsWith('sekretaris camat') ||
+      j.startsWith('lurah') ||
+      j.startsWith('sekretaris lurah') ||
+      j.startsWith('asisten ') ||
+      j.startsWith('staf ahli ') ||
+      j.startsWith('inspektur') ||
+      j.startsWith('direktur') ||
+      j.includes('sekretaris daerah') ||
+      j.includes('sekretaris dprd') ||
+      j.includes('sekretaris dinas') ||
+      j.includes('sekretaris badan') ||
+      j.includes('sekretaris inspektorat') ||
+      j.includes('kepala dinas') ||
+      j.includes('kepala badan') ||
+      j.includes('kepala bagian') ||
+      j.includes('kepala bidang') ||
+      j.includes('kepala sekolah') ||
+      j.includes('kepala puskesmas') ||
+      j.includes('kepala upt') ||
+      j.includes('kepala uptd')
+    ) {
+      // Kecualikan jabatan fungsional pelaksana non-pimpinan
+      if (
+        j.startsWith('asisten apoteker') ||
+        j.startsWith('asisten keperawatan') ||
+        j.startsWith('asisten teknisi')
+      ) {
+        return false;
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export const isLegacyAdmin = isPetinggiOrAdmin;
+
 
 /**
  * Normalisasi dan ekstraksi kata-kata signifikan dari string unit_kerja
