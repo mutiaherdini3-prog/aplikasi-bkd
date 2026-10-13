@@ -851,58 +851,71 @@ export default function AdminPage() {
     XLSX.writeFile(workbook, "Rekap_Tren_Tahunan_OPD.xlsx");
   };
 
-  // Download Template Excel untuk Sertifikasi Massal (contoh: Rabu Bertamu)
+  // Download Template Excel untuk Sertifikasi Massal (Auto-fill NIP dari database Google Sheet)
   const downloadTemplateSertifikasi = () => {
-    const templateData = [
-      {
-        "NIP": "197812042002122005",
-        "Nama Pegawai (Opsional)": "Contoh Pegawai 1",
-        "Status Pegawai": "PNS",
-        "Jabatan": "Analis Kepegawaian Ahli Muda",
-        "Jenis Sertifikasi": "Workshop",
-        "Nama Kursus": "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN",
-        "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
-        "Nomor Sertifikasi": "800/RB-01/BKPSDMD/2026",
-        "Tanggal Mulai": "2026-10-14",
-        "Tanggal Akhir": "2026-10-14",
-        "Tahun": 2026,
-        "Jumlah JP": 4,
-        "Link Sertifikat": "https://drive.google.com/file/d/contoh_link_sertifikat/view",
-        "Jenis Kursus": "Sosialisasi",
-        "Klasifikasi Kursus": "Non-Klasikal",
-        "Penanda Tangan": "Kepala BKPSDMD Kab. Bangka Barat",
-        "Biaya Pelatihan": "APBD"
-      },
-      {
-        "NIP": "197610101996021004",
-        "Nama Pegawai (Opsional)": "Contoh Pegawai 2",
-        "Status Pegawai": "PPPK",
-        "Jabatan": "Guru Kelas Ahli Pertama",
-        "Jenis Sertifikasi": "Webinar",
-        "Nama Kursus": "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN",
-        "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
-        "Nomor Sertifikasi": "800/RB-02/BKPSDMD/2026",
-        "Tanggal Mulai": "2026-10-21",
-        "Tanggal Akhir": "2026-10-23",
-        "Tahun": 2026,
-        "Jumlah JP": 4,
-        "Link Sertifikat": "",
-        "Jenis Kursus": "Webinar",
-        "Klasifikasi Kursus": "Non-Klasikal",
-        "Penanda Tangan": "Kepala BKPSDMD Kab. Bangka Barat",
-        "Biaya Pelatihan": "0"
-      }
-    ];
-
     const workbook = XLSX.utils.book_new();
 
-    // Sheet 1: Template_Sertifikasi
-    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    // 1. Sheet Referensi Pegawai dari Google Sheet database terkini (pegawaiList)
+    const refData = [
+      ["NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", "Unit Kerja"],
+      ...pegawaiList
+        .filter(p => p.nip && p.nip !== 'admin')
+        .map(p => [
+          p.nip,
+          p.nama || '-',
+          p.status_pegawai || '-',
+          p.jabatan || '-',
+          p.unit_kerja || '-'
+        ])
+    ];
+    const wsRef = XLSX.utils.aoa_to_sheet(refData);
+    wsRef['!cols'] = [{ wch: 22 }, { wch: 32 }, { wch: 18 }, { wch: 35 }, { wch: 35 }];
+
+    // 2. Sheet Template_Sertifikasi dengan Formula Otomatis
+    const headers = [
+      "NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", 
+      "Jenis Sertifikasi", "Nama Kursus", "Institusi Penyelenggara", "Nomor Sertifikasi", 
+      "Tanggal Mulai", "Tanggal Akhir", "Tahun", "Jumlah JP", "Link Sertifikat", 
+      "Jenis Kursus", "Klasifikasi Kursus", "Penanda Tangan", "Biaya Pelatihan"
+    ];
+
+    const sampleP1 = pegawaiList.find(p => p.nip === '197610101996021004') || pegawaiList[1] || { nip: '197610101996021004' };
+    const sampleP2 = pegawaiList.find(p => p.nip === '197812042002122005') || pegawaiList[2] || { nip: '197812042002122005' };
+
+    const rowsAoa: any[][] = [
+      headers,
+      [sampleP1.nip, null, null, null, "Workshop", "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-01/BKPSDMD/2026", "2026-10-14", "2026-10-14", 2026, 4, "https://drive.google.com/file/d/contoh_link_sertifikat/view", "Sosialisasi", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "APBD"],
+      [sampleP2.nip, null, null, null, "Webinar", "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-02/BKPSDMD/2026", "2026-10-21", "2026-10-23", 2026, 4, "", "Webinar", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "0"]
+    ];
+
+    // Sediakan 500 baris kosong berformula agar saat NIP diketik langsung terisi otomatis
+    for (let r = 3; r <= 500; r++) {
+      rowsAoa.push(new Array(headers.length).fill(null));
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet(rowsAoa);
+
+    // Pasang formula otomatis VLOOKUP ke tab Data_Referensi_Pegawai
+    for (let r = 2; r <= 500; r++) {
+      worksheet[`B${r}`] = { 
+        t: 's', 
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,2,FALSE),IFERROR(VLOOKUP(TEXT(A${r},"0"),Data_Referensi_Pegawai!$A:$E,2,FALSE),"NIP Tidak Ditemukan")))` 
+      };
+      worksheet[`C${r}`] = { 
+        t: 's', 
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,3,FALSE),IFERROR(VLOOKUP(TEXT(A${r},"0"),Data_Referensi_Pegawai!$A:$E,3,FALSE),"-")))` 
+      };
+      worksheet[`D${r}`] = { 
+        t: 's', 
+        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A:$E,4,FALSE),IFERROR(VLOOKUP(TEXT(A${r},"0"),Data_Referensi_Pegawai!$A:$E,4,FALSE),"-")))` 
+      };
+    }
+
     worksheet['!cols'] = [
       { wch: 22 }, // NIP
-      { wch: 26 }, // Nama Pegawai
-      { wch: 16 }, // Status Pegawai
-      { wch: 32 }, // Jabatan
+      { wch: 30 }, // Nama Pegawai (Otomatis)
+      { wch: 18 }, // Status Pegawai (Otomatis)
+      { wch: 35 }, // Jabatan (Otomatis)
       { wch: 18 }, // Jenis Sertifikasi
       { wch: 48 }, // Nama Kursus
       { wch: 32 }, // Institusi Penyelenggara
@@ -917,24 +930,30 @@ export default function AdminPage() {
       { wch: 32 }, // Penanda Tangan
       { wch: 16 }  // Biaya Pelatihan
     ];
+
+    // Sheet 1: Template_Sertifikasi (di posisi pertama)
     XLSX.utils.book_append_sheet(workbook, worksheet, "Template_Sertifikasi");
 
-    // Sheet 2: Petunjuk_Pengisian
+    // Sheet 2: Data_Referensi_Pegawai (sebagai basis data VLOOKUP)
+    XLSX.utils.book_append_sheet(workbook, wsRef, "Data_Referensi_Pegawai");
+
+    // Sheet 3: Petunjuk_Pengisian
     const petunjukData = [
+      { "Fitur Otomatis": "AUTO-FILL NIP", "Keterangan": "Cukup masukkan atau paste NIP di Kolom A, maka kolom Nama Pegawai, Status Pegawai, dan Jabatan akan OTOMATIS TERISI dari database!" },
       { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit yang terdaftar di database." },
-      { "Kolom": "Nama Pegawai (Opsional)", "Keterangan": "Hanya sebagai referensi admin di file Excel. Sistem mencocokkan data berdasarkan NIP." },
-      { "Kolom": "Status Pegawai", "Keterangan": "Opsional. Status kepegawaian (Contoh: PNS, PPPK). Jika NIP terdaftar, akan otomatis terisi dari database." },
-      { "Kolom": "Jabatan", "Keterangan": "Opsional. Jabatan pegawai (Contoh: Analis Kepegawaian Ahli Muda). Jika NIP terdaftar, akan otomatis terisi dari database." },
+      { "Kolom": "Nama Pegawai", "Keterangan": "OTOMATIS terisi lewat formula dari tab Data_Referensi_Pegawai." },
+      { "Kolom": "Status Pegawai", "Keterangan": "OTOMATIS terisi (PNS / PPPK / PW)." },
+      { "Kolom": "Jabatan", "Keterangan": "OTOMATIS terisi sesuai data kepegawaian." },
       { "Kolom": "Jenis Sertifikasi", "Keterangan": "Contoh: Workshop, Webinar, Bimtek, Seminar, Pelatihan, Diklat Teknis, Paten/Haki." },
       { "Kolom": "Nama Kursus", "Keterangan": "WAJIB diisi. Nama kegiatan diklat (Contoh: Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK)." },
       { "Kolom": "Institusi Penyelenggara", "Keterangan": "Instansi penyelenggara kegiatan (Contoh: BKPSDMD Kabupaten Bangka Barat)." },
       { "Kolom": "Nomor Sertifikasi", "Keterangan": "Nomor sertifikat atau surat tugas / piagam (Jika belum ada nomor, isi '-')." },
       { "Kolom": "Tanggal Mulai", "Keterangan": "Tanggal awal kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY, contoh: 2026-10-14)." },
-      { "Kolom": "Tanggal Akhir", "Keterangan": "Tanggal selesai kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY. Jika hanya 1 hari, isi sama dengan Tanggal Mulai)." },
+      { "Kolom": "Tanggal Akhir", "Keterangan": "Tanggal selesai kegiatan (Format: YYYY-MM-DD atau DD/MM/YYYY)." },
       { "Kolom": "Tahun", "Keterangan": "Tahun kegiatan (Contoh: 2026)." },
       { "Kolom": "Jumlah JP", "Keterangan": "WAJIB angka. Jumlah Jam Pelajaran yang diperoleh (Contoh: 4 atau 20)." },
-      { "Kolom": "Link Sertifikat", "Keterangan": "Tautan file Google Drive, Google Docs, atau URL. Boleh dikosongkan jika fisik sertifikat belum diunggah." },
-      { "Kolom": "Jenis Kursus", "Keterangan": "Pilihan: Webinar, Workshop, Diklat teknis, Seminar, Bimbingan teknis, Sosialisasi, Pelatihan manajerial, Pelatihan sosial kultural, E-learning, dll." },
+      { "Kolom": "Link Sertifikat", "Keterangan": "Tautan file Google Drive atau URL. Boleh dikosongkan jika fisik sertifikat belum diunggah." },
+      { "Kolom": "Jenis Kursus", "Keterangan": "Pilihan: Webinar, Workshop, Diklat teknis, Seminar, Bimbingan teknis, Sosialisasi, Pelatihan manajerial, dll." },
       { "Kolom": "Klasifikasi Kursus", "Keterangan": "Pilihan: Non-Klasikal / Klasikal / Blended Learning." },
       { "Kolom": "Penanda Tangan", "Keterangan": "Pejabat yang menandatangani (Contoh: Kepala BKPSDMD Kab. Bangka Barat)." },
       { "Kolom": "Biaya Pelatihan", "Keterangan": "Sumber pembiayaan (Contoh: APBD, Mandiri, Kontribusi, atau 0)." },
