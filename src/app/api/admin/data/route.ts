@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCachedSheetData } from '@/lib/google';
+import { isUnitKerjaMatch } from '@/lib/unit-kerja-match';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,9 +129,9 @@ export async function GET(request: Request) {
 
       const currentUnitKerja = row[unitKerjaIdx] || '';
       
-      // Filter for admin_diklat and admin
+      // Filter for admin_diklat and admin (fuzzy matching for abbreviations like BKPSDMD)
       if (adminRole === 'admin_diklat' || adminRole === 'admin') {
-        if (currentUnitKerja.trim().toLowerCase() !== adminUnitKerja.trim().toLowerCase()) continue;
+        if (!isUnitKerjaMatch(currentUnitKerja, adminUnitKerja)) continue;
       }
 
       const currentNip = row[nipIdx]?.toString().trim() || '';

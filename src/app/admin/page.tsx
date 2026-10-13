@@ -875,6 +875,8 @@ export default function AdminPage() {
       {
         "NIP": "197812042002122005",
         "Nama Pegawai (Opsional)": "Contoh Pegawai 1",
+        "Status Pegawai": "PNS",
+        "Jabatan": "Analis Kepegawaian Ahli Muda",
         "Jenis Sertifikasi": "Workshop",
         "Nama Kursus": "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN",
         "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
@@ -892,6 +894,8 @@ export default function AdminPage() {
       {
         "NIP": "197610101996021004",
         "Nama Pegawai (Opsional)": "Contoh Pegawai 2",
+        "Status Pegawai": "PPPK",
+        "Jabatan": "Guru Kelas Ahli Pertama",
         "Jenis Sertifikasi": "Webinar",
         "Nama Kursus": "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN",
         "Institusi Penyelenggara": "BKPSDMD Kabupaten Bangka Barat",
@@ -915,6 +919,8 @@ export default function AdminPage() {
     worksheet['!cols'] = [
       { wch: 22 }, // NIP
       { wch: 26 }, // Nama Pegawai
+      { wch: 16 }, // Status Pegawai
+      { wch: 32 }, // Jabatan
       { wch: 18 }, // Jenis Sertifikasi
       { wch: 48 }, // Nama Kursus
       { wch: 32 }, // Institusi Penyelenggara
@@ -935,6 +941,8 @@ export default function AdminPage() {
     const petunjukData = [
       { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit yang terdaftar di database." },
       { "Kolom": "Nama Pegawai (Opsional)", "Keterangan": "Hanya sebagai referensi admin di file Excel. Sistem mencocokkan data berdasarkan NIP." },
+      { "Kolom": "Status Pegawai", "Keterangan": "Opsional. Status kepegawaian (Contoh: PNS, PPPK). Jika NIP terdaftar, akan otomatis terisi dari database." },
+      { "Kolom": "Jabatan", "Keterangan": "Opsional. Jabatan pegawai (Contoh: Analis Kepegawaian Ahli Muda). Jika NIP terdaftar, akan otomatis terisi dari database." },
       { "Kolom": "Jenis Sertifikasi", "Keterangan": "Contoh: Workshop, Webinar, Bimtek, Seminar, Pelatihan, Diklat Teknis, Paten/Haki." },
       { "Kolom": "Nama Kursus", "Keterangan": "WAJIB diisi. Nama kegiatan diklat (Contoh: Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK)." },
       { "Kolom": "Institusi Penyelenggara", "Keterangan": "Instansi penyelenggara kegiatan (Contoh: BKPSDMD Kabupaten Bangka Barat)." },
@@ -1007,10 +1015,15 @@ export default function AdminPage() {
 
           const pegFound = pegawaiList.find(p => p.nip === nip);
 
+          const statusPeg = (r['Status Pegawai'] || r['status_pegawai'] || r['Status'] || '').toString().trim();
+          const jabatanPeg = (r['Jabatan'] || r['jabatan'] || '').toString().trim();
+
           return {
             rowNum: idx + 2,
             nip,
             nama_pegawai: pegFound?.nama || namaInput || '-',
+            status_pegawai: pegFound?.status_pegawai || statusPeg || '-',
+            jabatan: pegFound?.jabatan || jabatanPeg || '-',
             opd: pegFound?.unit_kerja || '-',
             isRegistered: !!pegFound,
             jenis_sertifikasi: jenisSert,
@@ -3833,6 +3846,8 @@ export default function AdminPage() {
                             <th className="text-center" style={{ width: '40px' }}>No</th>
                             <th style={{ width: '160px' }}>NIP</th>
                             <th style={{ width: '200px' }}>Nama & OPD</th>
+                            <th style={{ width: '120px' }}>Status Pegawai</th>
+                            <th style={{ width: '180px' }}>Jabatan</th>
                             <th>Nama Kursus / Kegiatan</th>
                             <th style={{ width: '140px' }}>Tanggal Pelaksanaan</th>
                             <th className="text-center" style={{ width: '70px' }}>JP</th>
@@ -3850,7 +3865,9 @@ export default function AdminPage() {
                                 d.nip.toLowerCase().includes(q) ||
                                 d.nama_pegawai.toLowerCase().includes(q) ||
                                 d.nama_kursus.toLowerCase().includes(q) ||
-                                d.opd.toLowerCase().includes(q)
+                                d.opd.toLowerCase().includes(q) ||
+                                (d.status_pegawai || '').toLowerCase().includes(q) ||
+                                (d.jabatan || '').toLowerCase().includes(q)
                               );
                             })
                             .map((item, idx) => (
@@ -3867,6 +3884,14 @@ export default function AdminPage() {
                                 <td>
                                   <div className="fw-bold text-dark">{item.nama_pegawai}</div>
                                   <small className="text-muted d-block text-truncate" style={{ maxWidth: '190px' }} title={item.opd}>{item.opd}</small>
+                                </td>
+                                <td>
+                                  <span className={`badge ${item.status_pegawai?.toUpperCase()?.includes('PNS') ? 'bg-primary' : item.status_pegawai?.toUpperCase()?.includes('PPPK') ? 'bg-info text-dark' : 'bg-secondary'}`} style={{ fontSize: '0.72rem' }}>
+                                    {item.status_pegawai || '-'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <small className="text-dark" title={item.jabatan}>{item.jabatan || '-'}</small>
                                 </td>
                                 <td>
                                   <div className="fw-bold text-primary">{item.nama_kursus}</div>

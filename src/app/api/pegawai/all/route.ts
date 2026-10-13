@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCachedSheetData } from '@/lib/google';
+import { isUnitKerjaMatch } from '@/lib/unit-kerja-match';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +87,7 @@ export async function GET(request: Request) {
       if (!row[nipIdx] || row[nipIdx] === 'admin') continue;
       
       const currentUnitKerja = row[unitKerjaIdx] || '';
-      if ((adminRole === 'admin_diklat' || adminRole === 'admin') && currentUnitKerja !== adminUnitKerja) continue;
+      if ((adminRole === 'admin_diklat' || adminRole === 'admin') && !isUnitKerjaMatch(currentUnitKerja, adminUnitKerja)) continue;
 
       const statusAktif = statusAktifIdx !== -1 ? (row[statusAktifIdx] || 'Aktif') : 'Aktif';
       
