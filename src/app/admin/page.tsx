@@ -894,52 +894,30 @@ export default function AdminPage() {
       "Jenis Kursus", "Klasifikasi Kursus", "Penanda Tangan", "Biaya Pelatihan"
     ];
 
-    const sampleZulfahmi = sourcePegawai.find((p: any) => p.nip === '197106072025211044') || {
-      nip: '197106072025211044',
-      nama: 'ZULFAHMI',
-      status_pegawai: 'PPPK Paruh Waktu',
-      jabatan: 'Operator Layanan Operasional'
-    };
-    const sampleMutia = sourcePegawai.find((p: any) => (p.nama || '').toLowerCase().includes('mutia')) || sourcePegawai[1] || {
-      nip: '197812042002122005',
-      nama: 'MUTIA HERDINI',
-      status_pegawai: 'PNS',
-      jabatan: 'Analis SDM Aparatur Ahli Pertama'
-    };
-
-    const rowsAoa: any[][] = [
-      headers,
-      [sampleZulfahmi.nip, sampleZulfahmi.nama, sampleZulfahmi.status_pegawai, sampleZulfahmi.jabatan, "Workshop", "Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK dan Disiplin ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-01/BKPSDMD/2026", "2026-10-14", "2026-10-14", 2026, 4, "https://drive.google.com/file/d/contoh_link_sertifikat/view", "Sosialisasi", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "APBD"],
-      [sampleMutia.nip, sampleMutia.nama, sampleMutia.status_pegawai, sampleMutia.jabatan, "Webinar", "Rabu Bertamu: Manajemen Talenta dan Sosialisasi Pola Karier ASN", "BKPSDMD Kabupaten Bangka Barat", "800/RB-02/BKPSDMD/2026", "2026-10-21", "2026-10-23", 2026, 4, "", "Webinar", "Non-Klasikal", "Kepala BKPSDMD Kab. Bangka Barat", "0"]
-    ];
-
     // Sediakan 500 baris kosong berformula agar saat NIP diketik langsung terisi otomatis
-    for (let r = 3; r <= 500; r++) {
+    const rowsAoa: any[][] = [headers];
+    for (let r = 2; r <= 500; r++) {
       rowsAoa.push(new Array(headers.length).fill(null));
     }
 
     const worksheet = XLSX.utils.aoa_to_sheet(rowsAoa);
 
     // Pasang formula otomatis VLOOKUP ke tab Data_Referensi_Pegawai
-    // Sertakan property 'v' agar SheetJS menyertakan formula saat di-write ke file XLSX
+    // Sertakan property 'v' kosong agar SheetJS menyertakan formula saat di-write ke file XLSX
     for (let r = 2; r <= 500; r++) {
-      const defaultValNama = r === 2 ? (sampleZulfahmi.nama || '') : r === 3 ? (sampleMutia.nama || '') : '';
-      const defaultValStatus = r === 2 ? (sampleZulfahmi.status_pegawai || '') : r === 3 ? (sampleMutia.status_pegawai || '') : '';
-      const defaultValJabatan = r === 2 ? (sampleZulfahmi.jabatan || '') : r === 3 ? (sampleMutia.jabatan || '') : '';
-
       worksheet[`B${r}`] = { 
         t: 's', 
-        v: defaultValNama,
+        v: '',
         f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),"NIP Tidak Ditemukan"))))` 
       };
       worksheet[`C${r}`] = { 
         t: 's', 
-        v: defaultValStatus,
+        v: '',
         f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),"NIP Tidak Ditemukan"))))` 
       };
       worksheet[`D${r}`] = { 
         t: 's', 
-        v: defaultValJabatan,
+        v: '',
         f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),"NIP Tidak Ditemukan"))))` 
       };
     }
