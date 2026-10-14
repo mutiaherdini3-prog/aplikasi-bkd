@@ -1680,19 +1680,19 @@ export default function AdminPage() {
               {userRole === 'super_admin' && (
                 <li><a onClick={() => { setActiveTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
-              {userRole !== 'super_admin' && (
+              {loggedInNip !== 'admin' && (
                 <li className="mt-4">
                   <a 
                     onClick={() => router.push('/dashboard')} 
-                    className="nav-item fw-bold text-primary" 
-                    style={{ backgroundColor: '#eff6ff', borderRadius: '8px', cursor: 'pointer' }}
-                    title="Kembali ke Dashboard Pegawai Anda"
+                    className="nav-item fw-bold text-primary shadow-sm" 
+                    style={{ backgroundColor: '#eff6ff', borderRadius: '8px', cursor: 'pointer', border: '1px solid #bfdbfe' }}
+                    title="Beralih ke Dashboard & Layanan Pegawai Pribadi Anda (Upload Diklat, IDP, dll)"
                   >
                     <i className="bi bi-person-workspace text-primary"></i> Dashboard Pegawai
                   </a>
                 </li>
               )}
-              <li className={userRole === 'super_admin' ? 'mt-4' : 'mt-2'}>
+              <li className={loggedInNip === 'admin' ? 'mt-4' : 'mt-2'}>
                 <a onClick={handleLogout} className="text-danger" style={{ cursor: 'pointer' }}>
                   <i className="bi bi-box-arrow-left"></i> Logout
                 </a>
@@ -1705,14 +1705,14 @@ export default function AdminPage() {
             <div className="topbar">
               <h5 className="fw-bold text-secondary mb-0">{getTopbarTitle()}</h5>
               <div className="d-flex align-items-center gap-3">
-                {userRole !== 'super_admin' && (
+                {loggedInNip !== 'admin' && (
                   <button 
                     onClick={() => router.push('/dashboard')} 
                     className="btn btn-sm btn-outline-primary shadow-sm fw-bold d-flex align-items-center gap-1 px-3" 
                     style={{ borderRadius: '20px' }}
-                    title="Kembali ke Dashboard Pegawai Anda"
+                    title="Beralih ke Dashboard & Layanan Pegawai Pribadi Anda (Upload Diklat, IDP, dll)"
                   >
-                    <i className="bi bi-arrow-left-circle-fill"></i>
+                    <i className="bi bi-person-workspace"></i>
                     <span>Dashboard Pegawai</span>
                   </button>
                 )}
@@ -1734,11 +1734,17 @@ export default function AdminPage() {
                 <i className="bi bi-bell fs-5 text-muted ms-1"></i>
                 <div className="d-flex align-items-center gap-2">
                   <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '36px', height: '36px', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    {userRole === 'super_admin' ? 'SA' : 'AO'}
+                    {userRole === 'super_admin' ? (loggedInNip === 'admin' ? 'SA' : (pegawaiList.find(p => p.nip === loggedInNip)?.nama?.substring(0, 2).toUpperCase() || 'SA')) : 'AO'}
                   </div>
                   <div>
-                    <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>{userRole === 'super_admin' ? 'Administrator Utama' : 'Pimpinan / Atasan OPD'}</div>
-                    <span className="badge bg-primary-subtle text-primary text-uppercase mt-1" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>{userRole === 'super_admin' ? 'Super Admin BKD' : 'Atasan OPD (Read Only)'}</span>
+                    <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>
+                      {loggedInNip === 'admin' 
+                        ? 'Administrator Utama' 
+                        : (pegawaiList.find(p => p.nip === loggedInNip)?.nama || 'Pegawai Super Admin')}
+                    </div>
+                    <span className="badge bg-primary-subtle text-primary text-uppercase mt-1" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>
+                      {userRole === 'super_admin' ? 'Super Admin BKD' : 'Atasan OPD (Read Only)'}
+                    </span>
                   </div>
                 </div>
               </div>
