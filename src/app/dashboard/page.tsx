@@ -102,11 +102,15 @@ export default function DashboardPage() {
       message: `Apakah Anda yakin ingin menghapus sertifikasi${namaKursus ? ` "${namaKursus}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
       onConfirm: async () => {
         setIsDeleting(true);
+        // Optimistic UI update
+        setSertifikasi(prev => prev.filter(s => s._rowIndex !== rowIndex && s.rowIndex !== rowIndex));
+        setShowDeleteConfirm(false);
+        setDeleteConfirmData(null);
         try {
           const res = await fetch(`/api/sertifikasi?rowIndex=${rowIndex}`, { method: 'DELETE' });
-          if (res.ok) { fetchData(); setShowDeleteConfirm(false); setDeleteConfirmData(null); }
-          else alert('Gagal menghapus sertifikat');
-        } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+          if (res.ok) { fetchData(); }
+          else { alert('Gagal menghapus sertifikat'); fetchData(); }
+        } catch (err) { alert('Terjadi kesalahan saat menghapus'); fetchData(); }
         finally { setIsDeleting(false); }
       }
     });
@@ -123,11 +127,15 @@ export default function DashboardPage() {
       message: `Apakah Anda yakin ingin menghapus riwayat pendidikan${namaPendidikan ? ` "${namaPendidikan}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
       onConfirm: async () => {
         setIsDeleting(true);
+        // Optimistic UI update
+        setPendidikan(prev => prev.filter(p => p._rowIndex !== rowIndex && p.rowIndex !== rowIndex));
+        setShowDeleteConfirm(false);
+        setDeleteConfirmData(null);
         try {
           const res = await fetch(`/api/pendidikan?rowIndex=${rowIndex}`, { method: 'DELETE' });
-          if (res.ok) { fetchData(); setShowDeleteConfirm(false); setDeleteConfirmData(null); }
-          else alert('Gagal menghapus pendidikan');
-        } catch (err) { alert('Terjadi kesalahan saat menghapus'); }
+          if (res.ok) { fetchData(); }
+          else { alert('Gagal menghapus pendidikan'); fetchData(); }
+        } catch (err) { alert('Terjadi kesalahan saat menghapus'); fetchData(); }
         finally { setIsDeleting(false); }
       }
     });
@@ -140,11 +148,15 @@ export default function DashboardPage() {
       message: `Apakah Anda yakin ingin menghapus pengajuan IDP${namaKompetensi ? ` "${namaKompetensi}"` : ''} ini? Tindakan ini tidak dapat dibatalkan.`,
       onConfirm: async () => {
         setIsDeleting(true);
+        // Optimistic UI update
+        setIdpList(prev => prev.filter(item => item._rowIndex !== rowIndex && item.rowIndex !== rowIndex));
+        setShowDeleteConfirm(false);
+        setDeleteConfirmData(null);
         try {
           const res = await fetch(`/api/idp?rowIndex=${rowIndex}`, { method: 'DELETE' });
-          if (res.ok) { fetchData(); setShowDeleteConfirm(false); setDeleteConfirmData(null); }
-          else alert('Gagal menghapus IDP');
-        } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); }
+          if (res.ok) { fetchData(); }
+          else { alert('Gagal menghapus IDP'); fetchData(); }
+        } catch (err) { alert('Terjadi kesalahan saat menghapus IDP'); fetchData(); }
         finally { setIsDeleting(false); }
       }
     });
@@ -160,6 +172,17 @@ export default function DashboardPage() {
     } else {
       if (!confirm('Yakin ingin menyetujui pengajuan IDP ini untuk diteruskan ke verifikasi tahap 2 (BKPSDMD)?')) return;
     }
+
+    // Optimistic UI update
+    setIdpBawahan(prev => prev.map(item => {
+      if (item._rowIndex === rowIndex || item.rowIndex === rowIndex) {
+        return {
+          ...item,
+          status: status
+        };
+      }
+      return item;
+    }));
     
     try {
       const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(status)}&alasan=${encodeURIComponent(alasan)}`, { method: 'PUT' });
@@ -167,9 +190,11 @@ export default function DashboardPage() {
         fetchData();
       } else {
         alert('Gagal memperbarui status');
+        fetchData();
       }
     } catch (err) {
       alert('Terjadi kesalahan saat memperbarui status');
+      fetchData();
     }
   };
 
