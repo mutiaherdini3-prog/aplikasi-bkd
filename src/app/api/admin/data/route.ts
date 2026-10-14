@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCachedSheetData } from '@/lib/google';
+import { batchGetCachedSheets } from '@/lib/google';
 import { isUnitKerjaMatch, isPetinggiOrAdmin } from '@/lib/unit-kerja-match';
 
 export const dynamic = 'force-dynamic';
@@ -9,8 +9,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const reqNip = searchParams.get('nip');
 
-    // Fetch Pegawai
-    const pRows = await getCachedSheetData('pegawai!A:ZZ');
+    // Fetch Pegawai, Sertifikasi, and IDP simultaneously
+    const sheetData = await batchGetCachedSheets([
+      'pegawai!A:ZZ',
+      'sertifikasi!A:Z',
+      'idp!A:Z'
+    ]);
+
+    const pRows = sheetData['pegawai!A:ZZ'] || [];
     if (pRows.length === 0) return NextResponse.json({ success: true, data: [] });
 
     const headers = pRows[0].map((h: string) => h.trim().toLowerCase());
@@ -20,7 +26,6 @@ export async function GET(request: Request) {
     const pangkatIdx = headers.indexOf('pangkat');
     const golonganIdx = headers.indexOf('golongan ');
     if (golonganIdx === -1) {
-      // In case of typo in sheet
       headers.indexOf('golongan');
     }
     const realGolonganIdx = headers.indexOf('golongan ') !== -1 ? headers.indexOf('golongan ') : headers.indexOf('golongan');
@@ -45,38 +50,34 @@ export async function GET(request: Request) {
       }
     }
 
-    // Fetch Sertifikasi
+    // Process Sertifikasi
     let allSertifikasi: any[] = [];
-    try {
-      const sRows = await getCachedSheetData('sertifikasi!A:Z');
-      if (sRows.length > 0) {
-        const sHeaders = sRows[0].map((h: string) => h.toLowerCase());
-        for (let i = 1; i < sRows.length; i++) {
-          const row: any = {};
-          sHeaders.forEach((h: string, idx: number) => {
-            row[h] = sRows[i][idx] || '';
-          });
-          if (row.jumlah_jp) row.jumlah_jp = Number(row.jumlah_jp);
-          allSertifikasi.push(row);
-        }
+    const sRows = sheetData['sertifikasi!A:Z'] || [];
+    if (sRows.length > 0) {
+      const sHeaders = sRows[0].map((h: string) => h.toLowerCase());
+      for (let i = 1; i < sRows.length; i++) {
+        const row: any = {};
+        sHeaders.forEach((h: string, idx: number) => {
+          row[h] = sRows[i][idx] || '';
+        });
+        if (row.jumlah_jp) row.jumlah_jp = Number(row.jumlah_jp);
+        allSertifikasi.push(row);
       }
-    } catch(e) {}
+    }
 
-    // Fetch IDP
+    // Process IDP
     let allIdp: any[] = [];
-    try {
-      const iRows = await getCachedSheetData('idp!A:Z');
-      if (iRows.length > 0) {
-        const iHeaders = iRows[0].map((h: string) => h.toLowerCase());
-        for (let i = 1; i < iRows.length; i++) {
-          const row: any = { _rowIndex: i + 1 };
-          iHeaders.forEach((h: string, idx: number) => {
-            row[h] = iRows[i][idx] || '';
-          });
-          allIdp.push(row);
-        }
+    const iRows = sheetData['idp!A:Z'] || [];
+    if (iRows.length > 0) {
+      const iHeaders = iRows[0].map((h: string) => h.toLowerCase());
+      for (let i = 1; i < iRows.length; i++) {
+        const row: any = { _rowIndex: i + 1 };
+        iHeaders.forEach((h: string, idx: number) => {
+          row[h] = iRows[i][idx] || '';
+        });
+        allIdp.push(row);
       }
-    } catch(e) {}
+    }
 
     const result = [];
     for (let i = 1; i < pRows.length; i++) {
