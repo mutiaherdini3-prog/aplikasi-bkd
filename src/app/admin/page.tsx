@@ -681,6 +681,10 @@ export default function AdminPage() {
   };
 
   const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK', onlyWithJP = false, showTargetAndStatus = false) => {
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
+      return;
+    }
     let baseList = pegawaiList;
     if (onlyWithJP) baseList = baseList.filter(p => p.jp > 0);
     if (mode === 'lulus') baseList = baseList.filter(p => checkLulusJP(p));
@@ -742,6 +746,10 @@ export default function AdminPage() {
   const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum", undefined, false, true);
 
   const exportIdpToExcel = () => {
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
+      return;
+    }
     const idpItems = pegawaiList.flatMap((p) => {
       if (!p.idp || p.idp.length === 0) return [];
       return p.idp.map((idp: any) => ({ p, idp }));
@@ -796,6 +804,10 @@ export default function AdminPage() {
   };
 
   const exportTrenToExcel = () => {
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
+      return;
+    }
     if (trenViewMode === 'pegawai') {
       const excelRows = filteredPegawaiTrendList.map((p: any, idx: number) => {
         const row: any = {
@@ -853,6 +865,10 @@ export default function AdminPage() {
 
   // Download Template Excel untuk Sertifikasi Massal (Auto-fill NIP dari database Google Sheet)
   const downloadTemplateSertifikasi = async () => {
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur download template hanya dapat diakses oleh Super Admin.');
+      return;
+    }
     let sourcePegawai: any[] = [];
     try {
       const res = await fetch(`/api/pegawai/all?all=true&t=${Date.now()}`, { cache: 'no-store' });
@@ -1947,16 +1963,18 @@ export default function AdminPage() {
                         <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
-                      <div className="dropdown">
-                        <button className="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
-                        </button>
-                        <ul className="dropdown-menu">
-                          <li><button className="dropdown-item" onClick={exportToExcelDataPegawai}>Semua</button></li>
-                          <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPNS}>PNS</button></li>
-                          <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPPPK}>PPPK</button></li>
-                        </ul>
-                      </div>
+                      {userRole === 'super_admin' && (
+                        <div className="dropdown">
+                          <button className="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                          </button>
+                          <ul className="dropdown-menu">
+                            <li><button className="dropdown-item" onClick={exportToExcelDataPegawai}>Semua</button></li>
+                            <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPNS}>PNS</button></li>
+                            <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPPPK}>PPPK</button></li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -2144,31 +2162,33 @@ export default function AdminPage() {
                             <option value="Pelatihan manajerial">Pelatihan manajerial</option>
                             <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
-                          <div className="dropdown">
-                            <button className="btn btn-sm btn-success dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                              <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
-                            </button>
-                            <ul className="dropdown-menu">
-                              <li><button className="dropdown-item" onClick={exportToExcelSert}>Semua</button></li>
-                              <li><button className="dropdown-item" onClick={exportToExcelSertPNS}>PNS</button></li>
-                              <li><button className="dropdown-item" onClick={exportToExcelSertPPPK}>PPPK</button></li>
-                            </ul>
-                          </div>
-                          <button 
-                            className="btn btn-sm btn-outline-success shadow-sm" 
-                            onClick={downloadTemplateSertifikasi}
-                            title="Download format Excel untuk input massal kegiatan (misal: Rabu Bertamu)"
-                          >
-                            <i className="bi bi-download me-1"></i> Download Template
-                          </button>
                           {userRole === 'super_admin' && (
-                            <button 
-                              className="btn btn-sm btn-primary shadow-sm" 
-                              onClick={() => { setShowImportSertifikasiModal(true); setImportResult(null); }}
-                              title="Upload file Excel sertifikasi massal"
-                            >
-                              <i className="bi bi-file-earmark-arrow-up me-1"></i> Upload Template Sertifikasi
-                            </button>
+                            <>
+                              <div className="dropdown">
+                                <button className="btn btn-sm btn-success dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                                </button>
+                                <ul className="dropdown-menu">
+                                  <li><button className="dropdown-item" onClick={exportToExcelSert}>Semua</button></li>
+                                  <li><button className="dropdown-item" onClick={exportToExcelSertPNS}>PNS</button></li>
+                                  <li><button className="dropdown-item" onClick={exportToExcelSertPPPK}>PPPK</button></li>
+                                </ul>
+                              </div>
+                              <button 
+                                className="btn btn-sm btn-outline-success shadow-sm" 
+                                onClick={downloadTemplateSertifikasi}
+                                title="Download format Excel untuk input massal kegiatan (misal: Rabu Bertamu)"
+                              >
+                                <i className="bi bi-download me-1"></i> Download Template
+                              </button>
+                              <button 
+                                className="btn btn-sm btn-primary shadow-sm" 
+                                onClick={() => { setShowImportSertifikasiModal(true); setImportResult(null); }}
+                                title="Upload file Excel sertifikasi massal"
+                              >
+                                <i className="bi bi-file-earmark-arrow-up me-1"></i> Upload Template Sertifikasi
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -2488,9 +2508,11 @@ export default function AdminPage() {
                         </select>
                       </div>
 
-                      <button className="btn btn-sm btn-success shadow-sm" onClick={exportTrenToExcel}>
-                        <i className="bi bi-file-earmark-excel me-1"></i> {trenViewMode === 'pegawai' ? 'Export Excel Pegawai' : 'Export Excel Rekap OPD'}
-                      </button>
+                      {userRole === 'super_admin' && (
+                        <button className="btn btn-sm btn-success shadow-sm" onClick={exportTrenToExcel}>
+                          <i className="bi bi-file-earmark-excel me-1"></i> {trenViewMode === 'pegawai' ? 'Export Excel Pegawai' : 'Export Excel Rekap OPD'}
+                        </button>
+                      )}
                     </div>
 
                     {/* TAMPILAN 1: REKAP PER PEGAWAI (5 PER HALAMAN) */}
@@ -2866,16 +2888,18 @@ export default function AdminPage() {
                         />
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                       </div>
-                      <button className="btn btn-sm btn-success" onClick={exportIdpToExcel}>
-                        <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
-                      </button>
                       {userRole === 'super_admin' && (
-                        <button className="btn btn-sm btn-primary" onClick={() => {
-                          setIdpForm({ isEdit: false });
-                          setShowIdpModal(true);
-                        }}>
-                          <i className="bi bi-plus-lg me-1"></i> Tambah IDP
-                        </button>
+                        <>
+                          <button className="btn btn-sm btn-success" onClick={exportIdpToExcel}>
+                            <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                          </button>
+                          <button className="btn btn-sm btn-primary" onClick={() => {
+                            setIdpForm({ isEdit: false });
+                            setShowIdpModal(true);
+                          }}>
+                            <i className="bi bi-plus-lg me-1"></i> Tambah IDP
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -2891,7 +2915,7 @@ export default function AdminPage() {
                           <th>Waktu</th>
                           <th>JP</th>
                           <th>Status</th>
-                          <th className="text-center">Aksi Verifikasi</th>
+                          {userRole === 'super_admin' && <th className="text-center">Aksi Verifikasi</th>}
                           {userRole === 'super_admin' && <th className="text-center">Aksi Admin</th>}
                         </tr>
                       </thead>
@@ -2936,16 +2960,18 @@ export default function AdminPage() {
                                          idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua</span> :
                                          <span className="badge bg-warning text-dark">Menunggu Ketua</span>}
                                       </td>
-                                      <td className="text-center">
-                                        {idp.status !== 'Disetujui' && idp.status !== 'Ditolak' ? (
-                                          <>
-                                            <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
-                                            <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
-                                          </>
-                                        ) : (
-                                          <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
-                                        )}
-                                      </td>
+                                      {userRole === 'super_admin' && (
+                                        <td className="text-center">
+                                          {idp.status !== 'Disetujui' && idp.status !== 'Ditolak' ? (
+                                            <>
+                                              <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
+                                              <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
+                                            </>
+                                          ) : (
+                                            <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
+                                          )}
+                                        </td>
+                                      )}
                                       {userRole === 'super_admin' && (
                                         <td className="text-center">
                                           <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
@@ -2980,7 +3006,7 @@ export default function AdminPage() {
               )}
 
               {/* TAB PROFIL PIMPINAN WEB */}
-              {activeTab === 'view-profil-web' && (
+              {userRole === 'super_admin' && activeTab === 'view-profil-web' && (
                 <div className="card border-0 shadow-sm rounded-4 p-4 mb-4">
                   <div className="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom gap-3">
                     <div>
@@ -3475,7 +3501,7 @@ export default function AdminPage() {
       )}
 
       {/* Modal Form Pegawai */}
-      {showPegawaiModal && (
+      {userRole === 'super_admin' && showPegawaiModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content border-0 shadow">
@@ -3609,7 +3635,7 @@ export default function AdminPage() {
       )}
 
       {/* Modal Form IDP */}
-      {showIdpModal && (
+      {userRole === 'super_admin' && showIdpModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content border-0 shadow">
@@ -3770,7 +3796,7 @@ export default function AdminPage() {
       )}
 
       {/* Modal Upload & Import Template Sertifikasi Massal */}
-      {showImportSertifikasiModal && (
+      {userRole === 'super_admin' && showImportSertifikasiModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1060 }}>
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div className="modal-content border-0 shadow-lg">
