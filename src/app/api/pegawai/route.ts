@@ -261,9 +261,11 @@ export async function GET(request: Request) {
     const pNipIdx = pHeaders.indexOf('nip');
     const nipAtasanIdx = pHeaders.indexOf('nip_atasan');
     let isAtasan = false;
-    if (pNipIdx !== -1) {
-      for (let i=1; i<pRows.length; i++) {
-        if (pRows[i][pNipIdx]?.trim() === nip.trim()) {
+    if (pNipIdx !== -1 && nip && nip.trim() !== '') {
+      const cleanNip = nip.trim();
+      for (let i = 1; i < pRows.length; i++) {
+        const rowNip = pRows[i][pNipIdx]?.toString().trim();
+        if (rowNip && rowNip === cleanNip) {
           pegawaiData = {};
           pHeaders.forEach((h, idx) => {
             let key = h;
@@ -288,9 +290,17 @@ export async function GET(request: Request) {
             pegawaiData.role = 'admin';
           }
           if (!pegawaiData.nip_atasan) pegawaiData.nip_atasan = '';
+          break; // <-- Hentikan loop begitu NIP cocok agar data tidak pernah tertimpa pegawai lain!
         }
-        if (nipAtasanIdx !== -1 && pRows[i][nipAtasanIdx]?.trim() === nip.trim()) {
-          isAtasan = true;
+      }
+
+      // Deteksi status atasan
+      if (nipAtasanIdx !== -1) {
+        for (let i = 1; i < pRows.length; i++) {
+          if (pRows[i][nipAtasanIdx]?.toString().trim() === cleanNip) {
+            isAtasan = true;
+            break;
+          }
         }
       }
     }

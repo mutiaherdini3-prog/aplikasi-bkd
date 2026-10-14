@@ -68,9 +68,19 @@ export default function LoginPage() {
       localStorage.removeItem('loggedInUser');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userJabatan');
+      localStorage.removeItem('userUnitKerja');
       localStorage.removeItem('lastUserEmail');
+      localStorage.removeItem('admin_active_tab');
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('cached_pegawai');
+      }
 
       localStorage.setItem('loggedInUser', data.nip);
+      localStorage.setItem('userName', data.nama || '');
+      localStorage.setItem('userJabatan', data.jabatan || '');
+      localStorage.setItem('userUnitKerja', data.unit_kerja || '');
       if (data.email) {
         localStorage.setItem('userEmail', data.email);
       }

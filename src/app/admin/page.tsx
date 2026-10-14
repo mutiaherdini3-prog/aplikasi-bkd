@@ -15,7 +15,7 @@ const PARSED_UNIT_KERJA_OPTIONS = UNIT_KERJA_OPTIONS.map(opt => ({
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('view-dashboard');
+  const [activeTab, setActiveTab] = useState<'view-dashboard' | 'view-pegawai' | 'view-sertifikasi' | 'view-idp' | 'view-tren' | 'view-profil-web'>('view-dashboard');
   const [pegawaiList, setPegawaiList] = useState<any[]>([]);
   const [selectedPegawai, setSelectedPegawai] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +26,14 @@ export default function AdminPage() {
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
   const [userRole, setUserRole] = useState<string>('');
   const [loggedInNip, setLoggedInNip] = useState<string>('');
+  const [loggedInNama, setLoggedInNama] = useState<string>('');
+
+  const changeTab = (tab: any) => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('admin_active_tab', tab);
+    }
+  };
   const [searchPegawai, setSearchPegawai] = useState('');
   const [searchSertifikasi, setSearchSertifikasi] = useState('');
   const [exportJenisKursusFilter, setExportJenisKursusFilter] = useState('all');
@@ -317,15 +325,29 @@ export default function AdminPage() {
   useEffect(() => {
     const role = localStorage.getItem('userRole') || '';
     const nip = localStorage.getItem('loggedInUser') || '';
+    const nama = localStorage.getItem('userName') || '';
     if (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat') {
       router.push('/login');
       return;
     }
     setUserRole(role);
     setLoggedInNip(nip);
-    if (role !== 'super_admin') {
-      setActiveTab('view-pegawai');
+    setLoggedInNama(nama);
+
+    // Pulihkan tab aktif yang tersimpan agar saat F5/refresh tidak pernah terlempar ke tab data pegawai lain
+    const savedTab = localStorage.getItem('admin_active_tab');
+    if (savedTab) {
+      if (role !== 'super_admin' && (savedTab === 'view-dashboard' || savedTab === 'view-tren' || savedTab === 'view-profil-web')) {
+        changeTab('view-pegawai');
+      } else {
+        setActiveTab(savedTab as any);
+      }
+    } else {
+      if (role !== 'super_admin') {
+        changeTab('view-pegawai');
+      }
     }
+
     fetchData();
     if (role === 'super_admin') {
       fetchProfilWeb();
@@ -505,19 +527,31 @@ export default function AdminPage() {
   const handleConfirmRejectIdp = async () => {
     if (!idpRejectData) return;
     const finalAlasan = rejectReason === 'Lainnya' ? (customReason.trim() || 'Tidak tersedia anggaran') : rejectReason;
-    setIsSubmittingReject(true);
+    const targetRowIndex = idpRejectData.rowIndex;
+    const targetStatus = idpRejectData.status;
+
+    // 1. Optimistic Update lokal (0 ms respon instan di UI!)
+    setRawPegawaiList(prev => prev.map(p => ({
+      ...p,
+      idp: p.idp?.map((item: any) => {
+        if (item._rowIndex === targetRowIndex) {
+          return { ...item, status: targetStatus, alasan_tolak: finalAlasan };
+        }
+        return item;
+      })
+    })));
+    setIdpRejectData(null);
+
+    // 2. Background sync ke server
     try {
-      const res = await fetch(`/api/idp?rowIndex=${idpRejectData.rowIndex}&status=${encodeURIComponent(idpRejectData.status)}&alasan=${encodeURIComponent(finalAlasan)}`, { method: 'PUT' });
-      if (res.ok) {
-        setIdpRejectData(null);
+      const res = await fetch(`/api/idp?rowIndex=${targetRowIndex}&status=${encodeURIComponent(targetStatus)}&alasan=${encodeURIComponent(finalAlasan)}`, { method: 'PUT' });
+      if (!res.ok) {
+        alert('Gagal menyimpan ke server, memulihkan data...');
         fetchData();
-      } else {
-        alert('Gagal memperbarui status penolakan IDP');
       }
     } catch (err) {
       alert('Terjadi kesalahan saat memproses penolakan IDP');
-    } finally {
-      setIsSubmittingReject(false);
+      fetchData();
     }
   };
 
@@ -535,15 +569,27 @@ export default function AdminPage() {
       if (!confirm(confirmMsg || defaultMsg)) return;
     }
 
+    // 1. Optimistic Update lokal (0 ms respon instan di UI!)
+    setRawPegawaiList(prev => prev.map(p => ({
+      ...p,
+      idp: p.idp?.map((item: any) => {
+        if (item._rowIndex === rowIndex) {
+          return { ...item, status: newStatus, alasan_tolak: alasan };
+        }
+        return item;
+      })
+    })));
+
+    // 2. Background sync ke server
     try {
       const res = await fetch(`/api/idp?rowIndex=${rowIndex}&status=${encodeURIComponent(newStatus)}&alasan=${encodeURIComponent(alasan)}`, { method: 'PUT' });
-      if (res.ok) {
+      if (!res.ok) {
+        alert('Gagal menyimpan ke server, memulihkan data...');
         fetchData();
-      } else {
-        alert('Gagal memperbarui status');
       }
     } catch (err) {
       alert('Terjadi kesalahan saat memperbarui status');
+      fetchData();
     }
   };
 
@@ -1703,16 +1749,16 @@ export default function AdminPage() {
             </div>
             <ul className="sidebar-nav">
               {userRole === 'super_admin' && (
-                <li><a onClick={() => setActiveTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
+                <li><a onClick={() => changeTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
               )}
-              <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {userRole !== 'super_admin' && '(OPD)'}</a></li>
-              <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
+              <li><a onClick={() => changeTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {userRole !== 'super_admin' && '(OPD)'}</a></li>
+              <li><a onClick={() => changeTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
               {userRole === 'super_admin' && (
-                <li><a onClick={() => setActiveTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
+                <li><a onClick={() => changeTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
               )}
-              <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
+              <li><a onClick={() => changeTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
               {userRole === 'super_admin' && (
-                <li><a onClick={() => { setActiveTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
+                <li><a onClick={() => { changeTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
               {loggedInNip !== 'admin' && (
                 <li className="mt-4">
@@ -1768,16 +1814,18 @@ export default function AdminPage() {
                 <i className="bi bi-bell fs-5 text-muted ms-1"></i>
                 <div className="d-flex align-items-center gap-2">
                   <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '36px', height: '36px', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    {userRole === 'super_admin' ? (loggedInNip === 'admin' ? 'SA' : (pegawaiList.find(p => p.nip === loggedInNip)?.nama?.substring(0, 2).toUpperCase() || 'SA')) : 'AO'}
+                    {loggedInNip === 'admin' 
+                      ? 'SA' 
+                      : (((pegawaiList.find(p => p.nip === loggedInNip)?.nama || loggedInNama || 'Admin').substring(0, 2)).toUpperCase())}
                   </div>
                   <div>
                     <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>
                       {loggedInNip === 'admin' 
                         ? 'Administrator Utama' 
-                        : (pegawaiList.find(p => p.nip === loggedInNip)?.nama || 'Pegawai Super Admin')}
+                        : (pegawaiList.find(p => p.nip === loggedInNip)?.nama || loggedInNama || (userRole === 'super_admin' ? 'Administrator' : 'Atasan OPD'))}
                     </div>
                     <span className="badge bg-primary-subtle text-primary text-uppercase mt-1" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>
-                      {userRole === 'super_admin' ? 'Super Admin BKD' : 'Atasan OPD (Read Only)'}
+                      {userRole === 'super_admin' ? 'Super Admin BKPSDMD' : 'Atasan OPD'}
                     </span>
                   </div>
                 </div>

@@ -5,7 +5,15 @@ import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [pegawai, setPegawai] = useState<any>(null);
+  const [pegawai, setPegawai] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('cached_pegawai');
+      if (cached) {
+        try { return JSON.parse(cached); } catch (e) {}
+      }
+    }
+    return null;
+  });
   const [sertifikasi, setSertifikasi] = useState<any[]>([]);
   const [pendidikan, setPendidikan] = useState<any[]>([]);
   const [idpList, setIdpList] = useState<any[]>([]);
@@ -35,7 +43,12 @@ export default function DashboardPage() {
 
       const result = await res.json();
       if (result.success && result.data) {
-        if (result.data.pegawai) setPegawai(result.data.pegawai);
+        if (result.data.pegawai) {
+          setPegawai(result.data.pegawai);
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('cached_pegawai', JSON.stringify(result.data.pegawai));
+          }
+        }
         if (result.data.sertifikasi) {
           setSertifikasi(result.data.sertifikasi);
           let sum = 0;

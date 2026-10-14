@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData } from '@/lib/google';
+import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData, clearSheetCache } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       requestBody: { values: rows }
     });
 
+    clearSheetCache();
     revalidateTag('google-sheets', { expire: 0 });
 
     return NextResponse.json({ success: true });
@@ -118,27 +119,26 @@ export async function PUT(request: Request) {
         requestBody: { values: [newRow] }
       });
     } else if (status) {
-      // Only status update (J column) and alasan tolak (M column)
+      // Only status update (J column) and alasan tolak (M column) using single batchUpdate for blazing speed
       finalStatus = status;
       const alasan = searchParams.get('alasan') || '';
       finalAlasanTolak = alasan;
 
-      await sheets.spreadsheets.values.update({
+      await sheets.spreadsheets.values.batchUpdate({
         spreadsheetId: GOOGLE_SHEET_ID,
-        range: `idp!J${rowIndex}`,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [[status]] }
-      });
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: GOOGLE_SHEET_ID,
-        range: `idp!M${rowIndex}`,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [[alasan]] }
+        requestBody: {
+          valueInputOption: 'USER_ENTERED',
+          data: [
+            { range: `idp!J${rowIndex}`, values: [[status]] },
+            { range: `idp!M${rowIndex}`, values: [[alasan]] }
+          ]
+        }
       });
     } else {
       return NextResponse.json({ success: false, message: 'No update data provided' }, { status: 400 });
     }
 
+    clearSheetCache();
     revalidateTag('google-sheets', { expire: 0 });
 
     return NextResponse.json({ success: true });
@@ -183,6 +183,7 @@ export async function DELETE(request: Request) {
       });
     }
 
+    clearSheetCache();
     revalidateTag('google-sheets', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
