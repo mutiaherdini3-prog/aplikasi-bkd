@@ -1680,17 +1680,19 @@ export default function AdminPage() {
               {userRole === 'super_admin' && (
                 <li><a onClick={() => { setActiveTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
-              <li className="mt-4">
-                <a 
-                  onClick={() => router.push('/dashboard')} 
-                  className="nav-item fw-bold text-primary" 
-                  style={{ backgroundColor: '#eff6ff', borderRadius: '8px', cursor: 'pointer' }}
-                  title="Kembali ke Dashboard Pegawai Anda"
-                >
-                  <i className="bi bi-person-workspace text-primary"></i> Dashboard Pegawai
-                </a>
-              </li>
-              <li className="mt-2">
+              {userRole !== 'super_admin' && (
+                <li className="mt-4">
+                  <a 
+                    onClick={() => router.push('/dashboard')} 
+                    className="nav-item fw-bold text-primary" 
+                    style={{ backgroundColor: '#eff6ff', borderRadius: '8px', cursor: 'pointer' }}
+                    title="Kembali ke Dashboard Pegawai Anda"
+                  >
+                    <i className="bi bi-person-workspace text-primary"></i> Dashboard Pegawai
+                  </a>
+                </li>
+              )}
+              <li className={userRole === 'super_admin' ? 'mt-4' : 'mt-2'}>
                 <a onClick={handleLogout} className="text-danger" style={{ cursor: 'pointer' }}>
                   <i className="bi bi-box-arrow-left"></i> Logout
                 </a>
@@ -1703,15 +1705,17 @@ export default function AdminPage() {
             <div className="topbar">
               <h5 className="fw-bold text-secondary mb-0">{getTopbarTitle()}</h5>
               <div className="d-flex align-items-center gap-3">
-                <button 
-                  onClick={() => router.push('/dashboard')} 
-                  className="btn btn-sm btn-outline-primary shadow-sm fw-bold d-flex align-items-center gap-1 px-3" 
-                  style={{ borderRadius: '20px' }}
-                  title="Kembali ke Dashboard Pegawai Anda"
-                >
-                  <i className="bi bi-arrow-left-circle-fill"></i>
-                  <span>Dashboard Pegawai</span>
-                </button>
+                {userRole !== 'super_admin' && (
+                  <button 
+                    onClick={() => router.push('/dashboard')} 
+                    className="btn btn-sm btn-outline-primary shadow-sm fw-bold d-flex align-items-center gap-1 px-3" 
+                    style={{ borderRadius: '20px' }}
+                    title="Kembali ke Dashboard Pegawai Anda"
+                  >
+                    <i className="bi bi-arrow-left-circle-fill"></i>
+                    <span>Dashboard Pegawai</span>
+                  </button>
+                )}
                 <div className="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill border">
                   <i className="bi bi-calendar3 text-primary" style={{ fontSize: '0.85rem' }}></i>
                   <span className="text-muted fw-bold" style={{ fontSize: '0.8rem' }}>Tahun:</span>
