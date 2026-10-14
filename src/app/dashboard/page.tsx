@@ -141,9 +141,9 @@ export default function DashboardPage() {
   const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
     let alasan = '';
     if (status.startsWith('Ditolak')) {
-      const input = prompt('Silakan masukkan alasan penolakan IDP bawahan:', 'Belum sesuai dengan prioritas pengembangan unit kerja');
+      const input = prompt('Silakan masukkan alasan penolakan IDP bawahan:', 'Tidak tersedia anggaran');
       if (input === null) return; // User cancelled
-      alasan = input.trim() || 'Belum sesuai dengan prioritas pengembangan unit kerja';
+      alasan = input.trim() || 'Tidak tersedia anggaran';
     } else {
       if (!confirm('Yakin ingin menyetujui pengajuan IDP ini untuk diteruskan ke verifikasi tahap 2 (BKPSDMD)?')) return;
     }

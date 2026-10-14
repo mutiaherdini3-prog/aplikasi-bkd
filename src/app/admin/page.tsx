@@ -39,6 +39,17 @@ export default function AdminPage() {
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  // State Modal Penolakan IDP
+  const [idpRejectData, setIdpRejectData] = useState<{
+    rowIndex: number;
+    status: string;
+    namaPegawai: string;
+    kompetensi: string;
+  } | null>(null);
+  const [rejectReason, setRejectReason] = useState<string>('Tidak tersedia anggaran');
+  const [customReason, setCustomReason] = useState<string>('');
+  const [isSubmittingReject, setIsSubmittingReject] = useState<boolean>(false);
+
   // State untuk Konfirmasi Hapus
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmData, setDeleteConfirmData] = useState<{
@@ -491,10 +502,29 @@ export default function AdminPage() {
     setShowDeleteConfirm(true);
   };
 
+  const handleConfirmRejectIdp = async () => {
+    if (!idpRejectData) return;
+    const finalAlasan = rejectReason === 'Lainnya' ? (customReason.trim() || 'Tidak tersedia anggaran') : rejectReason;
+    setIsSubmittingReject(true);
+    try {
+      const res = await fetch(`/api/idp?rowIndex=${idpRejectData.rowIndex}&status=${encodeURIComponent(idpRejectData.status)}&alasan=${encodeURIComponent(finalAlasan)}`, { method: 'PUT' });
+      if (res.ok) {
+        setIdpRejectData(null);
+        fetchData();
+      } else {
+        alert('Gagal memperbarui status penolakan IDP');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat memproses penolakan IDP');
+    } finally {
+      setIsSubmittingReject(false);
+    }
+  };
+
   const updateIdpStatus = async (rowIndex: number, newStatus: string, confirmMsg?: string) => {
     let alasan = '';
     if (newStatus.startsWith('Ditolak')) {
-      const defaultAlasan = newStatus === 'Ditolak BKPSDMD' ? 'Tidak memenuhi ketentuan BKPSDMD' : 'Belum relevan dengan rencana OPD';
+      const defaultAlasan = 'Tidak tersedia anggaran';
       const input = prompt(`Silakan masukkan alasan penolakan (${newStatus}):`, defaultAlasan);
       if (input === null) return; // Dibatalkan oleh admin
       alasan = input.trim() || defaultAlasan;
@@ -3028,7 +3058,16 @@ export default function AdminPage() {
                                               <button 
                                                 className="btn btn-sm btn-outline-danger" 
                                                 title="Tolak Pengajuan IDP" 
-                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak OPD')}
+                                                onClick={() => {
+                                                  setIdpRejectData({
+                                                    rowIndex: idp._rowIndex,
+                                                    status: 'Ditolak OPD',
+                                                    namaPegawai: p.nama,
+                                                    kompetensi: idp.jenis_kompetensi
+                                                  });
+                                                  setRejectReason('Tidak tersedia anggaran');
+                                                  setCustomReason('');
+                                                }}
                                               >
                                                 <i className="bi bi-x-lg me-1"></i>Tolak
                                               </button>
@@ -3054,7 +3093,16 @@ export default function AdminPage() {
                                               <button 
                                                 className="btn btn-sm btn-danger" 
                                                 title="Tolak Pengajuan IDP (BKPSDMD)" 
-                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak BKPSDMD')}
+                                                onClick={() => {
+                                                  setIdpRejectData({
+                                                    rowIndex: idp._rowIndex,
+                                                    status: 'Ditolak BKPSDMD',
+                                                    namaPegawai: p.nama,
+                                                    kompetensi: idp.jenis_kompetensi
+                                                  });
+                                                  setRejectReason('Tidak tersedia anggaran');
+                                                  setCustomReason('');
+                                                }}
                                               >
                                                 <i className="bi bi-x-circle-fill me-1"></i>Tolak
                                               </button>
@@ -3912,7 +3960,98 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Modal Upload & Import Template Sertifikasi Massal */}
+      {/* Modal Alasan Penolakan IDP (BKPSDMD & OPD) */}
+      {idpRejectData && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1065 }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '480px' }}>
+            <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+              <div className="modal-header bg-danger text-white border-0 py-3 px-4">
+                <h5 className="modal-title fw-bold d-flex align-items-center gap-2 mb-0 fs-6">
+                  <i className="bi bi-x-circle-fill fs-5"></i> Keterangan Penolakan Pengajuan IDP
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close btn-close-white" 
+                  onClick={() => !isSubmittingReject && setIdpRejectData(null)}
+                  disabled={isSubmittingReject}
+                ></button>
+              </div>
+              <div className="modal-body p-4">
+                <div className="p-3 bg-light rounded-3 mb-3 border">
+                  <div className="text-muted small">Pegawai: <strong className="text-dark">{idpRejectData.namaPegawai}</strong></div>
+                  <div className="text-muted small mt-1">Kompetensi: <strong className="text-primary">{idpRejectData.kompetensi}</strong></div>
+                  <div className="text-muted small mt-1">Tingkat Penolakan: <span className="badge bg-danger">{idpRejectData.status}</span></div>
+                </div>
+
+                <label className="form-label fw-bold text-dark mb-2">Keterangan / Alasan Penolakan:</label>
+                <div className="d-flex flex-column gap-2 mb-3">
+                  {[
+                    'Tidak tersedia anggaran',
+                    'Tidak sesuai prioritas kompetensi instansi',
+                    'Jadwal bertabrakan dengan agenda kedinasan',
+                    'Kuota peserta pelatihan telah penuh',
+                    'Lainnya'
+                  ].map((alasan) => (
+                    <div 
+                      key={alasan} 
+                      className={`p-2 px-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between transition-all ${rejectReason === alasan ? 'border-danger bg-danger bg-opacity-10 fw-bold text-danger' : 'bg-white text-dark'}`}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setRejectReason(alasan)}
+                    >
+                      <label className="form-check-label small mb-0" style={{ cursor: 'pointer' }}>
+                        {alasan === 'Tidak tersedia anggaran' && <i className="bi bi-cash-coin me-2 text-danger"></i>}
+                        {alasan}
+                      </label>
+                      <input 
+                        type="radio" 
+                        name="rejectReason" 
+                        className="form-check-input"
+                        checked={rejectReason === alasan}
+                        onChange={() => setRejectReason(alasan)}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {rejectReason === 'Lainnya' && (
+                  <div className="mt-2">
+                    <label className="form-label small text-muted">Ketik Keterangan Alasan Lainnya:</label>
+                    <textarea 
+                      className="form-control form-control-sm"
+                      rows={2}
+                      placeholder="Masukkan keterangan penolakan..."
+                      value={customReason}
+                      onChange={(e) => setCustomReason(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer bg-light border-0 py-3 px-4">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm px-3" 
+                  onClick={() => setIdpRejectData(null)}
+                  disabled={isSubmittingReject}
+                >
+                  Batal
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-danger btn-sm px-3" 
+                  onClick={handleConfirmRejectIdp}
+                  disabled={isSubmittingReject}
+                >
+                  {isSubmittingReject ? (
+                    <><span className="spinner-border spinner-border-sm me-1"></span> Menyimpan...</>
+                  ) : (
+                    <><i className="bi bi-x-circle me-1"></i> Simpan Penolakan</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {userRole === 'super_admin' && showImportSertifikasiModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1060 }}>
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
