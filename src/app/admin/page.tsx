@@ -1644,17 +1644,15 @@ export default function AdminPage() {
           {/* Sidebar */}
           <div className="col-lg-2 d-none d-lg-block sidebar">
             <div className="sidebar-brand">
-              <i className="bi bi-shield-lock-fill text-info me-2"></i> Admin SIPJP-BABAR
+              <i className="bi bi-shield-lock-fill text-info me-2"></i> {userRole === 'super_admin' ? 'Super Admin SIPJP' : 'Portal Atasan OPD'}
             </div>
             <ul className="sidebar-nav">
               <li><a onClick={() => setActiveTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
-              {(userRole === 'super_admin' || userRole === 'admin') && (
-                <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai</a></li>
-              )}
+              <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {userRole !== 'super_admin' && '(OPD)'}</a></li>
               <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
               <li><a onClick={() => setActiveTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
               <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
-              {(userRole === 'super_admin' || userRole === 'admin') && (
+              {userRole === 'super_admin' && (
                 <li><a onClick={() => { setActiveTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
               <li className="mt-4">
@@ -1706,10 +1704,12 @@ export default function AdminPage() {
                 </div>
                 <i className="bi bi-bell fs-5 text-muted ms-1"></i>
                 <div className="d-flex align-items-center gap-2">
-                  <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '36px', height: '36px', fontWeight: 'bold', fontSize: '0.9rem' }}>AD</div>
+                  <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '36px', height: '36px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                    {userRole === 'super_admin' ? 'SA' : 'AO'}
+                  </div>
                   <div>
-                    <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>Administrator Utama</div>
-                    <span className="text-muted text-uppercase" style={{ fontSize: '0.72rem', letterSpacing: '0.5px' }}>{userRole || 'ADMIN'}</span>
+                    <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>{userRole === 'super_admin' ? 'Administrator Utama' : 'Pimpinan / Atasan OPD'}</div>
+                    <span className="badge bg-primary-subtle text-primary text-uppercase mt-1" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>{userRole === 'super_admin' ? 'Super Admin BKD' : 'Atasan OPD (Read Only)'}</span>
                   </div>
                 </div>
               </div>
@@ -1930,7 +1930,7 @@ export default function AdminPage() {
                           />
                           <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                         </div>
-                        {(userRole === 'super_admin' || userRole === 'admin') && (
+                        {userRole === 'super_admin' && (
                           <button className="btn btn-sm btn-primary" onClick={() => {
                             setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0, email: '' });
                             setShowPegawaiModal(true);
@@ -1989,7 +1989,7 @@ export default function AdminPage() {
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
                             <td className="text-center">
-                              {(userRole === 'super_admin' || userRole === 'admin') ? (
+                              {userRole === 'super_admin' ? (
                                 <button 
                                   className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' ? 'btn-success' : 'btn-outline-secondary'}`}
                                   onClick={() => {
@@ -2005,13 +2005,13 @@ export default function AdminPage() {
                                 </button>
                               ) : (
                                 <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' ? 'bg-success' : 'bg-secondary'}`}>
-                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin' : 'Pegawai Biasa'}
+                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin / Atasan' : 'Pegawai'}
                                 </span>
                               )}
                             </td>
                             <td className="text-center">
                               <button className="btn btn-sm btn-outline-info me-1" title="Lihat Profil" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}><i className="bi bi-eye"></i></button>
-                              {(userRole === 'super_admin' || userRole === 'admin') && (
+                              {userRole === 'super_admin' && (
                                 <>
                                   <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
                                     const jenkelOptions = ['LAKI-LAKI', 'PEREMPUAN'];
@@ -2161,13 +2161,15 @@ export default function AdminPage() {
                           >
                             <i className="bi bi-download me-1"></i> Download Template
                           </button>
-                          <button 
-                            className="btn btn-sm btn-primary shadow-sm" 
-                            onClick={() => { setShowImportSertifikasiModal(true); setImportResult(null); }}
-                            title="Upload file Excel sertifikasi massal"
-                          >
-                            <i className="bi bi-file-earmark-arrow-up me-1"></i> Upload Template Sertifikasi
-                          </button>
+                          {userRole === 'super_admin' && (
+                            <button 
+                              className="btn btn-sm btn-primary shadow-sm" 
+                              onClick={() => { setShowImportSertifikasiModal(true); setImportResult(null); }}
+                              title="Upload file Excel sertifikasi massal"
+                            >
+                              <i className="bi bi-file-earmark-arrow-up me-1"></i> Upload Template Sertifikasi
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2867,12 +2869,14 @@ export default function AdminPage() {
                       <button className="btn btn-sm btn-success" onClick={exportIdpToExcel}>
                         <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                       </button>
-                      <button className="btn btn-sm btn-primary" onClick={() => {
-                        setIdpForm({ isEdit: false });
-                        setShowIdpModal(true);
-                      }}>
-                        <i className="bi bi-plus-lg me-1"></i> Tambah IDP
-                      </button>
+                      {userRole === 'super_admin' && (
+                        <button className="btn btn-sm btn-primary" onClick={() => {
+                          setIdpForm({ isEdit: false });
+                          setShowIdpModal(true);
+                        }}>
+                          <i className="bi bi-plus-lg me-1"></i> Tambah IDP
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div className="table-responsive">
@@ -2888,7 +2892,7 @@ export default function AdminPage() {
                           <th>JP</th>
                           <th>Status</th>
                           <th className="text-center">Aksi Verifikasi</th>
-                          <th className="text-center">Aksi Admin</th>
+                          {userRole === 'super_admin' && <th className="text-center">Aksi Admin</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -2942,13 +2946,15 @@ export default function AdminPage() {
                                           <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
                                         )}
                                       </td>
-                                      <td className="text-center">
-                                        <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
-                                          setIdpForm({ ...idp, nip: p.nip, isEdit: true });
-                                          setShowIdpModal(true);
-                                        }}><i className="bi bi-pencil"></i></button>
-                                        <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex, idp.jenis_kompetensi)}><i className="bi bi-trash"></i></button>
-                                      </td>
+                                      {userRole === 'super_admin' && (
+                                        <td className="text-center">
+                                          <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
+                                            setIdpForm({ ...idp, nip: p.nip, isEdit: true });
+                                            setShowIdpModal(true);
+                                          }}><i className="bi bi-pencil"></i></button>
+                                          <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex, idp.jenis_kompetensi)}><i className="bi bi-trash"></i></button>
+                                        </td>
+                                      )}
                                     </tr>
                                   );
                                 })}
