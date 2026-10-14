@@ -491,14 +491,18 @@ export default function AdminPage() {
     setShowDeleteConfirm(true);
   };
 
-  const updateIdpStatus = async (rowIndex: number, newStatus: string) => {
+  const updateIdpStatus = async (rowIndex: number, newStatus: string, confirmMsg?: string) => {
     let alasan = '';
-    if (newStatus === 'Ditolak') {
-      const input = prompt('Silakan masukkan alasan penolakan:');
+    if (newStatus.startsWith('Ditolak')) {
+      const defaultAlasan = newStatus === 'Ditolak BKPSDMD' ? 'Tidak memenuhi ketentuan BKPSDMD' : 'Belum relevan dengan rencana OPD';
+      const input = prompt(`Silakan masukkan alasan penolakan (${newStatus}):`, defaultAlasan);
       if (input === null) return; // Dibatalkan oleh admin
-      alasan = input;
+      alasan = input.trim() || defaultAlasan;
     } else {
-      if (!confirm('Yakin ingin menyetujui pengajuan IDP ini?')) return;
+      const defaultMsg = newStatus === 'Disetujui' 
+        ? 'Yakin ingin memberikan Persetujuan FINAL (BKPSDMD) untuk pengajuan IDP ini?' 
+        : 'Yakin ingin menyetujui usulan IDP ini dan meneruskannya ke verifikasi BKPSDMD?';
+      if (!confirm(confirmMsg || defaultMsg)) return;
     }
 
     try {
@@ -2891,8 +2895,15 @@ export default function AdminPage() {
               {/* APPROVAL IDP TAB */}
               {activeTab === 'view-idp' && (
                 <div className="table-card">
-                  <div className="alert alert-warning mb-4">
-                    <i className="bi bi-info-circle-fill me-2"></i> Modul ini masih dalam tahap pengembangan. Integrasi API untuk IDP belum sepenuhnya selesai. Ini adalah pratinjau tampilan tabel verifikasi.
+                  <div className="alert alert-info border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-3 p-3">
+                    <i className="bi bi-shield-check fs-2 text-primary"></i>
+                    <div>
+                      <div className="fw-bold text-dark">Sistem Verifikasi IDP Berlapis (2 Tahap):</div>
+                      <div className="small text-muted">
+                        <strong>Tahap 1 (Admin/Atasan OPD):</strong> Memverifikasi usulan kompetensi pegawai di instansi terkait untuk diteruskan ke BKPSDMD.<br/>
+                        <strong>Tahap 2 (Admin Instansi BKPSDMD / Approval Nyata):</strong> Penentu keputusan final penetapan IDP. Jika BKPSDMD tidak menyetujui, maka usulan tetap <strong>TIDAK DISETUJUI</strong> meskipun telah disetujui oleh OPD.
+                      </div>
+                    </div>
                   </div>
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h5 className="fw-bold mb-0">Daftar Pengajuan IDP Pegawai</h5>
@@ -2933,8 +2944,8 @@ export default function AdminPage() {
                           <th>Penyelenggara</th>
                           <th>Waktu</th>
                           <th>JP</th>
-                          <th>Status</th>
-                          {userRole === 'super_admin' && <th className="text-center">Aksi Verifikasi</th>}
+                          <th>Status Verifikasi</th>
+                          <th className="text-center">Aksi Verifikasi {userRole === 'super_admin' ? '(BKPSDMD)' : '(OPD)'}</th>
                           {userRole === 'super_admin' && <th className="text-center">Aksi Admin</th>}
                         </tr>
                       </thead>
@@ -2974,23 +2985,97 @@ export default function AdminPage() {
                                       <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
                                       <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
                                       <td>
-                                        {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui</span> :
-                                         idp.status === 'Ditolak' ? <span className="badge bg-danger">Ditolak</span> :
-                                         idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua</span> :
-                                         <span className="badge bg-warning text-dark">Menunggu Ketua</span>}
+                                        {idp.status === 'Disetujui' ? (
+                                          <span className="badge bg-success"><i className="bi bi-check-circle-fill me-1"></i>Disetujui Final (BKPSDMD)</span>
+                                        ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
+                                          <div>
+                                            <span className="badge bg-info text-dark"><i className="bi bi-arrow-right-circle me-1"></i>Disetujui OPD</span>
+                                            <div className="text-muted mt-1" style={{fontSize: '0.7rem'}}>Menunggu Final BKPSDMD</div>
+                                          </div>
+                                        ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                          <span className="badge bg-warning text-dark"><i className="bi bi-clock-history me-1"></i>Menunggu Verifikasi OPD</span>
+                                        ) : idp.status === 'Ditolak BKPSDMD' ? (
+                                          <div>
+                                            <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak BKPSDMD</span>
+                                            {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                          </div>
+                                        ) : (idp.status === 'Ditolak OPD' || idp.status === 'Ditolak Atasan OPD') ? (
+                                          <div>
+                                            <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak OPD</span>
+                                            {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                          </div>
+                                        ) : idp.status.toLowerCase().includes('ditolak') ? (
+                                          <div>
+                                            <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>{idp.status}</span>
+                                            {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                          </div>
+                                        ) : (
+                                          <span className="badge bg-secondary">{idp.status}</span>
+                                        )}
                                       </td>
-                                      {userRole === 'super_admin' && (
-                                        <td className="text-center">
-                                          {idp.status !== 'Disetujui' && idp.status !== 'Ditolak' ? (
-                                            <>
-                                              <button className="btn btn-sm btn-success me-1" title="Setujui (Final)" onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i></button>
-                                              <button className="btn btn-sm btn-danger" title="Tolak" onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i></button>
-                                            </>
+                                      <td className="text-center">
+                                        {userRole === 'admin' ? (
+                                          /* AKSI VERIFIKASI ADMIN OPD (TAHAP 1) */
+                                          (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                            <div className="d-flex justify-content-center gap-1">
+                                              <button 
+                                                className="btn btn-sm btn-outline-success" 
+                                                title="Setujui dan teruskan ke BKPSDMD" 
+                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Menunggu Persetujuan Admin', 'Setujui pengajuan IDP ini untuk diteruskan ke verifikasi tahap 2 (BKPSDMD)?')}
+                                              >
+                                                <i className="bi bi-check-lg me-1"></i>Setujui
+                                              </button>
+                                              <button 
+                                                className="btn btn-sm btn-outline-danger" 
+                                                title="Tolak Pengajuan IDP" 
+                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak OPD')}
+                                              >
+                                                <i className="bi bi-x-lg me-1"></i>Tolak
+                                              </button>
+                                            </div>
+                                          ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
+                                            <span className="badge bg-info text-dark py-1 px-2"><i className="bi bi-check-circle me-1"></i>Disetujui OPD</span>
+                                          ) : idp.status === 'Disetujui' ? (
+                                            <span className="badge bg-success py-1 px-2"><i className="bi bi-check2-all me-1"></i>Disetujui Final</span>
                                           ) : (
-                                            <button className="btn btn-sm btn-outline-secondary" disabled>Terverifikasi</button>
-                                          )}
-                                        </td>
-                                      )}
+                                            <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>Ditolak</span>
+                                          )
+                                        ) : (
+                                          /* AKSI VERIFIKASI ADMIN BKPSDMD / SUPER ADMIN (TAHAP 2 - APPROVAL NYATA/FINAL) */
+                                          (idp.status !== 'Disetujui' && !idp.status.toLowerCase().includes('ditolak')) ? (
+                                            <div className="d-flex justify-content-center gap-1">
+                                              <button 
+                                                className="btn btn-sm btn-success" 
+                                                title="Berikan Persetujuan Final (BKPSDMD)" 
+                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui', 'Berikan Persetujuan FINAL (BKPSDMD) pada pengajuan IDP ini?')}
+                                              >
+                                                <i className="bi bi-check-circle-fill me-1"></i>Setujui Final
+                                              </button>
+                                              <button 
+                                                className="btn btn-sm btn-danger" 
+                                                title="Tolak Pengajuan IDP (BKPSDMD)" 
+                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Ditolak BKPSDMD')}
+                                              >
+                                                <i className="bi bi-x-circle-fill me-1"></i>Tolak
+                                              </button>
+                                            </div>
+                                          ) : idp.status === 'Disetujui' ? (
+                                            <span className="badge bg-success py-1 px-2"><i className="bi bi-check2-all me-1"></i>Disetujui Final</span>
+                                          ) : (
+                                            <div className="d-flex align-items-center justify-content-center gap-1">
+                                              <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>{idp.status}</span>
+                                              <button 
+                                                className="btn btn-xs btn-outline-secondary" 
+                                                style={{fontSize: '0.7rem', padding: '1px 5px'}} 
+                                                title="Tinjau Ulang / Reset Status" 
+                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Menunggu Persetujuan Admin', 'Buka kembali usulan IDP ini menjadi Menunggu Verifikasi BKPSDMD?')}
+                                              >
+                                                <i className="bi bi-arrow-counterclockwise"></i>
+                                              </button>
+                                            </div>
+                                          )
+                                        )}
+                                      </td>
                                       {userRole === 'super_admin' && (
                                         <td className="text-center">
                                           <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
@@ -3738,12 +3823,25 @@ export default function AdminPage() {
                     <div className="col-md-12">
                       <label className="form-label">Status Verifikasi</label>
                       <select className="form-select" value={idpForm.status || 'Menunggu Persetujuan Ketua'} onChange={e => setIdpForm({...idpForm, status: e.target.value})}>
-                        <option value="Menunggu Persetujuan Ketua">Menunggu Persetujuan Ketua</option>
-                        <option value="Menunggu Persetujuan Admin">Menunggu Persetujuan Admin (Disetujui Ketua)</option>
-                        <option value="Disetujui">Disetujui Final</option>
-                        <option value="Ditolak">Ditolak</option>
+                        <option value="Menunggu Persetujuan Ketua">Tahap 1: Menunggu Persetujuan OPD</option>
+                        <option value="Menunggu Persetujuan Admin">Tahap 2: Disetujui OPD (Menunggu BKPSDMD)</option>
+                        <option value="Disetujui">Disetujui Final (BKPSDMD)</option>
+                        <option value="Ditolak BKPSDMD">Ditolak BKPSDMD</option>
+                        <option value="Ditolak OPD">Ditolak OPD</option>
                       </select>
                     </div>
+                    {idpForm.status?.toLowerCase().includes('ditolak') && (
+                      <div className="col-md-12">
+                        <label className="form-label text-danger fw-bold">Alasan Penolakan</label>
+                        <input 
+                          type="text" 
+                          className="form-control border-danger" 
+                          placeholder="Masukkan alasan penolakan..." 
+                          value={idpForm.alasan_tolak || ''} 
+                          onChange={e => setIdpForm({...idpForm, alasan_tolak: e.target.value})} 
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="modal-footer border-0 bg-light">

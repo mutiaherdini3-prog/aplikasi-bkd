@@ -362,8 +362,12 @@ export default function IDPPage() {
                   <label className="form-check-label text-muted" htmlFor="checkSetuju">Saya menyatakan data Rencana IDP yang diisi benar dan dapat dipertanggungjawabkan.</label>
                 </div>
                 
-                <div className="alert alert-info mt-3" style={{fontSize: '0.85rem', padding: '10px 15px'}}>
-                  <i className="bi bi-info-circle-fill me-2"></i> <strong>Catatan:</strong> Pelatihan yang diajukan boleh lebih dari 1 dan dapat disetujui lebih dari 1, namun <strong>harus relevan dengan jabatan</strong> saat pengajuan.
+                <div className="alert alert-info mt-3" style={{fontSize: '0.85rem', padding: '12px 16px'}}>
+                  <i className="bi bi-info-circle-fill me-2"></i> <strong>Alur Persetujuan Berlapis (2 Tahap):</strong>
+                  <ul className="mb-0 mt-1 ps-3">
+                    <li><strong>Tahap 1:</strong> Diverifikasi oleh Admin/Atasan di instansi OPD Anda.</li>
+                    <li><strong>Tahap 2:</strong> Penetapan dan persetujuan final oleh Admin Instansi BKPSDMD.</li>
+                  </ul>
                 </div>
 
                 <div className="text-end mt-4 pt-3 border-top">
@@ -380,7 +384,7 @@ export default function IDPPage() {
               <div className="info-timeline">
                 <div className="info-item">
                   <div className="info-dot">1</div><div className="info-title">Jenis Kompetensi</div>
-                  <div className="info-desc">Contoh: Orientasi pada hasil, Pengembangan diri dan orang lain, dll.</div>
+                  <div className="info-desc">Contoh: Teknis, Manajerial, Sosio Kultural, atau Fungsional.</div>
                 </div>
                 <div className="info-item">
                   <div className="info-dot">2</div><div className="info-title">Jenis Pengembangan</div>
@@ -388,7 +392,11 @@ export default function IDPPage() {
                 </div>
                 <div className="info-item">
                   <div className="info-dot">3</div><div className="info-title">Jalur Pengembangan</div>
-                  <div className="info-desc">Bentuk riil dari pengembangan seperti Mentoring, Coaching, Bimtek, Sertifikasi, dll.</div>
+                  <div className="info-desc">Bentuk riil seperti Bimtek, Workshop, Pelatihan Teknis, Sertifikasi.</div>
+                </div>
+                <div className="info-item">
+                  <div className="info-dot">4</div><div className="info-title">Approval Berlapis</div>
+                  <div className="info-desc">Diverifikasi Admin OPD terlebih dahulu, lalu disetujui final oleh BKPSDMD.</div>
                 </div>
               </div>
             </div>

@@ -140,12 +140,12 @@ export default function DashboardPage() {
 
   const updateStatusIdpBawahan = async (rowIndex: string, status: string) => {
     let alasan = '';
-    if (status === 'Ditolak') {
-      const input = prompt('Silakan masukkan alasan penolakan:');
+    if (status.startsWith('Ditolak')) {
+      const input = prompt('Silakan masukkan alasan penolakan IDP bawahan:', 'Belum sesuai dengan prioritas pengembangan unit kerja');
       if (input === null) return; // User cancelled
-      alasan = input;
+      alasan = input.trim() || 'Belum sesuai dengan prioritas pengembangan unit kerja';
     } else {
-      if (!confirm('Yakin ingin menyetujui pengajuan IDP ini?')) return;
+      if (!confirm('Yakin ingin menyetujui pengajuan IDP ini untuk diteruskan ke verifikasi tahap 2 (BKPSDMD)?')) return;
     }
     
     try {
@@ -435,17 +435,44 @@ export default function DashboardPage() {
                             <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
                             <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
                             <td>
-                              {idp.status === 'Disetujui' ? <span className="badge bg-success">Disetujui Final</span> :
-                               idp.status === 'Menunggu Persetujuan Admin' ? <span className="badge bg-info text-dark">Disetujui Ketua, Menunggu Admin</span> :
-                               idp.status === 'Menunggu Persetujuan Ketua' ? <span className="badge bg-warning text-dark">Menunggu Persetujuan Ketua</span> :
-                               idp.status === 'Ditolak' ? <div><span className="badge bg-danger">Ditolak</span><div className="text-muted mt-1" style={{fontSize: '0.75rem', maxWidth:'150px'}}>{idp.alasan_tolak ? `Alasan: ${idp.alasan_tolak}` : ''}</div></div> :
-                               idp.status === 'Selesai' ? <span className="badge bg-primary">Selesai (Bukti Terkirim)</span> :
-                               <span className="badge bg-secondary">{idp.status}</span>}
+                              {idp.status === 'Disetujui' ? (
+                                <span className="badge bg-success"><i className="bi bi-check-circle-fill me-1"></i>Disetujui Final (BKPSDMD)</span>
+                              ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
+                                <div>
+                                  <span className="badge bg-info text-dark"><i className="bi bi-arrow-right-circle me-1"></i>Disetujui OPD</span>
+                                  <div className="text-muted mt-1" style={{fontSize: '0.72rem'}}>Menunggu Final BKPSDMD</div>
+                                </div>
+                              ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                <span className="badge bg-warning text-dark"><i className="bi bi-clock-history me-1"></i>Menunggu Verifikasi OPD</span>
+                              ) : idp.status === 'Ditolak BKPSDMD' ? (
+                                <div>
+                                  <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak BKPSDMD</span>
+                                  {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.75rem', maxWidth:'170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                </div>
+                              ) : (idp.status === 'Ditolak OPD' || idp.status === 'Ditolak Atasan OPD') ? (
+                                <div>
+                                  <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak OPD</span>
+                                  {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.75rem', maxWidth:'170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                </div>
+                              ) : idp.status?.toLowerCase().includes('ditolak') ? (
+                                <div>
+                                  <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>{idp.status}</span>
+                                  {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.75rem', maxWidth:'170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                </div>
+                              ) : idp.status === 'Selesai' ? (
+                                <span className="badge bg-primary">Selesai (Bukti Terkirim)</span>
+                              ) : (
+                                <span className="badge bg-secondary">{idp.status}</span>
+                              )}
                             </td>
                             <td className="text-center">
-                              <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIDP(idp._rowIndex, idp.jenis_kompetensi)}>
-                                <i className="bi bi-trash"></i>
-                              </button>
+                              {idp.status !== 'Disetujui' ? (
+                                <button className="btn btn-sm btn-outline-danger" title="Hapus Usulan IDP" onClick={() => hapusIDP(idp._rowIndex, idp.jenis_kompetensi)}>
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              ) : (
+                                <span className="badge bg-light text-muted border" title="IDP yang telah disetujui final tidak dapat dihapus sembarangan">Terkunci</span>
+                              )}
                             </td>
                           </tr>
                         ))
@@ -458,7 +485,10 @@ export default function DashboardPage() {
                 {isAtasan && (
                   <>
                     <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-5">
-                      <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan</h5>
+                      <div>
+                        <h5 className="fw-bold mb-0 text-success"><i className="bi bi-people-fill me-2"></i> Persetujuan IDP Bawahan (Tahap 1 - OPD)</h5>
+                        <p className="text-muted small mb-0">Usulan yang disetujui akan diteruskan ke verifikasi tahap 2 (Admin BKPSDMD) untuk persetujuan final.</p>
+                      </div>
                     </div>
                 
                 <div className="table-responsive border rounded-3 bg-white mb-4 border-success">
@@ -470,13 +500,14 @@ export default function DashboardPage() {
                         <th>Pengembangan</th>
                         <th>Pelaksanaan</th>
                         <th>JP</th>
-                        <th className="text-center">Aksi (Ketua)</th>
+                        <th>Status</th>
+                        <th className="text-center">Aksi Verifikasi (OPD)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {idpBawahan.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="text-center text-muted py-4">Belum ada pengajuan IDP dari bawahan yang perlu diproses.</td>
+                          <td colSpan={7} className="text-center text-muted py-4">Belum ada pengajuan IDP dari bawahan yang perlu diproses.</td>
                         </tr>
                       ) : (
                         idpBawahan.map((idp, index) => (
@@ -486,14 +517,33 @@ export default function DashboardPage() {
                             <td>{idp.jenis_pengembangan} <br/><span className="text-muted" style={{fontSize: '0.8rem'}}>{idp.jalur_pengembangan}</span></td>
                             <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
                             <td><span className="badge bg-secondary rounded-pill">{idp.jp} JP</span></td>
-                            <td className="text-center">
-                              {idp.status === 'Menunggu Persetujuan Ketua' ? (
-                                <>
-                                  <button className="btn btn-sm btn-success me-1" title="Setujui IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Disetujui')}><i className="bi bi-check-lg"></i> Setujui</button>
-                                  <button className="btn btn-sm btn-danger" title="Tolak IDP" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Ditolak')}><i className="bi bi-x-lg"></i> Tolak</button>
-                                </>
+                            <td>
+                              {idp.status === 'Disetujui' ? (
+                                <span className="badge bg-success"><i className="bi bi-check-circle-fill me-1"></i>Disetujui Final (BKPSDMD)</span>
+                              ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
+                                <span className="badge bg-info text-dark"><i className="bi bi-arrow-right-circle me-1"></i>Disetujui OPD (Menunggu BKPSDMD)</span>
+                              ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                <span className="badge bg-warning text-dark"><i className="bi bi-clock-history me-1"></i>Menunggu Verifikasi OPD</span>
                               ) : (
-                                <span className={`badge ${idp.status === 'Ditolak' ? 'bg-danger' : 'bg-info'}`}>{idp.status === 'Ditolak' ? 'Ditolak' : 'Telah Disetujui'}</span>
+                                <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>{idp.status}</span>
+                              )}
+                            </td>
+                            <td className="text-center">
+                              {(idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                <div className="d-flex justify-content-center gap-1">
+                                  <button className="btn btn-sm btn-success" title="Setujui dan teruskan ke BKPSDMD" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Menunggu Persetujuan Admin')}>
+                                    <i className="bi bi-check-lg me-1"></i> Setujui ke BKPSDMD
+                                  </button>
+                                  <button className="btn btn-sm btn-danger" title="Tolak Pengajuan" onClick={() => updateStatusIdpBawahan(idp._rowIndex, 'Ditolak OPD')}>
+                                    <i className="bi bi-x-lg me-1"></i> Tolak
+                                  </button>
+                                </div>
+                              ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
+                                <span className="badge bg-info text-dark py-1 px-2"><i className="bi bi-check-circle me-1"></i>Telah Disetujui ke BKPSDMD</span>
+                              ) : idp.status === 'Disetujui' ? (
+                                <span className="badge bg-success py-1 px-2"><i className="bi bi-check2-all me-1"></i>Disetujui Final (BKPSDMD)</span>
+                              ) : (
+                                <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>{idp.status}</span>
                               )}
                             </td>
                           </tr>
