@@ -221,7 +221,7 @@ export async function GET(request: Request) {
           for (let i = 1; i < iRows.length; i++) {
             if (iRows[i][ketuaNipIdx]?.trim() === ketuaNip.trim()) {
               const row: any = { _rowIndex: i + 1 };
-              iHeaders.forEach((h, idx) => {
+              iHeaders.forEach((h: string, idx: number) => {
                 row[h] = iRows[i][idx] || '';
               });
               idpBawahan.push(row);
@@ -322,7 +322,7 @@ export async function GET(request: Request) {
           const rowNip = sRows[i][sNipIdx];
           if (rowNip && rowNip.toString().trim() === nip.trim()) {
             const row: any = { _rowIndex: i + 1 };
-            sHeaders.forEach((h, idx) => {
+            sHeaders.forEach((h: string, idx: number) => {
               row[h] = sRows[i][idx] || '';
             });
             if (row.jumlah_jp) row.jumlah_jp = Number(row.jumlah_jp);
@@ -343,7 +343,7 @@ export async function GET(request: Request) {
           const rowNip = eRows[i][eNipIdx];
           if (rowNip && rowNip.toString().trim() === nip.trim()) {
             const row: any = { _rowIndex: i + 1 };
-            eHeaders.forEach((h, idx) => {
+            eHeaders.forEach((h: string, idx: number) => {
               row[h] = eRows[i][idx] || '';
               // Also map to tingkat_pendidikan to match dashboard
               if (h === 'tingkat pendidikan' || h === 'tingkat') {
@@ -385,7 +385,7 @@ export async function GET(request: Request) {
           const rowNip = iRows[i][iNipIdx];
           if (rowNip && rowNip.toString().trim() === nip.trim()) {
             const row: any = { _rowIndex: i + 1 };
-            iHeaders.forEach((h, idx) => {
+            iHeaders.forEach((h: string, idx: number) => {
               row[h] = iRows[i][idx] || '';
             });
             idpData.push(row);

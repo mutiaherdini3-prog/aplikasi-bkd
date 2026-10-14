@@ -312,8 +312,13 @@ export default function AdminPage() {
     }
     setUserRole(role);
     setLoggedInNip(nip);
+    if (role !== 'super_admin') {
+      setActiveTab('view-pegawai');
+    }
     fetchData();
-    fetchProfilWeb();
+    if (role === 'super_admin') {
+      fetchProfilWeb();
+    }
   }, [router]);
 
   useEffect(() => {
@@ -1663,10 +1668,14 @@ export default function AdminPage() {
               <i className="bi bi-shield-lock-fill text-info me-2"></i> {userRole === 'super_admin' ? 'Super Admin SIPJP' : 'Portal Atasan OPD'}
             </div>
             <ul className="sidebar-nav">
-              <li><a onClick={() => setActiveTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
+              {userRole === 'super_admin' && (
+                <li><a onClick={() => setActiveTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
+              )}
               <li><a onClick={() => setActiveTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {userRole !== 'super_admin' && '(OPD)'}</a></li>
               <li><a onClick={() => setActiveTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
-              <li><a onClick={() => setActiveTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
+              {userRole === 'super_admin' && (
+                <li><a onClick={() => setActiveTab('view-tren')} className={`nav-item ${activeTab === 'view-tren' ? 'active' : ''}`}><i className="bi bi-graph-up-arrow"></i> Tren Tahunan OPD</a></li>
+              )}
               <li><a onClick={() => setActiveTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
               {userRole === 'super_admin' && (
                 <li><a onClick={() => { setActiveTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
@@ -1734,7 +1743,7 @@ export default function AdminPage() {
             <div className="p-4 p-md-5">
               
               {/* DASHBOARD TAB */}
-              {activeTab === 'view-dashboard' && (() => {
+              {userRole === 'super_admin' && activeTab === 'view-dashboard' && (() => {
                 const totalPegawai = pegawaiList.length;
                 const percentLulus = totalPegawai > 0 ? Math.round((lulus / totalPegawai) * 100) : 0;
 
@@ -2302,7 +2311,7 @@ export default function AdminPage() {
               })()}
 
               {/* TREN TAHUNAN OPD TAB */}
-              {activeTab === 'view-tren' && (
+              {userRole === 'super_admin' && activeTab === 'view-tren' && (
                 <div>
                   {/* KPI Summary Cards */}
                   <div className="row g-3 mb-4">
