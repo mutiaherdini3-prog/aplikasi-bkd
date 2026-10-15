@@ -15,7 +15,32 @@ const PARSED_UNIT_KERJA_OPTIONS = UNIT_KERJA_OPTIONS.map(opt => ({
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'view-dashboard' | 'view-pegawai' | 'view-sertifikasi' | 'view-idp' | 'view-tren' | 'view-profil-web'>('view-dashboard');
+  const [userRole, setUserRole] = useState<string>(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('userRole') || '';
+    return '';
+  });
+  const [loggedInNip, setLoggedInNip] = useState<string>(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('loggedInUser') || '';
+    return '';
+  });
+  const [loggedInNama, setLoggedInNama] = useState<string>(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('userName') || '';
+    return '';
+  });
+  const [activeTab, setActiveTab] = useState<'view-dashboard' | 'view-pegawai' | 'view-sertifikasi' | 'view-idp' | 'view-tren' | 'view-profil-web'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTab = localStorage.getItem('admin_active_tab');
+      const role = localStorage.getItem('userRole');
+      if (savedTab) {
+        if (role !== 'super_admin' && (savedTab === 'view-dashboard' || savedTab === 'view-tren' || savedTab === 'view-profil-web')) {
+          return 'view-pegawai';
+        }
+        return savedTab as any;
+      }
+      return role === 'super_admin' ? 'view-dashboard' : 'view-pegawai';
+    }
+    return 'view-dashboard';
+  });
   const [pegawaiList, setPegawaiList] = useState<any[]>([]);
   const [selectedPegawai, setSelectedPegawai] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
@@ -24,9 +49,6 @@ export default function AdminPage() {
   const [showIdpModal, setShowIdpModal] = useState(false);
   const [idpForm, setIdpForm] = useState<any>({});
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
-  const [userRole, setUserRole] = useState<string>('');
-  const [loggedInNip, setLoggedInNip] = useState<string>('');
-  const [loggedInNama, setLoggedInNama] = useState<string>('');
 
   const changeTab = (tab: any) => {
     setActiveTab(tab);
@@ -668,9 +690,10 @@ export default function AdminPage() {
   let idpCounter = 1;
 
   const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userEmail');
+    localStorage.clear();
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
     window.location.href = '/login';
   };
 

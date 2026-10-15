@@ -7,9 +7,24 @@ export default function DashboardPage() {
   const router = useRouter();
   const [pegawai, setPegawai] = useState<any>(() => {
     if (typeof window !== 'undefined') {
+      const currentNip = localStorage.getItem('loggedInUser');
       const cached = sessionStorage.getItem('cached_pegawai');
-      if (cached) {
-        try { return JSON.parse(cached); } catch (e) {}
+      if (cached && currentNip) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && String(parsed.nip).trim() === String(currentNip).trim()) {
+            return parsed;
+          }
+        } catch (e) {}
+      }
+      if (currentNip) {
+        return {
+          nip: currentNip,
+          nama: localStorage.getItem('userName') || '',
+          jabatan: localStorage.getItem('userJabatan') || '',
+          unit_kerja: localStorage.getItem('userUnitKerja') || '',
+          role: localStorage.getItem('userRole') || ''
+        };
       }
     }
     return null;
@@ -90,9 +105,10 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userEmail');
+    localStorage.clear();
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
     window.location.href = '/login';
   };
 

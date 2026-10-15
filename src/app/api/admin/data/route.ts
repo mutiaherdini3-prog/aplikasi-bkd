@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     if (roleIdx === -1) roleIdx = headers.indexOf('hak akses');
 
     // Determine admin's role and unit_kerja
-    let adminRole = 'super_admin';
+    let adminRole = reqNip === 'admin' ? 'super_admin' : 'pegawai';
     let adminUnitKerja = '';
     if (reqNip && reqNip !== 'admin') {
       const adminRow = pRows.find((row: any) => row[nipIdx]?.toString().trim() === reqNip.trim());

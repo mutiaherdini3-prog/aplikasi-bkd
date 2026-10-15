@@ -64,17 +64,10 @@ export default function LoginPage() {
       }
 
       const data = result.data;
-      // Bersihkan sesi lama dari storage agar profil tidak tertukar/stale
-      localStorage.removeItem('loggedInUser');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userJabatan');
-      localStorage.removeItem('userUnitKerja');
-      localStorage.removeItem('lastUserEmail');
-      localStorage.removeItem('admin_active_tab');
+      // Bersihkan seluruh sesi lama dari storage agar profil tidak tertukar/stale sama sekali
+      localStorage.clear();
       if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.removeItem('cached_pegawai');
+        sessionStorage.clear();
       }
 
       localStorage.setItem('loggedInUser', data.nip);
