@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { isUnitKerjaMatch } from '@/lib/unit-kerja-match';
 
 export default function IDPPage() {
   const router = useRouter();
@@ -39,18 +40,34 @@ export default function IDPPage() {
       try {
         const res = await fetch(`/api/pegawai?nip=${nip}`);
         const result = await res.json();
+        let userPegawai: any = null;
         if (result.success && result.data?.pegawai) {
-          setPegawai(result.data.pegawai);
+          userPegawai = result.data.pegawai;
+          setPegawai(userPegawai);
         }
 
         const resAll = await fetch('/api/pegawai/all');
         const resultAll = await resAll.json();
         if (resultAll.success) {
-          const others = resultAll.data.filter((p: any) => p.nip !== nip);
-          setSemuaPegawai(others);
+          const userUnit = userPegawai?.unit_kerja || '';
+          // Filter hanya atasan/pegawai dari Unit Kerja (OPD) yang sama!
+          let opdOthers = resultAll.data.filter((p: any) => {
+            if (p.nip === nip) return false;
+            if (userPegawai?.nip_atasan && p.nip === userPegawai.nip_atasan) return true;
+            if (userUnit && p.unit_kerja) {
+              return isUnitKerjaMatch(p.unit_kerja, userUnit);
+            }
+            return false;
+          });
+
+          // Jika unit kerja belum terdata / tidak ada rekan terdeteksi, fallback ke rekan lain
+          if (opdOthers.length === 0) {
+            opdOthers = resultAll.data.filter((p: any) => p.nip !== nip);
+          }
+          setSemuaPegawai(opdOthers);
           
-          if (result.data?.pegawai?.nip_atasan) {
-            const atasan = others.find((p: any) => p.nip === result.data.pegawai.nip_atasan);
+          if (userPegawai?.nip_atasan) {
+            const atasan = opdOthers.find((p: any) => p.nip === userPegawai.nip_atasan);
             if (atasan) {
               setSelectedKetua({ nip: atasan.nip, nama: atasan.nama });
             }

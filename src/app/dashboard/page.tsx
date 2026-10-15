@@ -49,11 +49,15 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     const nip = localStorage.getItem('loggedInUser');
+    const storedRole = localStorage.getItem('userRole');
     if (!nip) return;
     try {
+      const isSuper = storedRole === 'super_admin';
       const [res, resBawahan] = await Promise.all([
         fetch(`/api/pegawai?nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' }),
-        fetch(`/api/pegawai?ketua_nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' })
+        !isSuper 
+          ? fetch(`/api/pegawai?ketua_nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' }) 
+          : Promise.resolve(null)
       ]);
 
       const result = await res.json();
@@ -72,18 +76,24 @@ export default function DashboardPage() {
         }
         if (result.data.pendidikan) setPendidikan(result.data.pendidikan);
         if (result.data.idp) setIdpList(result.data.idp);
-        // Atasan adalah yang terdeteksi di API atau memiliki role admin
-        const role = result.data.pegawai?.role;
-        if (result.data.isAtasan || role === 'admin' || role === 'admin_diklat' || role === 'super_admin') {
+
+        // Super Admin BKPSDMD approval hanya dari Dashboard Panel Admin (/admin), bukan di dashboard pegawai
+        const currentRole = result.data.pegawai?.role || storedRole;
+        if (currentRole === 'super_admin') {
+          setIsAtasan(false);
+          setIdpBawahan([]);
+        } else if (result.data.isAtasan || currentRole === 'admin' || currentRole === 'admin_diklat') {
           setIsAtasan(true);
         } else {
           setIsAtasan(false);
         }
       }
 
-      const resultBawahan = await resBawahan.json();
-      if (resultBawahan.success && resultBawahan.data) {
-        setIdpBawahan(resultBawahan.data);
+      if (resBawahan) {
+        const resultBawahan = await resBawahan.json();
+        if (resultBawahan.success && resultBawahan.data) {
+          setIdpBawahan(resultBawahan.data);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch', error);

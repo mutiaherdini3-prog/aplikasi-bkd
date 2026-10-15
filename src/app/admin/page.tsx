@@ -3117,7 +3117,11 @@ export default function AdminPage() {
                                       <td className="text-center">
                                         {userRole === 'admin' ? (
                                           /* AKSI VERIFIKASI ADMIN OPD (TAHAP 1) */
-                                          (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                          p.nip === loggedInNip ? (
+                                            <span className="badge bg-secondary-subtle text-secondary py-1 px-2 border" title="Pengajuan pribadi Anda">
+                                              <i className="bi bi-person-fill me-1"></i>Pengajuan Pribadi
+                                            </span>
+                                          ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
                                             <div className="d-flex justify-content-center gap-1">
                                               <button 
                                                 className="btn btn-sm btn-outline-success" 
@@ -3152,7 +3156,11 @@ export default function AdminPage() {
                                           )
                                         ) : (
                                           /* AKSI VERIFIKASI ADMIN BKPSDMD / SUPER ADMIN (TAHAP 2 - APPROVAL NYATA/FINAL) */
-                                          (idp.status !== 'Disetujui' && !idp.status.toLowerCase().includes('ditolak')) ? (
+                                          p.nip === loggedInNip ? (
+                                            <span className="badge bg-secondary-subtle text-secondary py-1 px-2 border" title="Pengajuan pribadi Anda">
+                                              <i className="bi bi-person-fill me-1"></i>Pengajuan Pribadi
+                                            </span>
+                                          ) : (idp.status !== 'Disetujui' && !idp.status.toLowerCase().includes('ditolak')) ? (
                                             <div className="d-flex justify-content-center gap-1">
                                               <button 
                                                 className="btn btn-sm btn-success" 

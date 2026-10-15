@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGoogleSheets, GOOGLE_SHEET_ID, getCachedSheetData, getFreshSheetData } from '@/lib/google';
 import { revalidateTag } from 'next/cache';
-import { isPetinggiOrAdmin } from '@/lib/unit-kerja-match';
+import { isPetinggiOrAdmin, isUnitKerjaMatch } from '@/lib/unit-kerja-match';
 
 export const dynamic = 'force-dynamic';
 
@@ -210,40 +210,65 @@ export async function GET(request: Request) {
     const sheets = getGoogleSheets();
     
     if (ketuaNip) {
-      // Hanya fetch IDP bawahan untuk ketua ini
+      // Hanya fetch IDP bawahan untuk ketua ini (Atasan OPD / Admin OPD)
       let idpBawahan: any[] = [];
       try {
-        const iRows = await getCachedSheetData('idp!A:Z');
-        const iHeaders = iRows[0]?.map((h: string) => h.toLowerCase()) || [];
-        const ketuaNipIdx = iHeaders.indexOf('nip_ketua');
-        
-        if (ketuaNipIdx !== -1) {
-          for (let i = 1; i < iRows.length; i++) {
-            if (iRows[i][ketuaNipIdx]?.trim() === ketuaNip.trim()) {
-              const row: any = { _rowIndex: i + 1 };
-              iHeaders.forEach((h: string, idx: number) => {
-                row[h] = iRows[i][idx] || '';
-              });
-              idpBawahan.push(row);
-            }
-          }
-        }
-        
-        // Populate nama pegawai for each IDP
-        const pRows = await getCachedSheetData('pegawai!A:Z');
+        const pRows = await getCachedSheetData('pegawai!A:ZZ');
         const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
         const pNipIdx = pHeaders.indexOf('nip');
         const pNamaIdx = pHeaders.indexOf('nama');
-        
-        if (pNipIdx !== -1 && pNamaIdx !== -1) {
-           const nipToNama: Record<string, string> = {};
-           for (let i = 1; i < pRows.length; i++) {
-             nipToNama[pRows[i][pNipIdx]] = pRows[i][pNamaIdx];
-           }
-           idpBawahan = idpBawahan.map(idp => ({
-             ...idp,
-             nama_pegawai: nipToNama[idp.nip] || 'Unknown'
-           }));
+        const pUnitIdx = pHeaders.indexOf('unit kerja');
+        let pRoleIdx = pHeaders.indexOf('role');
+        if (pRoleIdx === -1) pRoleIdx = pHeaders.indexOf('hak akses');
+
+        // Cek profil akun ketua
+        const ketuaRow = pRows.find((r: any) => r[pNipIdx]?.toString().trim() === ketuaNip.trim());
+        const ketuaRole = (pRoleIdx !== -1 && ketuaRow?.[pRoleIdx]) ? ketuaRow[pRoleIdx].trim() : 'pegawai';
+        const ketuaUnit = (pUnitIdx !== -1 && ketuaRow?.[pUnitIdx]) ? ketuaRow[pUnitIdx].trim() : '';
+
+        // Super Admin BKPSDMD approval hanya dari Panel Admin (/admin), tidak di dashboard bawahan
+        if (ketuaRole === 'super_admin' || ketuaNip === 'admin') {
+          return NextResponse.json({ success: true, data: [] });
+        }
+
+        const iRows = await getCachedSheetData('idp!A:Z');
+        const iHeaders = iRows[0]?.map((h: string) => h.toLowerCase()) || [];
+        const ketuaNipIdx = iHeaders.indexOf('nip_ketua');
+        const nipIdx = iHeaders.indexOf('nip');
+
+        // Map NIP ke Data Pegawai
+        const nipToPegawai: Record<string, { nama: string; unit_kerja: string }> = {};
+        for (let i = 1; i < pRows.length; i++) {
+          const rowNip = pRows[i][pNipIdx]?.toString().trim();
+          if (rowNip) {
+            nipToPegawai[rowNip] = {
+              nama: pRows[i][pNamaIdx] || '',
+              unit_kerja: pRows[i][pUnitIdx] || ''
+            };
+          }
+        }
+
+        for (let i = 1; i < iRows.length; i++) {
+          const rowKetuaNip = ketuaNipIdx !== -1 ? iRows[i][ketuaNipIdx]?.trim() : '';
+          const rowPegNip = nipIdx !== -1 ? iRows[i][nipIdx]?.trim() : '';
+          const pegInfo = nipToPegawai[rowPegNip];
+
+          // Masuk ke dashboard atasan jika:
+          // 1. Ditunjuk langsung sebagai ketua/atasan oleh pegawai terkait
+          // 2. ATAU ketua ini adalah Admin OPD dan pegawainya berada di OPD yang sama
+          const isDirectKetua = rowKetuaNip && rowKetuaNip === ketuaNip.trim();
+          const isSameOpdAdmin = (ketuaRole === 'admin' || ketuaRole === 'admin_diklat') && 
+            ketuaUnit && pegInfo && isUnitKerjaMatch(pegInfo.unit_kerja, ketuaUnit);
+
+          if (isDirectKetua || isSameOpdAdmin) {
+            const row: any = { _rowIndex: i + 1 };
+            iHeaders.forEach((h: string, idx: number) => {
+              row[h] = iRows[i][idx] || '';
+            });
+            row.nama_pegawai = pegInfo?.nama || 'Unknown';
+            row.unit_kerja = pegInfo?.unit_kerja || '';
+            idpBawahan.push(row);
+          }
         }
 
         return NextResponse.json({ success: true, data: idpBawahan });
