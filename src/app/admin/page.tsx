@@ -791,8 +791,8 @@ export default function AdminPage() {
   };
 
   const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK', onlyWithJP = false, showTargetAndStatus = false) => {
-    if (userRole !== 'super_admin' && userRole !== 'admin' && userRole !== 'admin_diklat') {
-      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Admin.');
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
       return;
     }
     let baseList = pegawaiList;
@@ -856,8 +856,8 @@ export default function AdminPage() {
   const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum", undefined, false, true);
 
   const exportIdpToExcel = () => {
-    if (userRole !== 'super_admin' && userRole !== 'admin' && userRole !== 'admin_diklat') {
-      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Admin.');
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
       return;
     }
     const idpItems = pegawaiList.flatMap((p) => {
@@ -914,8 +914,8 @@ export default function AdminPage() {
   };
 
   const exportTrenToExcel = () => {
-    if (userRole !== 'super_admin' && userRole !== 'admin' && userRole !== 'admin_diklat') {
-      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Admin.');
+    if (userRole !== 'super_admin') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
       return;
     }
     if (trenViewMode === 'pegawai') {
@@ -2058,6 +2058,15 @@ export default function AdminPage() {
                 
                 return (
                 <div className="table-card">
+                  {userRole !== 'super_admin' && (
+                    <div className="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between shadow-sm" style={{ borderRadius: '8px', fontSize: '0.85rem' }}>
+                      <div>
+                        <i className="bi bi-info-circle-fill me-2 text-primary"></i>
+                        <strong>Mode Pemantauan OPD (Hanya Lihat):</strong> Anda dapat melihat data profil dan perkembangan JP pegawai di instansi Anda. Hak kelola data dan ekspor sistem dikhususkan untuk Super Admin BKPSDMD.
+                      </div>
+                      <span className="badge bg-secondary">View Only</span>
+                    </div>
+                  )}
                   <div className="d-flex flex-column mb-4 gap-3">
                     <div className="d-flex justify-content-between align-items-center">
                       <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
@@ -2089,7 +2098,7 @@ export default function AdminPage() {
                         <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
-                      {(userRole === 'super_admin' || userRole === 'admin' || userRole === 'admin_diklat') && (
+                      {userRole === 'super_admin' && (
                         <div className="dropdown position-relative">
                           <button 
                             className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1" 
@@ -2321,7 +2330,7 @@ export default function AdminPage() {
                             <option value="Pelatihan manajerial">Pelatihan manajerial</option>
                             <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
-                          {(userRole === 'super_admin' || userRole === 'admin' || userRole === 'admin_diklat') && (
+                          {userRole === 'super_admin' && (
                             <div className="dropdown position-relative">
                               <button 
                                 className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1" 
@@ -3086,7 +3095,7 @@ export default function AdminPage() {
                         />
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                       </div>
-                      {(userRole === 'super_admin' || userRole === 'admin' || userRole === 'admin_diklat') && (
+                      {userRole === 'super_admin' && (
                         <button className="btn btn-sm btn-success shadow-sm" onClick={exportIdpToExcel}>
                           <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                         </button>
@@ -3113,7 +3122,7 @@ export default function AdminPage() {
                           <th>Waktu</th>
                           <th>JP</th>
                           <th>Status Verifikasi</th>
-                          <th className="text-center">Aksi Verifikasi {userRole === 'super_admin' ? '(BKPSDMD)' : '(OPD)'}</th>
+                          <th className="text-center">{userRole === 'super_admin' ? 'Aksi Verifikasi (BKPSDMD)' : 'Status Aksi'}</th>
                           {userRole === 'super_admin' && <th className="text-center">Aksi Admin</th>}
                         </tr>
                       </thead>
@@ -3182,45 +3191,11 @@ export default function AdminPage() {
                                         )}
                                       </td>
                                       <td className="text-center">
-                                        {userRole === 'admin' ? (
-                                          /* AKSI VERIFIKASI ADMIN OPD (TAHAP 1) */
-                                          p.nip === loggedInNip ? (
-                                            <span className="badge bg-secondary-subtle text-secondary py-1 px-2 border" title="Pengajuan pribadi Anda">
-                                              <i className="bi bi-person-fill me-1"></i>Pengajuan Pribadi
-                                            </span>
-                                          ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
-                                            <div className="d-flex justify-content-center gap-1">
-                                              <button 
-                                                className="btn btn-sm btn-outline-success" 
-                                                title="Setujui dan teruskan ke BKPSDMD" 
-                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Menunggu Persetujuan Admin', 'Setujui pengajuan IDP ini untuk diteruskan ke verifikasi tahap 2 (BKPSDMD)?')}
-                                              >
-                                                <i className="bi bi-check-lg me-1"></i>Setujui
-                                              </button>
-                                              <button 
-                                                className="btn btn-sm btn-outline-danger" 
-                                                title="Tolak Pengajuan IDP" 
-                                                onClick={() => {
-                                                  setIdpRejectData({
-                                                    rowIndex: idp._rowIndex,
-                                                    status: 'Ditolak OPD',
-                                                    namaPegawai: p.nama,
-                                                    kompetensi: idp.jenis_kompetensi
-                                                  });
-                                                  setRejectReason('Tidak tersedia anggaran');
-                                                  setCustomReason('');
-                                                }}
-                                              >
-                                                <i className="bi bi-x-lg me-1"></i>Tolak
-                                              </button>
-                                            </div>
-                                          ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
-                                            <span className="badge bg-info text-dark py-1 px-2"><i className="bi bi-check-circle me-1"></i>Disetujui OPD</span>
-                                          ) : idp.status === 'Disetujui' ? (
-                                            <span className="badge bg-success py-1 px-2"><i className="bi bi-check2-all me-1"></i>Disetujui Final</span>
-                                          ) : (
-                                            <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>Ditolak</span>
-                                          )
+                                        {userRole !== 'super_admin' ? (
+                                          /* ADMIN OPD: VIEW ONLY / TIDAK BISA MENGUBAH DATA */
+                                          <span className="badge bg-light text-muted border py-1 px-2" title="Mode Pemantauan OPD (Hanya Melihat)">
+                                            <i className="bi bi-eye me-1"></i>Hanya Pantau
+                                          </span>
                                         ) : (
                                           /* AKSI VERIFIKASI ADMIN BKPSDMD / SUPER ADMIN (TAHAP 2 - APPROVAL NYATA/FINAL) */
                                           p.nip === loggedInNip ? (
