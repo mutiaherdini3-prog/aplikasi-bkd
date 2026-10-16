@@ -29,7 +29,8 @@ export default function AdminPage() {
   });
   const [activeTab, setActiveTab] = useState<'view-dashboard' | 'view-pegawai' | 'view-sertifikasi' | 'view-idp' | 'view-tren' | 'view-profil-web'>(() => {
     if (typeof window !== 'undefined') {
-      const savedTab = localStorage.getItem('admin_active_tab');
+      const nip = localStorage.getItem('loggedInUser') || '';
+      const savedTab = (nip ? localStorage.getItem(`admin_active_tab_${nip}`) : null) || localStorage.getItem('admin_active_tab');
       const role = localStorage.getItem('userRole');
       if (savedTab) {
         if (role !== 'super_admin' && (savedTab === 'view-dashboard' || savedTab === 'view-tren' || savedTab === 'view-profil-web')) {
@@ -53,6 +54,10 @@ export default function AdminPage() {
   const changeTab = (tab: any) => {
     setActiveTab(tab);
     if (typeof window !== 'undefined') {
+      const nip = localStorage.getItem('loggedInUser') || '';
+      if (nip) {
+        localStorage.setItem(`admin_active_tab_${nip}`, tab);
+      }
       localStorage.setItem('admin_active_tab', tab);
     }
   };
@@ -62,6 +67,8 @@ export default function AdminPage() {
   const [searchIdp, setSearchIdp] = useState('');
   const [openExportPegawaiDropdown, setOpenExportPegawaiDropdown] = useState(false);
   const [openExportSertDropdown, setOpenExportSertDropdown] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportingText, setExportingText] = useState('');
 
   // State untuk Import Template Sertifikasi Massal (contoh: Rabu Bertamu)
   const [showImportSertifikasiModal, setShowImportSertifikasiModal] = useState(false);
@@ -327,8 +334,10 @@ export default function AdminPage() {
   const fetchData = async () => {
     try {
       const userNip = localStorage.getItem('loggedInUser') || '';
+      if (!userNip) return;
+
       const [resData, resAll] = await Promise.all([
-        fetch(`/api/admin/data?nip=${userNip}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetch(`/api/admin/data?nip=${encodeURIComponent(userNip)}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
         fetch(`/api/pegawai/all?all=true`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
       ]);
       
@@ -350,7 +359,7 @@ export default function AdminPage() {
     const role = localStorage.getItem('userRole') || '';
     const nip = localStorage.getItem('loggedInUser') || '';
     const nama = localStorage.getItem('userName') || '';
-    if (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat') {
+    if (!nip || (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat')) {
       router.push('/login');
       return;
     }
@@ -358,8 +367,8 @@ export default function AdminPage() {
     setLoggedInNip(nip);
     setLoggedInNama(nama);
 
-    // Pulihkan tab aktif yang tersimpan agar saat F5/refresh tidak pernah terlempar ke tab data pegawai lain
-    const savedTab = localStorage.getItem('admin_active_tab');
+    // Pulihkan tab aktif yang tersimpan spesifik per NIP akun ini
+    const savedTab = localStorage.getItem(`admin_active_tab_${nip}`) || localStorage.getItem('admin_active_tab');
     if (savedTab) {
       if (role !== 'super_admin' && (savedTab === 'view-dashboard' || savedTab === 'view-tren' || savedTab === 'view-profil-web')) {
         changeTab('view-pegawai');
@@ -369,6 +378,8 @@ export default function AdminPage() {
     } else {
       if (role !== 'super_admin') {
         changeTab('view-pegawai');
+      } else {
+        changeTab('view-dashboard');
       }
     }
 
@@ -722,13 +733,32 @@ export default function AdminPage() {
     return '';
   };
 
+  const startAsyncExport = (exportFn: () => void, label: string) => {
+    setOpenExportPegawaiDropdown(false);
+    setOpenExportSertDropdown(false);
+    setIsExporting(true);
+    setExportingText(`Menyiapkan ${label}...`);
+    setTimeout(() => {
+      try {
+        exportFn();
+      } catch (err: any) {
+        alert('Gagal mengekspor data: ' + (err.message || 'Terjadi kesalahan'));
+      } finally {
+        setIsExporting(false);
+        setExportingText('');
+      }
+    }, 60);
+  };
+
   const generateExcelSheet = (pegawaiData: any[], sheetName: string, workbook: any, statusKelulusanLabel?: string, showTargetAndStatus = false) => {
     if (pegawaiData.length === 0) return;
     
-    const maxCerts = Math.max(0, ...pegawaiData.map(p => {
-      const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      return certs.length;
-    }));
+    const maxCerts = pegawaiData.reduce((max, p) => {
+      const len = (p.filteredSertifikasi || p.sertifikasi || []).length;
+      return len > max ? len : max;
+    }, 0);
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
     const excelData = pegawaiData.map((p, index) => {
       const baseRow: any = {
@@ -761,9 +791,11 @@ export default function AdminPage() {
             const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
             if (match && match[1]) linkUrl = match[1];
           }
-          if (linkUrl.startsWith('/uploads')) linkUrl = `${window.location.origin}${linkUrl}`;
-          if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
-            linkUrl = `${window.location.origin}/view?url=${encodeURIComponent(linkUrl)}`;
+          if (typeof linkUrl === 'string') {
+            if (linkUrl.startsWith('/uploads')) linkUrl = `${origin}${linkUrl}`;
+            if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
+              linkUrl = `${origin}/view?url=${encodeURIComponent(linkUrl)}`;
+            }
           }
           baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
         } else {
@@ -779,11 +811,14 @@ export default function AdminPage() {
     });
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
-    for (const cellAddress in worksheet) {
-      if (!cellAddress.startsWith('!')) {
-        const cell = worksheet[cellAddress];
-        if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('http')) {
-          worksheet[cellAddress] = { t: 's', v: "Lihat Dokumen", l: { Target: cell.v } };
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = worksheet[cellRef];
+        if (cell && typeof cell.v === 'string' && cell.v.startsWith('http')) {
+          cell.l = { Target: cell.v };
+          cell.v = "Lihat Dokumen";
         }
       }
     }
@@ -2122,19 +2157,19 @@ export default function AdminPage() {
                               }}
                             >
                               <li>
-                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => { setOpenExportPegawaiDropdown(false); exportToExcelDataPegawai(); }}>
+                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => startAsyncExport(exportToExcelDataPegawai, 'Data Pegawai (Semua)')}>
                                   <span><i className="bi bi-people me-2 text-primary"></i>Semua Pegawai</span>
                                   <span className="badge bg-secondary-subtle text-secondary">{pegawaiList.length}</span>
                                 </button>
                               </li>
                               <li>
-                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => { setOpenExportPegawaiDropdown(false); exportToExcelDataPegawaiPNS(); }}>
+                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => startAsyncExport(exportToExcelDataPegawaiPNS, 'Data Pegawai PNS')}>
                                   <span><i className="bi bi-person-check me-2 text-success"></i>PNS Saja</span>
                                   <span className="badge bg-primary-subtle text-primary">{pnsList.length}</span>
                                 </button>
                               </li>
                               <li>
-                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => { setOpenExportPegawaiDropdown(false); exportToExcelDataPegawaiPPPK(); }}>
+                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => startAsyncExport(exportToExcelDataPegawaiPPPK, 'Data Pegawai PPPK')}>
                                   <span><i className="bi bi-person-badge me-2 text-info"></i>PPPK Saja</span>
                                   <span className="badge bg-info-subtle text-dark">{pppkList.length}</span>
                                 </button>
@@ -2354,17 +2389,17 @@ export default function AdminPage() {
                                   }}
                                 >
                                   <li>
-                                    <button className="dropdown-item py-2" onClick={() => { setOpenExportSertDropdown(false); exportToExcelSert(); }}>
+                                    <button className="dropdown-item py-2" onClick={() => startAsyncExport(exportToExcelSert, 'Rekap Semua Sertifikasi')}>
                                       <i className="bi bi-card-checklist me-2 text-primary"></i>Semua Sertifikasi
                                     </button>
                                   </li>
                                   <li>
-                                    <button className="dropdown-item py-2" onClick={() => { setOpenExportSertDropdown(false); exportToExcelSertPNS(); }}>
+                                    <button className="dropdown-item py-2" onClick={() => startAsyncExport(exportToExcelSertPNS, 'Rekap Sertifikasi PNS')}>
                                       <i className="bi bi-person-check me-2 text-success"></i>Sertifikasi PNS Saja
                                     </button>
                                   </li>
                                   <li>
-                                    <button className="dropdown-item py-2" onClick={() => { setOpenExportSertDropdown(false); exportToExcelSertPPPK(); }}>
+                                    <button className="dropdown-item py-2" onClick={() => startAsyncExport(exportToExcelSertPPPK, 'Rekap Sertifikasi PPPK')}>
                                       <i className="bi bi-person-badge me-2 text-info"></i>Sertifikasi PPPK Saja
                                     </button>
                                   </li>
@@ -2709,7 +2744,7 @@ export default function AdminPage() {
                       </div>
 
                       {userRole === 'super_admin' && (
-                        <button className="btn btn-sm btn-success shadow-sm" onClick={exportTrenToExcel}>
+                        <button className="btn btn-sm btn-success shadow-sm" onClick={() => startAsyncExport(exportTrenToExcel, trenViewMode === 'pegawai' ? 'Excel Pegawai Tren' : 'Excel Rekap OPD Tren')}>
                           <i className="bi bi-file-earmark-excel me-1"></i> {trenViewMode === 'pegawai' ? 'Export Excel Pegawai' : 'Export Excel Rekap OPD'}
                         </button>
                       )}
@@ -3096,7 +3131,7 @@ export default function AdminPage() {
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                       </div>
                       {userRole === 'super_admin' && (
-                        <button className="btn btn-sm btn-success shadow-sm" onClick={exportIdpToExcel}>
+                        <button className="btn btn-sm btn-success shadow-sm" onClick={() => startAsyncExport(exportIdpToExcel, 'Rekap IDP ASN')}>
                           <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                         </button>
                       )}
@@ -4397,6 +4432,30 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {isExporting && (
+        <div 
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 99999,
+            backgroundColor: '#0f172a',
+            color: '#ffffff',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '0.88rem',
+            fontWeight: '500'
+          }}
+        >
+          <div className="spinner-border spinner-border-sm text-success" role="status"></div>
+          <span>{exportingText || 'Sedang menyiapkan file Excel...'}</span>
         </div>
       )}
     </>

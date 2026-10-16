@@ -36,10 +36,15 @@ export async function GET(request: Request) {
     let roleIdx = headers.indexOf('role');
     if (roleIdx === -1) roleIdx = headers.indexOf('hak akses');
 
+    // Wajib ada reqNip agar tidak terjadi tumpang tindih data saat refresh kilat
+    if (!reqNip || typeof reqNip !== 'string' || reqNip.trim() === '') {
+      return NextResponse.json({ success: false, error: 'Unauthorized: NIP tidak valid' }, { status: 401 });
+    }
+
     // Determine admin's role and unit_kerja
     let adminRole = reqNip === 'admin' ? 'super_admin' : 'pegawai';
     let adminUnitKerja = '';
-    if (reqNip && reqNip !== 'admin') {
+    if (reqNip !== 'admin') {
       const adminRow = pRows.find((row: any) => row[nipIdx]?.toString().trim() === reqNip.trim());
       if (adminRow) {
         adminRole = roleIdx !== -1 && adminRow[roleIdx] && adminRow[roleIdx].trim() !== '' ? adminRow[roleIdx].trim() : 'pegawai';
@@ -48,6 +53,11 @@ export async function GET(request: Request) {
         }
         adminUnitKerja = adminRow[unitKerjaIdx] || '';
       }
+    }
+
+    // Jika bukan super_admin dan bukan admin OPD, tolak akses
+    if (adminRole !== 'super_admin' && adminRole !== 'admin' && adminRole !== 'admin_diklat') {
+      return NextResponse.json({ success: false, error: 'Forbidden: Hak akses tidak mencukupi' }, { status: 403 });
     }
 
     // Process Sertifikasi
