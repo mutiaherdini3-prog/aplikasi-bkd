@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { UNIT_KERJA_OPTIONS, isUnitKerjaMatch } from '@/lib/unit-kerja-match';
 
 export default function EditProfilPage() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function EditProfilPage() {
     nip: '',
     nama: '',
     email: '',
-    status_pegawai: '',
+    status_pegawai: 'PNS',
     golonganPangkat: '',
     jenkel: '',
     jabatan: '',
@@ -21,6 +22,63 @@ export default function EditProfilPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Normalisasi Status Pegawai (PNS / PPPK / PW)
+  const normalizeStatus = (val?: string) => {
+    if (!val) return 'PNS';
+    const s = val.trim().toUpperCase();
+    if (s.includes('PNS')) return 'PNS';
+    if (s.includes('PPPK')) return 'PPPK';
+    if (s.includes('PW') || s.includes('WIYATA') || s.includes('NON')) return 'PW';
+    return val;
+  };
+
+  // Normalisasi Jenis Kelamin (Laki-Laki / Perempuan)
+  const normalizeJenkel = (val?: string) => {
+    if (!val) return '';
+    const s = val.trim().toLowerCase();
+    if (s === 'perempuan' || s === 'wanita' || s === 'p') return 'Perempuan';
+    if (s === 'laki-laki' || s === 'laki - laki' || s === 'pria' || s === 'l') return 'Laki-Laki';
+    return val;
+  };
+
+  // Normalisasi Golongan / Pangkat ke opsi dropdown
+  const normalizeGolonganPangkat = (status: string, gol?: string, pang?: string) => {
+    const normStatus = normalizeStatus(status);
+    const cleanGol = (gol || '').trim();
+    const cleanPang = (pang || '').trim();
+
+    if (normStatus === 'PNS') {
+      const pnsOptions = [
+        "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I", 
+        "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I", 
+        "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I", 
+        "IV/a - Pembina", "IV/b - Pembina Tk. I", "IV/c - Pembina Utama Muda", "IV/d - Pembina Utama Madya", "IV/e - Pembina Utama"
+      ];
+      // 1. Cek kecocokan golongan & pangkat
+      if (cleanGol && cleanPang) {
+        const matchBoth = pnsOptions.find(opt => 
+          opt.toLowerCase().includes(cleanGol.toLowerCase()) && 
+          opt.toLowerCase().includes(cleanPang.toLowerCase())
+        );
+        if (matchBoth) return matchBoth;
+      }
+      // 2. Cek kecocokan awalan golongan misal "I/b"
+      if (cleanGol) {
+        const matchGol = pnsOptions.find(opt => opt.toLowerCase().startsWith(cleanGol.toLowerCase() + ' '));
+        if (matchGol) return matchGol;
+      }
+      // 3. Cek kecocokan nama pangkat
+      if (cleanPang && cleanPang !== '-' && cleanPang !== 'Tidak Ada') {
+        const matchPang = pnsOptions.find(opt => opt.toLowerCase().includes(cleanPang.toLowerCase()));
+        if (matchPang) return matchPang;
+      }
+    } else if (normStatus === 'PPPK') {
+      const cleanNum = cleanGol.replace(/[^IVX0-9]/gi, '').toUpperCase();
+      if (cleanNum) return `Golongan ${cleanNum}`;
+    }
+    return cleanGol && cleanPang && cleanPang !== '-' ? `${cleanGol} - ${cleanPang}` : (cleanGol || cleanPang || '');
+  };
 
   useEffect(() => {
     const nip = localStorage.getItem('loggedInUser');
@@ -35,19 +93,31 @@ export default function EditProfilPage() {
         const json = await res.json();
         const data = json.data?.pegawai;
         if (data) {
-          const gol = data.golongan && data.golongan !== '-' ? data.golongan : '';
-          const pang = data.pangkat && data.pangkat !== '-' && data.pangkat !== 'Tidak Ada' ? data.pangkat : '';
-          const golPangText = gol && pang ? `${gol} - ${pang}` : (gol || pang || '-');
+          // Cari unit kerja yang paling cocok dari daftar opsi atau gunakan nilai aslinya
+          let matchedUnit = (data.unit_kerja || localStorage.getItem('userUnitKerja') || '').trim();
+          if (matchedUnit) {
+            const exact = UNIT_KERJA_OPTIONS.find(u => u.toLowerCase() === matchedUnit.toLowerCase());
+            if (exact) {
+              matchedUnit = exact;
+            } else {
+              const fuzzy = UNIT_KERJA_OPTIONS.find(u => isUnitKerjaMatch(u, matchedUnit));
+              if (fuzzy) matchedUnit = fuzzy;
+            }
+          }
+
+          const normStatus = normalizeStatus(data.status_pegawai);
+          const normJenkel = normalizeJenkel(data.jenkel);
+          const normGolPang = normalizeGolonganPangkat(normStatus, data.golongan, data.pangkat);
 
           setFormData({
-            nip: data.nip || '',
-            nama: data.nama || '',
-            email: data.email || '',
-            status_pegawai: data.status_pegawai || '',
-            golonganPangkat: golPangText,
-            jenkel: data.jenkel || '',
-            jabatan: data.jabatan || '',
-            unit_kerja: data.unit_kerja || '',
+            nip: data.nip || nip,
+            nama: data.nama || localStorage.getItem('userName') || '',
+            email: data.email || localStorage.getItem('userEmail') || '',
+            status_pegawai: normStatus,
+            golonganPangkat: normGolPang,
+            jenkel: normJenkel,
+            jabatan: data.jabatan || localStorage.getItem('userJabatan') || '',
+            unit_kerja: matchedUnit,
             foto_profil: data.foto_profil || ''
           });
         }
@@ -57,6 +127,21 @@ export default function EditProfilPage() {
     };
     fetchData();
   }, [router]);
+
+  const getGolonganOptions = () => {
+    const norm = normalizeStatus(formData.status_pegawai);
+    if (norm === 'PNS') {
+      return [
+        "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I", 
+        "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I", 
+        "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I", 
+        "IV/a - Pembina", "IV/b - Pembina Tk. I", "IV/c - Pembina Utama Muda", "IV/d - Pembina Utama Madya", "IV/e - Pembina Utama"
+      ];
+    } else if (norm === 'PPPK') {
+      return ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII"].map(g => `Golongan ${g}`);
+    }
+    return [];
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,13 +199,33 @@ export default function EditProfilPage() {
     e.preventDefault();
     setIsLoading(true);
 
+    let valGolongan = '-';
+    let valPangkat = '-';
+    
+    const normStatus = normalizeStatus(formData.status_pegawai);
+    if (formData.golonganPangkat && normStatus === 'PNS') {
+      const parts = formData.golonganPangkat.split(' - ');
+      valGolongan = parts[0] || '-';
+      valPangkat = parts[1] || '-';
+    } else if (formData.golonganPangkat && normStatus === 'PPPK') {
+      valGolongan = formData.golonganPangkat.replace(/^Golongan\s+/i, '');
+      valPangkat = 'Tidak Ada';
+    }
+
     try {
       const res = await fetch('/api/pegawai', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nip: formData.nip,
+          nama: formData.nama,
           email: formData.email,
+          status_pegawai: formData.status_pegawai,
+          pangkat: valPangkat,
+          golongan: valGolongan,
+          jenkel: formData.jenkel,
+          jabatan: formData.jabatan,
+          unit_kerja: formData.unit_kerja,
           foto_profil: formData.foto_profil
         })
       });
@@ -130,7 +235,10 @@ export default function EditProfilPage() {
         throw new Error(json.message || json.error || 'Gagal menyimpan data');
       }
       
-      // Sinkronkan email di local storage
+      // Sinkronkan data di local storage
+      if (formData.nama) localStorage.setItem('userName', formData.nama);
+      if (formData.jabatan) localStorage.setItem('userJabatan', formData.jabatan);
+      if (formData.unit_kerja) localStorage.setItem('userUnitKerja', formData.unit_kerja);
       if (formData.email && formData.email.trim() !== '') {
         localStorage.setItem('userEmail', formData.email.trim().toLowerCase());
       } else {
@@ -146,6 +254,8 @@ export default function EditProfilPage() {
     }
   };
 
+  const golOptions = getGolonganOptions();
+
   return (
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -153,7 +263,7 @@ export default function EditProfilPage() {
       <style dangerouslySetInnerHTML={{__html: `
         body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; color: #334155; }
         .navbar-custom { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        .card-custom { border: none; border-radius: 14px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
+        .card-custom { border: none; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
       `}} />
 
       <nav className="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
@@ -166,29 +276,24 @@ export default function EditProfilPage() {
 
       <div className="container mt-4 mb-5">
         <div className="row justify-content-center">
-          <div className="col-lg-7 col-md-9">
+          <div className="col-md-8">
             <div className="card card-custom p-4 bg-white">
-              <div className="border-bottom pb-3 mb-4">
-                <h4 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-                  <i className="bi bi-person-badge text-primary"></i> Pengaturan Profil Pegawai
-                </h4>
-                <p className="text-muted small mb-0">Kelola foto profil dan email notifikasi pengajuan Anda.</p>
-              </div>
+              <h4 className="fw-bold mb-4 border-bottom pb-3"><i className="bi bi-person-gear text-primary me-2"></i> Lengkapi Profil Kepegawaian</h4>
 
               <form onSubmit={handleSubmit}>
                 <div className="row g-3">
                   {/* Foto Profil */}
-                  <div className="col-12 text-center mb-3">
+                  <div className="col-md-12 text-center mb-3">
                     <div 
-                      className="bg-light d-inline-flex justify-content-center align-items-center rounded-circle border border-3 shadow-sm position-relative overflow-hidden cursor-pointer" 
-                      style={{ width: '130px', height: '130px', cursor: 'pointer' }}
+                      className="bg-light d-inline-flex justify-content-center align-items-center rounded-circle border border-3 shadow-sm mb-2 position-relative overflow-hidden cursor-pointer" 
+                      style={{ width: '120px', height: '120px', cursor: 'pointer' }}
                       onClick={() => fileInputRef.current?.click()}
-                      title="Klik untuk ganti foto profil"
+                      title="Klik untuk ubah foto profil"
                     >
                       {formData.foto_profil ? (
                         <img src={getImageUrl(formData.foto_profil)} alt="Foto Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <i className="bi bi-person text-secondary" style={{ fontSize: '4.5rem' }}></i>
+                        <i className="bi bi-person text-secondary" style={{ fontSize: '4rem' }}></i>
                       )}
                       {isUploading && (
                         <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75">
@@ -197,92 +302,136 @@ export default function EditProfilPage() {
                       )}
                     </div>
                     <div>
-                      <button type="button" className="btn btn-sm btn-outline-primary mt-2 rounded-pill px-3 shadow-sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                        <i className="bi bi-camera me-1"></i> Ubah Foto Profil
+                      <button type="button" className="btn btn-sm btn-outline-primary mt-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                        <i className="bi bi-camera me-1"></i> Ubah Foto
                       </button>
                       <input type="file" ref={fileInputRef} className="d-none" accept="image/*" onChange={handlePhotoUpload} />
                     </div>
                   </div>
-
-                  {/* Input Email Notifikasi (Fokus Utama) */}
-                  <div className="col-12">
-                    <div className="p-3 rounded-3 border border-primary border-opacity-25 bg-primary bg-opacity-10">
-                      <label className="form-label fw-bold text-primary mb-1 d-flex align-items-center gap-1">
-                        <i className="bi bi-envelope-check-fill"></i> Email Notifikasi Pengajuan IDP
-                      </label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-white border-end-0 text-muted"><i className="bi bi-envelope"></i></span>
-                        <input 
-                          type="email" 
-                          className="form-control form-control-lg bg-white border-start-0" 
-                          placeholder="contoh: nama@email.com" 
-                          value={formData.email} 
-                          onChange={e => setFormData(prev => ({...prev, email: e.target.value}))} 
-                        />
-                      </div>
-                      <small className="text-muted mt-2 d-block" style={{ fontSize: '0.8rem' }}>
-                        Digunakan untuk menerima pemberitahuan otomatis saat usulan IDP Anda disetujui atau memerlukan revisi.
-                      </small>
-                    </div>
+                  
+                  {/* NIP (Readonly) */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium small mb-1">NIP *</label>
+                    <input type="text" className="form-control bg-light" readOnly value={formData.nip} />
                   </div>
 
-                  {/* Data Kepegawaian (Read-Only dari Master Data BKD / Google Sheets) */}
-                  <div className="col-12 mt-3">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <h6 className="fw-bold text-secondary mb-0 d-flex align-items-center gap-1">
-                        <i className="bi bi-shield-lock-fill text-muted"></i> Data Kepegawaian Resmi
-                      </h6>
-                      <span className="badge bg-light text-muted border fw-semibold">
-                        <i className="bi bi-database-check text-success me-1"></i>Tersinkronisasi BKD
-                      </span>
-                    </div>
+                  {/* Nama Lengkap */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium small mb-1">Nama Lengkap (Termasuk Gelar) *</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      placeholder="Contoh: Budi Santoso, S.Kom." 
+                      required 
+                      value={formData.nama} 
+                      onChange={e => setFormData({...formData, nama: e.target.value})} 
+                    />
+                  </div>
 
-                    <div className="p-3 bg-light rounded-3 border">
-                      <div className="row g-3">
-                        <div className="col-sm-6">
-                          <label className="form-label text-muted small mb-0">NIP</label>
-                          <div className="fw-bold text-dark">{formData.nip || '-'}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="form-label text-muted small mb-0">Nama Lengkap</label>
-                          <div className="fw-bold text-dark">{formData.nama || '-'}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="form-label text-muted small mb-0">Status Pegawai</label>
-                          <div className="fw-semibold text-dark">{formData.status_pegawai || '-'}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="form-label text-muted small mb-0">Golongan / Pangkat</label>
-                          <div className="fw-semibold text-dark">{formData.golonganPangkat || '-'}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="form-label text-muted small mb-0">Jenis Kelamin</label>
-                          <div className="fw-semibold text-dark">{formData.jenkel || '-'}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="form-label text-muted small mb-0">Jabatan</label>
-                          <div className="fw-semibold text-dark">{formData.jabatan || '-'}</div>
-                        </div>
-                        <div className="col-12">
-                          <label className="form-label text-muted small mb-0">Unit Kerja</label>
-                          <div className="fw-semibold text-dark">{formData.unit_kerja || '-'}</div>
-                        </div>
-                      </div>
+                  {/* Email Notifikasi (Fokus pengisian - opsional / boleh kosong) */}
+                  <div className="col-md-12">
+                    <label className="form-label fw-medium small mb-1">Email Notifikasi</label>
+                    <div className="input-group">
+                      <span className="input-group-text"><i className="bi bi-envelope"></i></span>
+                      <input 
+                        type="email" 
+                        className="form-control" 
+                        placeholder="contoh: nama@email.com (opsional)" 
+                        value={formData.email} 
+                        onChange={e => setFormData({...formData, email: e.target.value})} 
+                      />
                     </div>
-
-                    <div className="text-muted d-flex align-items-center gap-1 mt-2" style={{ fontSize: '0.78rem' }}>
-                      <i className="bi bi-info-circle text-primary"></i>
-                      <span>Data kepegawaian di atas bersumber langsung dari Google Sheets BKD dan tidak perlu diisi manual.</span>
-                    </div>
+                    <small className="text-muted" style={{ fontSize: '0.78rem' }}>Digunakan untuk menerima notifikasi pengajuan dan persetujuan IDP. Dapat diubah atau dikosongkan kapan saja.</small>
+                  </div>
+                  
+                  {/* Status Pegawai */}
+                  <div className="col-md-12">
+                    <label className="form-label fw-medium small mb-1">Status Pegawai *</label>
+                    <select 
+                      className="form-select" 
+                      required 
+                      value={formData.status_pegawai} 
+                      onChange={e => setFormData({...formData, status_pegawai: e.target.value, golonganPangkat: ''})}
+                    >
+                      <option value="">- Pilih Status -</option>
+                      <option value="PNS">PNS</option>
+                      <option value="PPPK">PPPK</option>
+                      <option value="PW">PW (Pegawai Wiyata / Non-ASN)</option>
+                    </select>
+                  </div>
+                  
+                  {/* Golongan / Pangkat */}
+                  <div className="col-md-12">
+                    <label className="form-label fw-medium small mb-1">Golongan / Pangkat *</label>
+                    <select 
+                      className="form-select" 
+                      required={formData.status_pegawai !== 'PW'} 
+                      disabled={!formData.status_pegawai || formData.status_pegawai === 'PW'} 
+                      value={formData.golonganPangkat} 
+                      onChange={e => setFormData({...formData, golonganPangkat: e.target.value})}
+                    >
+                      <option value="">- Pilih Golongan / Pangkat -</option>
+                      {formData.golonganPangkat && !golOptions.includes(formData.golonganPangkat) && (
+                        <option value={formData.golonganPangkat}>{formData.golonganPangkat}</option>
+                      )}
+                      {golOptions.map((opt, i) => (
+                        <option key={i} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Jenis Kelamin (Otomatis terpilih Laki-Laki / Perempuan) */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium small mb-1">Jenis Kelamin *</label>
+                    <select 
+                      className="form-select" 
+                      required 
+                      value={formData.jenkel} 
+                      onChange={e => setFormData({...formData, jenkel: e.target.value})}
+                    >
+                      <option value="">- Pilih Jenis Kelamin -</option>
+                      <option value="Laki-Laki">Laki-Laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+                  
+                  {/* Jabatan */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium small mb-1">Jabatan *</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      placeholder="Contoh: Pranata Komputer Ahli Muda" 
+                      required 
+                      value={formData.jabatan} 
+                      onChange={e => setFormData({...formData, jabatan: e.target.value})} 
+                    />
+                  </div>
+                  
+                  {/* Unit Kerja (Otomatis terpilih unit kerja dari database) */}
+                  <div className="col-md-12">
+                    <label className="form-label fw-medium small mb-1">Unit Kerja (Kab. Bangka Barat) *</label>
+                    <select 
+                      className="form-select" 
+                      required 
+                      value={formData.unit_kerja} 
+                      onChange={e => setFormData({...formData, unit_kerja: e.target.value})}
+                    >
+                      <option value="">- PILIH UNIT KERJA -</option>
+                      {formData.unit_kerja && !UNIT_KERJA_OPTIONS.some(o => o.toLowerCase() === formData.unit_kerja.toLowerCase()) && (
+                        <option value={formData.unit_kerja}>{formData.unit_kerja}</option>
+                      )}
+                      {UNIT_KERJA_OPTIONS.map(opd => (
+                        <option key={opd} value={opd}>{opd}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                <div className="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
-                  <button type="button" onClick={() => router.push('/dashboard')} className="btn btn-outline-secondary px-3">
-                    Batal
-                  </button>
-                  <button type="submit" disabled={isLoading} className="btn btn-primary px-4 fw-bold shadow-sm">
-                    {isLoading ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="bi bi-check2 me-1"></i>}
+                <div className="d-flex justify-content-end mt-4 pt-3 border-top">
+                  <button type="button" onClick={() => router.push('/dashboard')} className="btn btn-outline-secondary me-2">Batal</button>
+                  <button type="submit" disabled={isLoading} className="btn btn-primary px-4 fw-bold">
+                    {isLoading ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="bi bi-save me-1"></i>}
                     Simpan Profil
                   </button>
                 </div>
