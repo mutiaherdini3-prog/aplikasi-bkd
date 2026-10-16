@@ -60,6 +60,8 @@ export default function AdminPage() {
   const [searchSertifikasi, setSearchSertifikasi] = useState('');
   const [exportJenisKursusFilter, setExportJenisKursusFilter] = useState('all');
   const [searchIdp, setSearchIdp] = useState('');
+  const [openExportPegawaiDropdown, setOpenExportPegawaiDropdown] = useState(false);
+  const [openExportSertDropdown, setOpenExportSertDropdown] = useState(false);
 
   // State untuk Import Template Sertifikasi Massal (contoh: Rabu Bertamu)
   const [showImportSertifikasiModal, setShowImportSertifikasiModal] = useState(false);
@@ -789,8 +791,8 @@ export default function AdminPage() {
   };
 
   const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK', onlyWithJP = false, showTargetAndStatus = false) => {
-    if (userRole !== 'super_admin') {
-      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
+    if (userRole !== 'super_admin' && userRole !== 'admin' && userRole !== 'admin_diklat') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Admin.');
       return;
     }
     let baseList = pegawaiList;
@@ -854,8 +856,8 @@ export default function AdminPage() {
   const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum", undefined, false, true);
 
   const exportIdpToExcel = () => {
-    if (userRole !== 'super_admin') {
-      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
+    if (userRole !== 'super_admin' && userRole !== 'admin' && userRole !== 'admin_diklat') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Admin.');
       return;
     }
     const idpItems = pegawaiList.flatMap((p) => {
@@ -912,8 +914,8 @@ export default function AdminPage() {
   };
 
   const exportTrenToExcel = () => {
-    if (userRole !== 'super_admin') {
-      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
+    if (userRole !== 'super_admin' && userRole !== 'admin' && userRole !== 'admin_diklat') {
+      alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Admin.');
       return;
     }
     if (trenViewMode === 'pegawai') {
@@ -2087,16 +2089,49 @@ export default function AdminPage() {
                         <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
-                      {userRole === 'super_admin' && (
-                        <div className="dropdown">
-                          <button className="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                      {(userRole === 'super_admin' || userRole === 'admin' || userRole === 'admin_diklat') && (
+                        <div className="dropdown position-relative">
+                          <button 
+                            className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1" 
+                            type="button" 
+                            onClick={() => setOpenExportPegawaiDropdown(!openExportPegawaiDropdown)}
+                          >
+                            <i className="bi bi-file-earmark-excel"></i>
+                            <span>Export Excel</span>
                           </button>
-                          <ul className="dropdown-menu">
-                            <li><button className="dropdown-item" onClick={exportToExcelDataPegawai}>Semua</button></li>
-                            <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPNS}>PNS</button></li>
-                            <li><button className="dropdown-item" onClick={exportToExcelDataPegawaiPPPK}>PPPK</button></li>
-                          </ul>
+                          {openExportPegawaiDropdown && (
+                            <ul 
+                              className="dropdown-menu show shadow-lg border-0 mt-1 py-1" 
+                              style={{ 
+                                position: 'absolute', 
+                                top: '100%', 
+                                right: 0, 
+                                zIndex: 1055, 
+                                display: 'block',
+                                minWidth: '200px',
+                                borderRadius: '10px'
+                              }}
+                            >
+                              <li>
+                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => { setOpenExportPegawaiDropdown(false); exportToExcelDataPegawai(); }}>
+                                  <span><i className="bi bi-people me-2 text-primary"></i>Semua Pegawai</span>
+                                  <span className="badge bg-secondary-subtle text-secondary">{pegawaiList.length}</span>
+                                </button>
+                              </li>
+                              <li>
+                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => { setOpenExportPegawaiDropdown(false); exportToExcelDataPegawaiPNS(); }}>
+                                  <span><i className="bi bi-person-check me-2 text-success"></i>PNS Saja</span>
+                                  <span className="badge bg-primary-subtle text-primary">{pnsList.length}</span>
+                                </button>
+                              </li>
+                              <li>
+                                <button className="dropdown-item py-2 d-flex align-items-center justify-content-between" onClick={() => { setOpenExportPegawaiDropdown(false); exportToExcelDataPegawaiPPPK(); }}>
+                                  <span><i className="bi bi-person-badge me-2 text-info"></i>PPPK Saja</span>
+                                  <span className="badge bg-info-subtle text-dark">{pppkList.length}</span>
+                                </button>
+                              </li>
+                            </ul>
+                          )}
                         </div>
                       )}
                     </div>
@@ -2286,18 +2321,50 @@ export default function AdminPage() {
                             <option value="Pelatihan manajerial">Pelatihan manajerial</option>
                             <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
+                          {(userRole === 'super_admin' || userRole === 'admin' || userRole === 'admin_diklat') && (
+                            <div className="dropdown position-relative">
+                              <button 
+                                className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1" 
+                                type="button" 
+                                onClick={() => setOpenExportSertDropdown(!openExportSertDropdown)}
+                              >
+                                <i className="bi bi-file-earmark-excel"></i>
+                                <span>Export Excel</span>
+                              </button>
+                              {openExportSertDropdown && (
+                                <ul 
+                                  className="dropdown-menu show shadow-lg border-0 mt-1 py-1" 
+                                  style={{ 
+                                    position: 'absolute', 
+                                    top: '100%', 
+                                    right: 0, 
+                                    zIndex: 1055, 
+                                    display: 'block',
+                                    minWidth: '220px',
+                                    borderRadius: '10px'
+                                  }}
+                                >
+                                  <li>
+                                    <button className="dropdown-item py-2" onClick={() => { setOpenExportSertDropdown(false); exportToExcelSert(); }}>
+                                      <i className="bi bi-card-checklist me-2 text-primary"></i>Semua Sertifikasi
+                                    </button>
+                                  </li>
+                                  <li>
+                                    <button className="dropdown-item py-2" onClick={() => { setOpenExportSertDropdown(false); exportToExcelSertPNS(); }}>
+                                      <i className="bi bi-person-check me-2 text-success"></i>Sertifikasi PNS Saja
+                                    </button>
+                                  </li>
+                                  <li>
+                                    <button className="dropdown-item py-2" onClick={() => { setOpenExportSertDropdown(false); exportToExcelSertPPPK(); }}>
+                                      <i className="bi bi-person-badge me-2 text-info"></i>Sertifikasi PPPK Saja
+                                    </button>
+                                  </li>
+                                </ul>
+                              )}
+                            </div>
+                          )}
                           {userRole === 'super_admin' && (
                             <>
-                              <div className="dropdown">
-                                <button className="btn btn-sm btn-success dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                  <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
-                                </button>
-                                <ul className="dropdown-menu">
-                                  <li><button className="dropdown-item" onClick={exportToExcelSert}>Semua</button></li>
-                                  <li><button className="dropdown-item" onClick={exportToExcelSertPNS}>PNS</button></li>
-                                  <li><button className="dropdown-item" onClick={exportToExcelSertPPPK}>PPPK</button></li>
-                                </ul>
-                              </div>
                               <button 
                                 className="btn btn-sm btn-outline-success shadow-sm" 
                                 onClick={downloadTemplateSertifikasi}
@@ -3019,18 +3086,18 @@ export default function AdminPage() {
                         />
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
                       </div>
+                      {(userRole === 'super_admin' || userRole === 'admin' || userRole === 'admin_diklat') && (
+                        <button className="btn btn-sm btn-success shadow-sm" onClick={exportIdpToExcel}>
+                          <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+                        </button>
+                      )}
                       {userRole === 'super_admin' && (
-                        <>
-                          <button className="btn btn-sm btn-success" onClick={exportIdpToExcel}>
-                            <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
-                          </button>
-                          <button className="btn btn-sm btn-primary" onClick={() => {
-                            setIdpForm({ isEdit: false });
-                            setShowIdpModal(true);
-                          }}>
-                            <i className="bi bi-plus-lg me-1"></i> Tambah IDP
-                          </button>
-                        </>
+                        <button className="btn btn-sm btn-primary shadow-sm" onClick={() => {
+                          setIdpForm({ isEdit: false });
+                          setShowIdpModal(true);
+                        }}>
+                          <i className="bi bi-plus-lg me-1"></i> Tambah IDP
+                        </button>
                       )}
                     </div>
                   </div>
