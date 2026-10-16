@@ -1557,6 +1557,35 @@ export default function AdminPage() {
     return filteredPegawaiTrendList.slice(start, start + ITEMS_PER_PAGE_PEGAWAI);
   }, [filteredPegawaiTrendList, currentPageTrenPegawai]);
 
+  const filteredPegawaiList = useMemo(() => {
+    if (!searchPegawai) return pegawaiList;
+    const query = searchPegawai.toLowerCase().trim();
+    return pegawaiList.filter(p => 
+      (p.nama && p.nama.toLowerCase().includes(query)) || 
+      (p.nip && p.nip.toLowerCase().includes(query))
+    );
+  }, [pegawaiList, searchPegawai]);
+
+  const allIdpItems = useMemo(() => {
+    return pegawaiList.flatMap((p) => {
+      if (!p.idp || p.idp.length === 0) return [];
+      return p.idp.map((idp: any) => ({ p, idp }));
+    });
+  }, [pegawaiList]);
+
+  const filteredIdpItems = useMemo(() => {
+    return allIdpItems.filter((item: any) => {
+      if (tahunFilter !== 'all') {
+        if (item.idp.tahun !== tahunFilter && (!item.idp.waktu_pelaksanaan_awal || !item.idp.waktu_pelaksanaan_awal.includes(tahunFilter))) return false;
+      }
+      if (!searchIdp) return true;
+      const query = searchIdp.toLowerCase().trim();
+      return (item.p.nama && item.p.nama.toLowerCase().includes(query)) ||
+             (item.p.nip && item.p.nip.toLowerCase().includes(query)) ||
+             (item.idp.jenis_kompetensi && item.idp.jenis_kompetensi.toLowerCase().includes(query));
+    });
+  }, [allIdpItems, tahunFilter, searchIdp]);
+
   return (
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -2083,15 +2112,7 @@ export default function AdminPage() {
               })()}
 
               {/* DATA PEGAWAI TAB */}
-              {activeTab === 'view-pegawai' && (() => {
-                const filteredPegawaiList = pegawaiList.filter(p => {
-                  if (!searchPegawai) return true;
-                  const query = searchPegawai.toLowerCase();
-                  return (p.nama && p.nama.toLowerCase().includes(query)) || 
-                         (p.nip && p.nip.toLowerCase().includes(query));
-                });
-                
-                return (
+              {activeTab === 'view-pegawai' && (
                 <div className="table-card">
                   {userRole !== 'super_admin' && (
                     <div className="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between shadow-sm" style={{ borderRadius: '8px', fontSize: '0.85rem' }}>
@@ -2298,7 +2319,7 @@ export default function AdminPage() {
                   </div>
                   <PaginationControls currentPage={currentPagePegawai} setCurrentPage={setCurrentPagePegawai} totalItems={filteredPegawaiList.length} />
                 </div>
-              );})()}
+              )}
 
               {/* REKAP SERTIFIKASI TAB */}
               {activeTab === 'view-sertifikasi' && (() => {
@@ -3162,154 +3183,126 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(
-                          (() => {
-                            const idpItems = pegawaiList.flatMap((p) => {
-                              if (!p.idp || p.idp.length === 0) return [];
-                              return p.idp.map((idp: any) => ({ p, idp }));
-                            }).filter((item: any) => {
-                              if (tahunFilter !== 'all') {
-                                if (item.idp.tahun !== tahunFilter && (!item.idp.waktu_pelaksanaan_awal || !item.idp.waktu_pelaksanaan_awal.includes(tahunFilter))) return false;
-                              }
-                              if (!searchIdp) return true;
-                              const query = searchIdp.toLowerCase();
-                              return (item.p.nama && item.p.nama.toLowerCase().includes(query)) ||
-                                     (item.p.nip && item.p.nip.toLowerCase().includes(query)) ||
-                                     (item.idp.jenis_kompetensi && item.idp.jenis_kompetensi.toLowerCase().includes(query));
-                            });
-                            
-                            if (idpItems.length === 0) return null;
-                            
-                            const paginatedIdp = idpItems.slice((currentPageIdp - 1) * ITEMS_PER_PAGE, currentPageIdp * ITEMS_PER_PAGE);
-                            return (
-                              <>
-                                {paginatedIdp.map((item: any, idx: number) => {
-                                  const displayNo = (currentPageIdp - 1) * ITEMS_PER_PAGE + idx + 1;
-                                  const p = item.p;
-                                  const idp = item.idp;
-                                  return (
-                                    <tr key={idp._rowIndex || item.p.nip + "-" + idx}>
-                                      <td>{displayNo}</td>
-                                      <td className="fw-bold">{p.nama}<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>{p.nip}</span></td>
-                                      <td>{idp.jenis_kompetensi}</td>
-                                      <td>{idp.jenis_pengembangan}<br/><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
-                                      <td>{idp.penyelenggara}</td>
-                                      <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
-                                      <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
-                                      <td>
-                                        {idp.status === 'Disetujui' ? (
-                                          <span className="badge bg-success"><i className="bi bi-check-circle-fill me-1"></i>Disetujui Final (BKPSDMD)</span>
-                                        ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
-                                          <div>
-                                            <span className="badge bg-info text-dark"><i className="bi bi-arrow-right-circle me-1"></i>Disetujui OPD</span>
-                                            <div className="text-muted mt-1" style={{fontSize: '0.7rem'}}>Menunggu Final BKPSDMD</div>
-                                          </div>
-                                        ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
-                                          <span className="badge bg-warning text-dark"><i className="bi bi-clock-history me-1"></i>Menunggu Verifikasi OPD</span>
-                                        ) : idp.status === 'Ditolak BKPSDMD' ? (
-                                          <div>
-                                            <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak BKPSDMD</span>
-                                            {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
-                                          </div>
-                                        ) : (idp.status === 'Ditolak OPD' || idp.status === 'Ditolak Atasan OPD') ? (
-                                          <div>
-                                            <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak OPD</span>
-                                            {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
-                                          </div>
-                                        ) : idp.status.toLowerCase().includes('ditolak') ? (
-                                          <div>
-                                            <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>{idp.status}</span>
-                                            {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
-                                          </div>
-                                        ) : (
-                                          <span className="badge bg-secondary">{idp.status}</span>
-                                        )}
-                                      </td>
-                                      <td className="text-center">
-                                        {userRole !== 'super_admin' ? (
-                                          /* ADMIN OPD: VIEW ONLY / TIDAK BISA MENGUBAH DATA */
-                                          <span className="badge bg-light text-muted border py-1 px-2" title="Mode Pemantauan OPD (Hanya Melihat)">
-                                            <i className="bi bi-eye me-1"></i>Hanya Pantau
-                                          </span>
-                                        ) : (
-                                          /* AKSI VERIFIKASI ADMIN BKPSDMD / SUPER ADMIN (TAHAP 2 - APPROVAL NYATA/FINAL) */
-                                          p.nip === loggedInNip ? (
-                                            <span className="badge bg-secondary-subtle text-secondary py-1 px-2 border" title="Pengajuan pribadi Anda">
-                                              <i className="bi bi-person-fill me-1"></i>Pengajuan Pribadi
-                                            </span>
-                                          ) : (idp.status !== 'Disetujui' && !idp.status.toLowerCase().includes('ditolak')) ? (
-                                            <div className="d-flex justify-content-center gap-1">
-                                              <button 
-                                                className="btn btn-sm btn-success" 
-                                                title="Berikan Persetujuan Final (BKPSDMD)" 
-                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui', 'Berikan Persetujuan FINAL (BKPSDMD) pada pengajuan IDP ini?')}
-                                              >
-                                                <i className="bi bi-check-circle-fill me-1"></i>Setujui Final
-                                              </button>
-                                              <button 
-                                                className="btn btn-sm btn-danger" 
-                                                title="Tolak Pengajuan IDP (BKPSDMD)" 
-                                                onClick={() => {
-                                                  setIdpRejectData({
-                                                    rowIndex: idp._rowIndex,
-                                                    status: 'Ditolak BKPSDMD',
-                                                    namaPegawai: p.nama,
-                                                    kompetensi: idp.jenis_kompetensi
-                                                  });
-                                                  setRejectReason('Tidak tersedia anggaran');
-                                                  setCustomReason('');
-                                                }}
-                                              >
-                                                <i className="bi bi-x-circle-fill me-1"></i>Tolak
-                                              </button>
-                                            </div>
-                                          ) : idp.status === 'Disetujui' ? (
-                                            <span className="badge bg-success py-1 px-2"><i className="bi bi-check2-all me-1"></i>Disetujui Final</span>
-                                          ) : (
-                                            <div className="d-flex align-items-center justify-content-center gap-1">
-                                              <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>{idp.status}</span>
-                                              <button 
-                                                className="btn btn-xs btn-outline-secondary" 
-                                                style={{fontSize: '0.7rem', padding: '1px 5px'}} 
-                                                title="Tinjau Ulang / Reset Status" 
-                                                onClick={() => updateIdpStatus(idp._rowIndex, 'Menunggu Persetujuan Admin', 'Buka kembali usulan IDP ini menjadi Menunggu Verifikasi BKPSDMD?')}
-                                              >
-                                                <i className="bi bi-arrow-counterclockwise"></i>
-                                              </button>
-                                            </div>
-                                          )
-                                        )}
-                                      </td>
-                                      {userRole === 'super_admin' && (
-                                        <td className="text-center">
-                                          <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
-                                            setIdpForm({ ...idp, nip: p.nip, isEdit: true });
-                                            setShowIdpModal(true);
-                                          }}><i className="bi bi-pencil"></i></button>
-                                          <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex, idp.jenis_kompetensi)}><i className="bi bi-trash"></i></button>
-                                        </td>
-                                      )}
-                                    </tr>
-                                  );
-                                })}
-                              </>
-                            );
-                          })()
-                        )}
-                        
-                        {/* Jika kosong semua */}
-                        {pegawaiList.flatMap(p => p.idp || []).length === 0 && (
+                        {filteredIdpItems.slice((currentPageIdp - 1) * ITEMS_PER_PAGE, currentPageIdp * ITEMS_PER_PAGE).map((item: any, idx: number) => {
+                          const displayNo = (currentPageIdp - 1) * ITEMS_PER_PAGE + idx + 1;
+                          const p = item.p;
+                          const idp = item.idp;
+                          return (
+                            <tr key={idp._rowIndex || item.p.nip + "-" + idx}>
+                              <td>{displayNo}</td>
+                              <td className="fw-bold">{p.nama}<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>{p.nip}</span></td>
+                              <td>{idp.jenis_kompetensi}</td>
+                              <td>{idp.jenis_pengembangan}<br/><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
+                              <td>{idp.penyelenggara}</td>
+                              <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
+                              <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
+                              <td>
+                                {idp.status === 'Disetujui' ? (
+                                  <span className="badge bg-success"><i className="bi bi-check-circle-fill me-1"></i>Disetujui Final (BKPSDMD)</span>
+                                ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
+                                  <div>
+                                    <span className="badge bg-info text-dark"><i className="bi bi-arrow-right-circle me-1"></i>Disetujui OPD</span>
+                                    <div className="text-muted mt-1" style={{fontSize: '0.7rem'}}>Menunggu Final BKPSDMD</div>
+                                  </div>
+                                ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
+                                  <span className="badge bg-warning text-dark"><i className="bi bi-clock-history me-1"></i>Menunggu Verifikasi OPD</span>
+                                ) : idp.status === 'Ditolak BKPSDMD' ? (
+                                  <div>
+                                    <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak BKPSDMD</span>
+                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                  </div>
+                                ) : (idp.status === 'Ditolak OPD' || idp.status === 'Ditolak Atasan OPD') ? (
+                                  <div>
+                                    <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak OPD</span>
+                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                  </div>
+                                ) : idp.status.toLowerCase().includes('ditolak') ? (
+                                  <div>
+                                    <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>{idp.status}</span>
+                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                  </div>
+                                ) : (
+                                  <span className="badge bg-secondary">{idp.status}</span>
+                                )}
+                              </td>
+                              <td className="text-center">
+                                {userRole !== 'super_admin' ? (
+                                  /* ADMIN OPD: VIEW ONLY / TIDAK BISA MENGUBAH DATA */
+                                  <span className="badge bg-light text-muted border py-1 px-2" title="Mode Pemantauan OPD (Hanya Melihat)">
+                                    <i className="bi bi-eye me-1"></i>Hanya Pantau
+                                  </span>
+                                ) : (
+                                  /* AKSI VERIFIKASI ADMIN BKPSDMD / SUPER ADMIN (TAHAP 2 - APPROVAL NYATA/FINAL) */
+                                  p.nip === loggedInNip ? (
+                                    <span className="badge bg-secondary-subtle text-secondary py-1 px-2 border" title="Pengajuan pribadi Anda">
+                                      <i className="bi bi-person-fill me-1"></i>Pengajuan Pribadi
+                                    </span>
+                                  ) : (idp.status !== 'Disetujui' && !idp.status.toLowerCase().includes('ditolak')) ? (
+                                    <div className="d-flex justify-content-center gap-1">
+                                      <button 
+                                        className="btn btn-sm btn-success" 
+                                        title="Berikan Persetujuan Final (BKPSDMD)" 
+                                        onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui', 'Berikan Persetujuan FINAL (BKPSDMD) pada pengajuan IDP ini?')}
+                                      >
+                                        <i className="bi bi-check-circle-fill me-1"></i>Setujui Final
+                                      </button>
+                                      <button 
+                                        className="btn btn-sm btn-danger" 
+                                        title="Tolak Pengajuan IDP (BKPSDMD)" 
+                                        onClick={() => {
+                                          setIdpRejectData({
+                                            rowIndex: idp._rowIndex,
+                                            status: 'Ditolak BKPSDMD',
+                                            namaPegawai: p.nama,
+                                            kompetensi: idp.jenis_kompetensi
+                                          });
+                                          setRejectReason('Tidak tersedia anggaran');
+                                          setCustomReason('');
+                                        }}
+                                      >
+                                        <i className="bi bi-x-circle-fill me-1"></i>Tolak
+                                      </button>
+                                    </div>
+                                  ) : idp.status === 'Disetujui' ? (
+                                    <span className="badge bg-success py-1 px-2"><i className="bi bi-check2-all me-1"></i>Disetujui Final</span>
+                                  ) : (
+                                    <div className="d-flex align-items-center justify-content-center gap-1">
+                                      <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>{idp.status}</span>
+                                      <button 
+                                        className="btn btn-xs btn-outline-secondary" 
+                                        style={{fontSize: '0.7rem', padding: '1px 5px'}} 
+                                        title="Tinjau Ulang / Reset Status" 
+                                        onClick={() => updateIdpStatus(idp._rowIndex, 'Menunggu Persetujuan Admin', 'Buka kembali usulan IDP ini menjadi Menunggu Verifikasi BKPSDMD?')}
+                                      >
+                                        <i className="bi bi-arrow-counterclockwise"></i>
+                                      </button>
+                                    </div>
+                                  )
+                                )}
+                              </td>
+                              {userRole === 'super_admin' && (
+                                <td className="text-center">
+                                  <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
+                                    setIdpForm({ ...idp, nip: p.nip, isEdit: true });
+                                    setShowIdpModal(true);
+                                  }}><i className="bi bi-pencil"></i></button>
+                                  <button className="btn btn-sm btn-outline-danger" title="Hapus IDP" onClick={() => hapusIdp(idp._rowIndex, idp.jenis_kompetensi)}><i className="bi bi-trash"></i></button>
+                                </td>
+                              )}
+                            </tr>
+                          );
+                        })}
+                        {filteredIdpItems.length === 0 && (
                           <tr>
-                            <td colSpan={10} className="text-center text-muted py-4">Belum ada pengajuan IDP dari pegawai.</td>
+                            <td colSpan={userRole === 'super_admin' ? 10 : 9} className="text-center text-muted py-4">
+                              {allIdpItems.length === 0 ? 'Belum ada pengajuan IDP dari pegawai.' : 'Tidak ada pengajuan IDP yang sesuai pencarian / filter tahun.'}
+                            </td>
                           </tr>
                         )}
                       </tbody>
                     </table>
                   </div>
-                  {(() => {
-                    const idpItemsLength = pegawaiList.reduce((acc, p) => acc + (p.idp ? p.idp.length : 0), 0);
-                    return <PaginationControls currentPage={currentPageIdp} setCurrentPage={setCurrentPageIdp} totalItems={idpItemsLength} />;
-                  })()}
+                  <PaginationControls currentPage={currentPageIdp} setCurrentPage={setCurrentPageIdp} totalItems={filteredIdpItems.length} />
                 </div>
               )}
 
