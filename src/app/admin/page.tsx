@@ -2826,13 +2826,12 @@ export default function AdminPage() {
                                   </th>
                                 ))}
                                 <th className="text-center" style={{ width: '130px' }}>Status Tren</th>
-                                <th className="text-center" style={{ width: '100px' }}>Aksi</th>
                               </tr>
                             </thead>
                             <tbody>
                               {paginatedPegawaiTrend.length === 0 ? (
                                 <tr>
-                                  <td colSpan={6 + trendYears.length} className="text-center py-5 text-muted">
+                                  <td colSpan={5 + trendYears.length} className="text-center py-5 text-muted">
                                     <i className="bi bi-inbox fs-3 d-block mb-2"></i>
                                     Tidak ada data pegawai yang sesuai dengan filter.
                                   </td>
@@ -2887,16 +2886,7 @@ export default function AdminPage() {
                                           </span>
                                         )}
                                       </td>
-                                      <td className="text-center">
-                                        <button 
-                                          className="btn btn-sm btn-outline-info py-1 px-2"
-                                          style={{ fontSize: '0.78rem' }}
-                                          onClick={() => { setSelectedPegawai(p); setShowModal(true); }}
-                                          title="Lihat Detail Pegawai"
-                                        >
-                                          <i className="bi bi-eye me-1"></i> Detail
-                                        </button>
-                                      </td>
+
                                     </tr>
                                   );
                                 })
@@ -3063,13 +3053,13 @@ export default function AdminPage() {
                                                       {trendYears.map(yr => (
                                                         <th key={yr} className="text-center">JP {yr}</th>
                                                       ))}
-                                                      <th className="text-center">Aksi</th>
+
                                                     </tr>
                                                   </thead>
                                                   <tbody>
                                                     {pagedMembers.length === 0 ? (
                                                       <tr>
-                                                        <td colSpan={5 + trendYears.length} className="text-center py-3 text-muted">Belum ada data pegawai di OPD ini.</td>
+                                                        <td colSpan={4 + trendYears.length} className="text-center py-3 text-muted">Belum ada data pegawai di OPD ini.</td>
                                                       </tr>
                                                     ) : (
                                                       pagedMembers.map((m, mIdx) => {
@@ -3096,16 +3086,7 @@ export default function AdminPage() {
                                                                 </td>
                                                               );
                                                             })}
-                                                            <td className="text-center">
-                                                              <button 
-                                                                className="btn btn-sm btn-outline-info py-0 px-2"
-                                                                style={{ fontSize: '0.75rem' }}
-                                                                onClick={() => { setSelectedPegawai(m); setShowModal(true); }}
-                                                                title="Lihat Detail Pegawai"
-                                                              >
-                                                                <i className="bi bi-eye"></i> Detail
-                                                              </button>
-                                                            </td>
+
                                                           </tr>
                                                         );
                                                       })
