@@ -2252,8 +2252,7 @@ export default function AdminPage() {
                               )}
                             </td>
                             <td className="text-center">
-                              <button className="btn btn-sm btn-outline-info me-1" title="Lihat Profil" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}><i className="bi bi-eye"></i></button>
-                              {userRole === 'super_admin' && (
+                              {userRole === 'super_admin' ? (
                                 <>
                                   <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
                                     const jenkelOptions = ['LAKI-LAKI', 'PEREMPUAN'];
@@ -2310,6 +2309,8 @@ export default function AdminPage() {
                                   }}><i className="bi bi-pencil"></i></button>
                                   <button className="btn btn-sm btn-outline-danger" onClick={() => hapusPegawai(p.nip, p.nama)} title="Hapus Pegawai"><i className="bi bi-trash"></i></button>
                                 </>
+                              ) : (
+                                <span className="text-muted small">-</span>
                               )}
                             </td>
                           </tr>
