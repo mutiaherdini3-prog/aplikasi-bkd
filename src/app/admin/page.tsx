@@ -750,82 +750,118 @@ export default function AdminPage() {
     }, 60);
   };
 
-  const generateExcelSheet = (pegawaiData: any[], sheetName: string, workbook: any, statusKelulusanLabel?: string, showTargetAndStatus = false) => {
+  const generateExcelSheet = (
+    pegawaiData: any[], 
+    sheetName: string, 
+    workbook: any, 
+    statusKelulusanLabel?: string, 
+    showTargetAndStatus = false,
+    includeCerts = true
+  ) => {
     if (pegawaiData.length === 0) return;
     
-    const maxCerts = pegawaiData.reduce((max, p) => {
-      const len = (p.filteredSertifikasi || p.sertifikasi || []).length;
-      return len > max ? len : max;
-    }, 0);
-
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    let excelData: any[] = [];
 
-    const excelData = pegawaiData.map((p, index) => {
-      const baseRow: any = {
-        "No": index + 1,
-        "NIP": p.nip,
-        "Nama Pegawai": p.nama,
-        "Jenis Kelamin": p.jenis_kelamin,
-        "Status Pegawai": p.status_pegawai,
-        "Pangkat/Golongan": p.pangkat,
-        "Jabatan": p.jabatan,
-        "Unit Kerja": p.unit_kerja,
-        "Total JP": p.jp,
-      };
-      if (showTargetAndStatus) {
-        baseRow["Target JP"] = getTargetJP(p);
-        baseRow["Status Kelulusan"] = statusKelulusanLabel || (checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI");
-      }
-
-      const certs = p.filteredSertifikasi || p.sertifikasi || [];
-      for (let i = 0; i < maxCerts; i++) {
-        if (i < certs.length) {
-          const s = certs[i];
-          baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
-          baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
-          baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
-          baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
-          baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
-          let linkUrl = s.link_sertifikat || 'Tidak ada link';
-          if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
-            const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
-            if (match && match[1]) linkUrl = match[1];
-          }
-          if (typeof linkUrl === 'string') {
-            if (linkUrl.startsWith('/uploads')) linkUrl = `${origin}${linkUrl}`;
-            if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
-              linkUrl = `${origin}/view?url=${encodeURIComponent(linkUrl)}`;
-            }
-          }
-          baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
-        } else {
-          baseRow[`Nama Sertifikat ${i + 1}`] = '-';
-          baseRow[`Jenis Kursus ${i + 1}`] = '-';
-          baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
-          baseRow[`Penanda Tangan ${i + 1}`] = '-';
-          baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
-          baseRow[`Link Sertifikat ${i + 1}`] = '-';
+    if (!includeCerts) {
+      // Format Rapi Data Pegawai: No, NIP, Nama Pegawai, Jabatan, Unit Kerja, Total JP
+      excelData = pegawaiData.map((p, index) => {
+        const row: any = {
+          "No": index + 1,
+          "NIP": p.nip || '-',
+          "Nama Pegawai": p.nama || '-',
+          "Jabatan": p.jabatan || '-',
+          "Unit Kerja": p.unit_kerja || '-',
+          "Total JP": p.jp || 0,
+        };
+        if (showTargetAndStatus) {
+          row["Target JP"] = getTargetJP(p);
+          row["Status Kelulusan"] = statusKelulusanLabel || (checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI");
         }
-      }
-      return baseRow;
-    });
+        return row;
+      });
+    } else {
+      const maxCerts = pegawaiData.reduce((max, p) => {
+        const len = (p.filteredSertifikasi || p.sertifikasi || []).length;
+        return len > max ? len : max;
+      }, 0);
+
+      excelData = pegawaiData.map((p, index) => {
+        const baseRow: any = {
+          "No": index + 1,
+          "NIP": p.nip,
+          "Nama Pegawai": p.nama,
+          "Jenis Kelamin": p.jenis_kelamin,
+          "Status Pegawai": p.status_pegawai,
+          "Pangkat/Golongan": p.pangkat,
+          "Jabatan": p.jabatan,
+          "Unit Kerja": p.unit_kerja,
+          "Total JP": p.jp,
+        };
+        if (showTargetAndStatus) {
+          baseRow["Target JP"] = getTargetJP(p);
+          baseRow["Status Kelulusan"] = statusKelulusanLabel || (checkLulusJP(p) ? "MEMENUHI" : "BELUM MEMENUHI");
+        }
+
+        const certs = p.filteredSertifikasi || p.sertifikasi || [];
+        for (let i = 0; i < maxCerts; i++) {
+          if (i < certs.length) {
+            const s = certs[i];
+            baseRow[`Nama Sertifikat ${i + 1}`] = s.nama_kursus || s.jenis_sertifikasi || '-';
+            baseRow[`Jenis Kursus ${i + 1}`] = s['jenis kursus'] || s.jenis_kursus || '-';
+            baseRow[`Klasifikasi Kursus ${i + 1}`] = s['klasifikasi kursus'] || s.klasifikasi_kursus || '-';
+            baseRow[`Penanda Tangan ${i + 1}`] = s['penanda tangan'] || s.pejabat || s.penanda_tangan || '-';
+            baseRow[`Biaya Pelatihan ${i + 1}`] = s['biaya pelatihan'] || s.biaya || s.biaya_pelatihan || '-';
+            let linkUrl = s.link_sertifikat || 'Tidak ada link';
+            if (typeof linkUrl === 'string' && linkUrl.startsWith('=HYPERLINK("')) {
+              const match = linkUrl.match(/=HYPERLINK\("(.*?)",/);
+              if (match && match[1]) linkUrl = match[1];
+            }
+            if (typeof linkUrl === 'string') {
+              if (linkUrl.startsWith('/uploads')) linkUrl = `${origin}${linkUrl}`;
+              if (linkUrl.startsWith('http') && !linkUrl.includes('/view?url=') && !linkUrl.includes('drive.google.com')) {
+                linkUrl = `${origin}/view?url=${encodeURIComponent(linkUrl)}`;
+              }
+            }
+            baseRow[`Link Sertifikat ${i + 1}`] = linkUrl;
+          } else {
+            baseRow[`Nama Sertifikat ${i + 1}`] = '-';
+            baseRow[`Jenis Kursus ${i + 1}`] = '-';
+            baseRow[`Klasifikasi Kursus ${i + 1}`] = '-';
+            baseRow[`Penanda Tangan ${i + 1}`] = '-';
+            baseRow[`Biaya Pelatihan ${i + 1}`] = '-';
+            baseRow[`Link Sertifikat ${i + 1}`] = '-';
+          }
+        }
+        return baseRow;
+      });
+    }
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
-    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
-    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-      for (let C = range.s.c; C <= range.e.c; ++C) {
-        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
-        const cell = worksheet[cellRef];
-        if (cell && typeof cell.v === 'string' && cell.v.startsWith('http')) {
-          cell.l = { Target: cell.v };
-          cell.v = "Lihat Dokumen";
+    if (includeCerts) {
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+      for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+          const cell = worksheet[cellRef];
+          if (cell && typeof cell.v === 'string' && cell.v.startsWith('http')) {
+            cell.l = { Target: cell.v };
+            cell.v = "Lihat Dokumen";
+          }
         }
       }
     }
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   };
 
-  const handleExport = (title: string, mode: 'all' | 'lulus' | 'belum', targetType?: 'PNS' | 'PPPK', onlyWithJP = false, showTargetAndStatus = false) => {
+  const handleExport = (
+    title: string, 
+    mode: 'all' | 'lulus' | 'belum', 
+    targetType?: 'PNS' | 'PPPK', 
+    onlyWithJP = false, 
+    showTargetAndStatus = false,
+    includeCerts = true
+  ) => {
     if (userRole !== 'super_admin') {
       alert('Akses ditolak: Fitur ekspor data hanya dapat diakses oleh Super Admin.');
       return;
@@ -867,25 +903,26 @@ export default function AdminPage() {
     const workbook = XLSX.utils.book_new();
     const statusLabel = mode === 'lulus' ? "MEMENUHI" : mode === 'belum' ? "BELUM MEMENUHI" : undefined;
     
-    if ((!targetType || targetType === 'PNS') && pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel, showTargetAndStatus);
-    if ((!targetType || targetType === 'PPPK') && pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel, showTargetAndStatus);
-    if (!targetType && pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel, showTargetAndStatus);
+    if ((!targetType || targetType === 'PNS') && pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel, showTargetAndStatus, includeCerts);
+    if ((!targetType || targetType === 'PPPK') && pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel, showTargetAndStatus, includeCerts);
+    if (!targetType && pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel, showTargetAndStatus, includeCerts);
     
     if (workbook.SheetNames.length === 0) {
       alert('Tidak ada data untuk di-export');
       return;
     }
 
-    XLSX.writeFile(workbook, `Laporan_Sertifikasi_${title}_${tahunFilter}.xlsx`);
+    const filePrefix = includeCerts ? 'Laporan_Sertifikasi' : 'Data_Pegawai';
+    XLSX.writeFile(workbook, `${filePrefix}_${title}_${tahunFilter}.xlsx`);
   };
 
-  const exportToExcelDataPegawai = () => handleExport("Data_Pegawai", "all", undefined, true, false);
-  const exportToExcelDataPegawaiPNS = () => handleExport("Data_Pegawai_PNS", "all", "PNS", true, false);
-  const exportToExcelDataPegawaiPPPK = () => handleExport("Data_Pegawai_PPPK", "all", "PPPK", true, false);
+  const exportToExcelDataPegawai = () => handleExport("Semua", "all", undefined, false, false, false);
+  const exportToExcelDataPegawaiPNS = () => handleExport("PNS", "all", "PNS", false, false, false);
+  const exportToExcelDataPegawaiPPPK = () => handleExport("PPPK", "all", "PPPK", false, false, false);
 
-  const exportToExcelSert = () => handleExport("Rekap_Sertifikasi", "all", undefined, false, true);
-  const exportToExcelSertPNS = () => handleExport("Rekap_Sertifikasi_PNS", "all", "PNS", false, true);
-  const exportToExcelSertPPPK = () => handleExport("Rekap_Sertifikasi_PPPK", "all", "PPPK", false, true);
+  const exportToExcelSert = () => handleExport("Rekap_Sertifikasi", "all", undefined, false, true, true);
+  const exportToExcelSertPNS = () => handleExport("Rekap_Sertifikasi_PNS", "all", "PNS", false, true, true);
+  const exportToExcelSertPPPK = () => handleExport("Rekap_Sertifikasi_PPPK", "all", "PPPK", false, true, true);
 
   const exportToExcelMemenuhi = () => handleExport("MemenuhiJP", "lulus", undefined, false, true);
   const exportToExcelBelumMemenuhi = () => handleExport("BelumMemenuhiJP", "belum", undefined, false, true);
