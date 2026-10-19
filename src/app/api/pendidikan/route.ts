@@ -53,6 +53,12 @@ export async function POST(request: Request) {
       }
     });
 
+    // Ensure id_pendidikan is always populated at the end column
+    const idPendIdx = sHeaders.findIndex((h: string) => h.toLowerCase().trim() === 'id_pendidikan');
+    if (idPendIdx !== -1 && !newRow[idPendIdx]) {
+      newRow[idPendIdx] = `PEND-${Date.now().toString().slice(-5)}`;
+    }
+
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
       range: 'pendidikan!A:ZZ',

@@ -16,7 +16,8 @@ export async function POST(request: Request) {
     }
 
     const sheets = getGoogleSheets();
-    const rows = idpData.map((item: any) => [
+    const nowTs = Date.now().toString().slice(-4);
+    const rows = idpData.map((item: any, idx: number) => [
       nip,
       item.jenis_kompetensi || '',
       item.jenis_pengembangan || '',
@@ -29,12 +30,13 @@ export async function POST(request: Request) {
       item.status || 'Menunggu Persetujuan Ketua',
       item.nip_ketua || '',
       item.nama_ketua || '',
-      item.alasan_tolak || ''
+      item.alasan_tolak || '',
+      item.id_idp || `IDP-${nowTs}${idx + 1}`
     ]);
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'idp!A:Z',
+      range: 'idp!A:N',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: rows }
     });
@@ -62,7 +64,7 @@ export async function PUT(request: Request) {
     try {
       const getRes = await sheets.spreadsheets.values.get({
         spreadsheetId: GOOGLE_SHEET_ID,
-        range: `idp!A${rowIndex}:M${rowIndex}`
+        range: `idp!A${rowIndex}:N${rowIndex}`
       });
       existingRow = getRes.data.values?.[0] || [];
     } catch (e) {}
@@ -72,6 +74,7 @@ export async function PUT(request: Request) {
     const jenisPengembangan = existingRow[2] || '';
     const jp = existingRow[7] || '';
     const namaKetua = existingRow[11] || '';
+    const existingIdIdp = existingRow[13] || `IDP-${Date.now().toString().slice(-4)}`;
 
     // Check if body exists (for full update) or if it's just a status update via query params
     let updateData = null;
@@ -88,7 +91,7 @@ export async function PUT(request: Request) {
 
     if (updateData && Object.keys(updateData).length > 0) {
       // Full row update
-      const { nip, jenis_kompetensi, jenis_pengembangan, jalur_pengembangan, penyelenggara, waktu_pelaksanaan_awal, waktu_pelaksanaan_akhir, jp: newJp, anggaran, status: newStatus, nip_ketua, nama_ketua, alasan_tolak } = updateData;
+      const { nip, jenis_kompetensi, jenis_pengembangan, jalur_pengembangan, penyelenggara, waktu_pelaksanaan_awal, waktu_pelaksanaan_akhir, jp: newJp, anggaran, status: newStatus, nip_ketua, nama_ketua, alasan_tolak, id_idp: newIdIdp } = updateData;
       
       finalStatus = newStatus || 'Menunggu Persetujuan Ketua';
       finalAlasanTolak = alasan_tolak || '';
@@ -109,12 +112,13 @@ export async function PUT(request: Request) {
         finalStatus,
         nip_ketua || '',
         nama_ketua || '',
-        finalAlasanTolak
+        finalAlasanTolak,
+        newIdIdp || existingIdIdp
       ];
 
       await sheets.spreadsheets.values.update({
         spreadsheetId: GOOGLE_SHEET_ID,
-        range: `idp!A${rowIndex}:M${rowIndex}`,
+        range: `idp!A${rowIndex}:N${rowIndex}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [newRow] }
       });

@@ -195,6 +195,7 @@ export async function POST(request: Request) {
 
       const rowsToWrite = [
         ['key', 'value'],
+        ['id_profil', 'PROFIL-01'],
         ['bupati_nama', updatedData.bupati_nama],
         ['bupati_jabatan', updatedData.bupati_jabatan],
         ['bupati_foto', updatedData.bupati_foto],
@@ -207,7 +208,7 @@ export async function POST(request: Request) {
 
       await sheets.spreadsheets.values.update({
         spreadsheetId: GOOGLE_SHEET_ID,
-        range: 'profil_web!A1:B9',
+        range: 'profil_web!A1:B10',
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: rowsToWrite },
       });
