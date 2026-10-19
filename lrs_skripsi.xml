@@ -1,0 +1,98 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1150" pageHeight="800" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- ==================== 1. TABEL SERTIFIKASI (KIRI ATAS) ==================== -->
+    <mxCell id="title_sertifikasi" value="&lt;b&gt;Sertifikasi&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="70" y="70" width="150" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="box_sertifikasi" value="&lt;u&gt;nomor_sertifikat&lt;/u&gt;&lt;br&gt;nama_kursus&lt;br&gt;jenis_sertifikasi&lt;br&gt;institusi_penyelenggara&lt;br&gt;tgl_sertifikasi&lt;br&gt;tahun&lt;br&gt;jumlah_jp&lt;br&gt;jenis_kursus&lt;br&gt;klasifikasi_kursus&lt;br&gt;penanda_tangan&lt;br&gt;biaya_pelatihan&lt;br&gt;file_sertifikat&lt;br&gt;nip" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;lineHeight=1.35;" vertex="1" parent="1">
+      <mxGeometry x="70" y="95" width="150" height="250" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 2. TABEL PENDIDIKAN (KIRI BAWAH) ==================== -->
+    <mxCell id="title_pendidikan" value="&lt;b&gt;Pendidikan&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="70" y="470" width="140" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="box_pendidikan" value="&lt;u&gt;id_pendidikan&lt;/u&gt;&lt;br&gt;tingkat_pendidikan&lt;br&gt;jurusan&lt;br&gt;tahun_lulus&lt;br&gt;nip" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;lineHeight=1.35;" vertex="1" parent="1">
+      <mxGeometry x="70" y="495" width="140" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 3. TABEL PEGAWAI (TENGAH ATAS) ==================== -->
+    <mxCell id="title_pegawai" value="&lt;b&gt;Pegawai&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="480" y="70" width="140" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="box_pegawai" value="&lt;u&gt;nip&lt;/u&gt;&lt;br&gt;nama&lt;br&gt;password&lt;br&gt;jenis_kelamin&lt;br&gt;status_pegawai&lt;br&gt;pangkat&lt;br&gt;golongan&lt;br&gt;jabatan&lt;br&gt;unit_kerja&lt;br&gt;email&lt;br&gt;jumlah_jp&lt;br&gt;role" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;lineHeight=1.35;" vertex="1" parent="1">
+      <mxGeometry x="480" y="95" width="140" height="230" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 4. TABEL IDP (KANAN ATAS) ==================== -->
+    <mxCell id="title_idp" value="&lt;b&gt;IDP&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="880" y="70" width="160" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="box_idp" value="&lt;u&gt;id_idp&lt;/u&gt;&lt;br&gt;jenis_kompetensi&lt;br&gt;jenis_pengembangan&lt;br&gt;jalur_pengembangan&lt;br&gt;penyelenggara&lt;br&gt;waktu_mulai&lt;br&gt;waktu_selesai&lt;br&gt;durasi_jp&lt;br&gt;anggaran&lt;br&gt;status_verifikasi&lt;br&gt;persetujuan_opd&lt;br&gt;nip_pemohon&lt;br&gt;nip_atasan&lt;br&gt;id_admin" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;lineHeight=1.35;" vertex="1" parent="1">
+      <mxGeometry x="880" y="95" width="160" height="270" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 5. TABEL SUPER_ADMIN (KANAN BAWAH) ==================== -->
+    <mxCell id="title_super_admin" value="&lt;b&gt;Super_Admin&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="895" y="495" width="130" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="box_super_admin" value="&lt;u&gt;id_admin&lt;/u&gt;&lt;br&gt;password" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;lineHeight=1.35;" vertex="1" parent="1">
+      <mxGeometry x="895" y="520" width="130" height="65" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== GARIS HUBUNG RELASIONAL (LRS) ==================== -->
+    <!-- 1. Relasi Pegawai -> Sertifikasi (FK: nip) -->
+    <mxCell id="edge_pegawai_sertifikasi" value="nip" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=10;fontStyle=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_sertifikasi" target="box_pegawai">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="350" y="160"/>
+          <mxPoint x="350" y="160"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2. Relasi Pegawai -> Pendidikan (FK: nip) -->
+    <mxCell id="edge_pegawai_pendidikan" value="nip" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=10;fontStyle=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="box_pendidikan">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="430" y="270"/>
+          <mxPoint x="430" y="547"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3. Relasi Pegawai -> IDP (Pemohon: nip_pemohon) -->
+    <mxCell id="edge_pegawai_idp_pemohon" value="nip_pemohon" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=10;fontStyle=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="box_idp">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="145"/>
+          <mxPoint x="750" y="145"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4. Relasi Pegawai -> IDP (Atasan: nip_atasan) -->
+    <mxCell id="edge_pegawai_idp_atasan" value="nip_atasan" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=10;fontStyle=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="box_idp">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="240"/>
+          <mxPoint x="750" y="240"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 5. Relasi Super_Admin -> IDP (Admin: id_admin) -->
+    <mxCell id="edge_admin_idp" value="id_admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=10;fontStyle=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_idp" target="box_super_admin">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="960" y="440"/>
+          <mxPoint x="960" y="440"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
