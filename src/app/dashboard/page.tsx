@@ -273,7 +273,7 @@ export default function DashboardPage() {
               <i className="bi bi-envelope-exclamation-fill text-primary fs-3 me-3"></i>
               <div>
                 <strong className="text-dark d-block">Alamat Email Belum Dilengkapi</strong>
-                <small className="text-secondary">Silakan lengkapi email Anda agar sistem SIPJP dapat mengirimkan notifikasi otomatis saat pengajuan usulan IDP disetujui atau ditolak.</small>
+                <small className="text-secondary">Silakan lengkapi email Anda.</small>
               </div>
             </div>
             <a href="/edit-profil" className="btn btn-primary btn-sm px-3 fw-bold rounded-pill text-nowrap shadow-sm">

@@ -1,0 +1,203 @@
+<mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="1000" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- ==================== 1. ENTITAS UNIT_KERJA ==================== -->
+    <mxCell id="box_unit_kerja" value="&lt;b&gt;Unit_Kerja&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="60" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_unit_kerja" value="&lt;u&gt;id_opd&lt;/u&gt;&lt;br&gt;nama_opd&lt;br&gt;kategori_unit" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="60" y="165" width="120" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 2. ENTITAS PEGAWAI ==================== -->
+    <mxCell id="box_pegawai" value="&lt;b&gt;Pegawai&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="380" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_pegawai" value="&lt;u&gt;nip&lt;/u&gt;&lt;br&gt;nama&lt;br&gt;password&lt;br&gt;jenis_kelamin&lt;br&gt;status_pegawai&lt;br&gt;pangkat&lt;br&gt;golongan&lt;br&gt;jabatan&lt;br&gt;email&lt;br&gt;no_hp&lt;br&gt;role&lt;br&gt;status_aktif" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="380" y="165" width="130" height="180" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 3. ENTITAS SERTIFIKASI ==================== -->
+    <mxCell id="box_sertifikasi" value="&lt;b&gt;Sertifikasi&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="820" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_sertifikasi" value="&lt;u&gt;id_sertifikasi&lt;/u&gt;&lt;br&gt;nama_kursus&lt;br&gt;jenis_sertifikasi&lt;br&gt;jenis_kursus&lt;br&gt;klasifikasi_kursus&lt;br&gt;nomor_sertifikat&lt;br&gt;institusi&lt;br&gt;tgl_mulai&lt;br&gt;tgl_selesai&lt;br&gt;tahun&lt;br&gt;jumlah_jp&lt;br&gt;penanda_tangan&lt;br&gt;biaya_pelatihan" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="820" y="165" width="140" height="200" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 4. ENTITAS DOKUMEN_STORAGE ==================== -->
+    <mxCell id="box_dokumen" value="&lt;b&gt;Dokumen_Storage&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1180" y="120" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_dokumen" value="&lt;u&gt;id_dokumen&lt;/u&gt;&lt;br&gt;nama_file&lt;br&gt;tipe_file&lt;br&gt;ukuran_file&lt;br&gt;url_file&lt;br&gt;tgl_upload" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="1180" y="165" width="130" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 5. ENTITAS PENDIDIKAN ==================== -->
+    <mxCell id="box_pendidikan" value="&lt;b&gt;Pendidikan&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="380" y="460" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_pendidikan" value="&lt;u&gt;id_pendidikan&lt;/u&gt;&lt;br&gt;tingkat_pendidikan&lt;br&gt;jurusan&lt;br&gt;tahun_lulus" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="380" y="505" width="130" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 6. ENTITAS IDP ==================== -->
+    <mxCell id="box_idp" value="&lt;b&gt;IDP&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="820" y="460" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_idp" value="&lt;u&gt;id_idp&lt;/u&gt;&lt;br&gt;jenis_kompetensi&lt;br&gt;jenis_pengembangan&lt;br&gt;jalur_pengembangan&lt;br&gt;penyelenggara&lt;br&gt;waktu_mulai&lt;br&gt;waktu_selesai&lt;br&gt;tahun&lt;br&gt;target_jp&lt;br&gt;anggaran&lt;br&gt;status_verifikasi&lt;br&gt;alasan_tolak" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="820" y="505" width="140" height="190" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 7. ENTITAS SUPER_ADMIN ==================== -->
+    <mxCell id="box_super_admin" value="&lt;b&gt;Super_Admin&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1180" y="460" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_super_admin" value="&lt;u&gt;id_admin&lt;/u&gt;&lt;br&gt;nama_admin&lt;br&gt;password&lt;br&gt;email&lt;br&gt;no_hp&lt;br&gt;level_akses" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="1180" y="505" width="130" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== 8. ENTITAS PROFIL_WEB ==================== -->
+    <mxCell id="box_profil" value="&lt;b&gt;Profil_Web&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1180" y="730" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="attr_profil" value="&lt;u&gt;id_profil&lt;/u&gt;&lt;br&gt;nama_bupati&lt;br&gt;nama_wakil&lt;br&gt;judul_portal&lt;br&gt;subjudul_portal&lt;br&gt;foto_bupati&lt;br&gt;foto_wakil" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=10;spacingTop=0;spacingLeft=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="1180" y="775" width="130" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== RELASI: naungi (Unit_Kerja - Pegawai) ==================== -->
+    <mxCell id="rel_naungi" value="&lt;b&gt;naungi&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="230" y="117" width="75" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_naungi" value="&lt;u&gt;id_opd&lt;/u&gt;&lt;br&gt;&lt;u&gt;nip&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="230" y="168" width="80" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_naungi_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_unit_kerja" target="rel_naungi">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_naungi_2" value="m" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_naungi" target="box_pegawai">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== RELASI: peroleh (Pegawai - Sertifikasi) ==================== -->
+    <mxCell id="rel_peroleh" value="&lt;b&gt;peroleh&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="630" y="117" width="75" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_peroleh" value="&lt;u&gt;nip&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_sertifikasi&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="625" y="168" width="90" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_peroleh_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="rel_peroleh">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_peroleh_2" value="m" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_peroleh" target="box_sertifikasi">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== RELASI: lampir (Sertifikasi - Dokumen_Storage) ==================== -->
+    <mxCell id="rel_lampir" value="&lt;b&gt;lampir&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1030" y="117" width="75" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_lampir" value="&lt;u&gt;id_sertifikasi&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_dokumen&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="1025" y="168" width="95" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_lampir_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_sertifikasi" target="rel_lampir">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_lampir_2" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_lampir" target="box_dokumen">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== RELASI: miliki (Pegawai - Pendidikan) ==================== -->
+    <mxCell id="rel_miliki" value="&lt;b&gt;miliki&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="402" y="365" width="75" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_miliki" value="&lt;u&gt;nip&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_pendidikan&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="300" y="370" width="95" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_miliki_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="rel_miliki">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_miliki_2" value="m" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_miliki" target="box_pendidikan">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== RELASI 1: ajukan (Pegawai ASN - IDP) ==================== -->
+    <mxCell id="rel_ajukan" value="&lt;b&gt;ajukan&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="610" y="390" width="85" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_ajukan" value="&lt;u&gt;nip_pemohon&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_idp&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="605" y="440" width="95" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_ajukan_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="rel_ajukan">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="540" y="150"/>
+          <mxPoint x="540" y="413"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="edge_rel_ajukan_2" value="m" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_ajukan" target="box_idp">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="413"/>
+          <mxPoint x="750" y="475"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ==================== RELASI 2: verif_opd (Admin OPD - IDP) ==================== -->
+    <mxCell id="rel_verif_opd" value="&lt;b&gt;verif_opd&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10.5;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="610" y="500" width="85" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_verif_opd" value="&lt;u&gt;nip_atasan&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_idp&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="605" y="550" width="95" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_verif_opd_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_pegawai" target="rel_verif_opd">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="520" y="165"/>
+          <mxPoint x="520" y="523"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="edge_rel_verif_opd_2" value="m" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_verif_opd" target="box_idp">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="523"/>
+          <mxPoint x="750" y="490"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ==================== RELASI 3: approve_bkd (Super Admin BKPSDMD - IDP) ==================== -->
+    <mxCell id="rel_approve_bkd" value="&lt;b&gt;approve_bkd&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="457" width="95" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_approve_bkd" value="&lt;u&gt;id_admin&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_idp&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="508" width="95" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_approve_bkd_1" value="m" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_idp" target="rel_approve_bkd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_approve_bkd_2" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_approve_bkd" target="box_super_admin">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ==================== RELASI 4: kelola (Super Admin - Profil_Web) ==================== -->
+    <mxCell id="rel_kelola" value="&lt;b&gt;kelola&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.5;strokeColor=#000000;fillColor=#ffffff;fontFamily=Arial;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1207" y="630" width="75" height="46" as="geometry"/>
+    </mxCell>
+    <mxCell id="fk_rel_kelola" value="&lt;u&gt;id_admin&lt;/u&gt;&lt;br&gt;&lt;u&gt;id_profil&lt;/u&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontSize=9.5;spacingTop=0;lineHeight=1.2;" vertex="1" parent="1">
+      <mxGeometry x="1105" y="635" width="90" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_kelola_1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="box_super_admin" target="rel_kelola">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge_rel_kelola_2" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeWidth=1.2;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="rel_kelola" target="box_profil">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
