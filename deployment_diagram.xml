@@ -1,0 +1,117 @@
+<mxGraphModel dx="1000" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="700" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Section Title -->
+    <mxCell id="sec_title" value="4.4.9 Deployment Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="25" width="300" height="25" as="geometry"/>
+    </mxCell>
+
+    <!-- Outer Frame (pkg) -->
+    <mxCell id="frame_pkg" value="pkg" style="shape=umlFrame;whiteSpace=wrap;html=1;width=60;height=22;fillColor=none;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="760" height="520" as="geometry"/>
+    </mxCell>
+
+    <!-- Upper Server Box -->
+    <mxCell id="server_box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="85" y="95" width="710" height="220" as="geometry"/>
+    </mxCell>
+
+    <!-- Server Component Note (Pink) -->
+    <mxCell id="note_server" value="Server" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=middle;align=center;fillColor=#f8cecc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="380" y="110" width="120" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Web Server 3D Cube (Yellow) -->
+    <mxCell id="cube_web" value="Web Server (Next.js / Node.js)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.06;darkOpacity2=0.12;size=12;fillColor=#fff2cc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11.5;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="105" y="220" width="220" height="65" as="geometry"/>
+    </mxCell>
+
+    <!-- Database Server 3D Cube (Yellow) -->
+    <mxCell id="cube_db" value="Database Server (Google Sheets API)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.06;darkOpacity2=0.12;size=12;fillColor=#fff2cc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11.5;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="545" y="220" width="230" height="65" as="geometry"/>
+    </mxCell>
+
+    <!-- Lines inside Server Box -->
+    <mxCell id="line_srv_web" value="" style="edgeStyle=none;rounded=0;html=1;endArrow=none;strokeColor=#000000;strokeWidth=1.2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="380" y="145" as="sourcePoint"/>
+        <mxPoint x="225" y="220" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="line_srv_db" value="" style="edgeStyle=none;rounded=0;html=1;endArrow=none;strokeColor=#000000;strokeWidth=1.2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="500" y="145" as="sourcePoint"/>
+        <mxPoint x="650" y="220" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Network 3D Cube (Yellow) -->
+    <mxCell id="cube_network" value="Network" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.06;darkOpacity2=0.12;size=12;fillColor=#fff2cc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+      <mxGeometry x="360" y="315" width="160" height="110" as="geometry"/>
+    </mxCell>
+
+    <!-- Internet Note inside Network (Pink) -->
+    <mxCell id="note_internet" value="Internet" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=middle;align=center;fillColor=#f8cecc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11.5;" vertex="1" parent="1">
+      <mxGeometry x="382" y="352" width="115" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Lines from Web Server & DB Server to Network -->
+    <mxCell id="line_web_net" value="" style="edgeStyle=none;rounded=0;html=1;endArrow=none;strokeColor=#000000;strokeWidth=1.2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="225" y="285" as="sourcePoint"/>
+        <mxPoint x="360" y="340" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="line_db_net" value="" style="edgeStyle=none;rounded=0;html=1;endArrow=none;strokeColor=#000000;strokeWidth=1.2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="650" y="285" as="sourcePoint"/>
+        <mxPoint x="520" y="340" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Client 1: Komputer Admin (Yellow 3D Cube) -->
+    <mxCell id="cube_admin" value="Komputer Admin (OPD &amp; BKPSDMD)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.06;darkOpacity2=0.12;size=12;fillColor=#fff2cc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+      <mxGeometry x="145" y="450" width="200" height="85" as="geometry"/>
+    </mxCell>
+
+    <!-- Client Note inside Komputer Admin (Pink) -->
+    <mxCell id="note_cli_admin" value="Client" style="shape=note;whiteSpace=wrap;html=1;size=12;verticalAlign=middle;align=center;fillColor=#f8cecc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="195" y="482" width="90" height="42" as="geometry"/>
+    </mxCell>
+
+    <!-- Client 2: Komputer / Smartphone Pegawai (Yellow 3D Cube) -->
+    <mxCell id="cube_pegawai" value="Komputer / Smartphone Pegawai" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.06;darkOpacity2=0.12;size=12;fillColor=#fff2cc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;align=center;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+      <mxGeometry x="535" y="450" width="200" height="85" as="geometry"/>
+    </mxCell>
+
+    <!-- Client Note inside Komputer Pegawai (Pink) -->
+    <mxCell id="note_cli_pegawai" value="Client" style="shape=note;whiteSpace=wrap;html=1;size=12;verticalAlign=middle;align=center;fillColor=#f8cecc;strokeColor=#000000;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="585" y="482" width="90" height="42" as="geometry"/>
+    </mxCell>
+
+    <!-- Lines from Network to Clients -->
+    <mxCell id="line_net_admin" value="" style="edgeStyle=none;rounded=0;html=1;endArrow=none;strokeColor=#000000;strokeWidth=1.2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="400" y="425" as="sourcePoint"/>
+        <mxPoint x="270" y="450" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="line_net_pegawai" value="" style="edgeStyle=none;rounded=0;html=1;endArrow=none;strokeColor=#000000;strokeWidth=1.2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="480" y="425" as="sourcePoint"/>
+        <mxPoint x="610" y="450" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Caption -->
+    <mxCell id="cap_deploy" value="&lt;i&gt;Gambar 4. 21 Deployment Diagram&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Times New Roman;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="595" width="760" height="25" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
