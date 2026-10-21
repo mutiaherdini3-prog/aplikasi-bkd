@@ -1,0 +1,37 @@
+<mxGraphModel dx="1000" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="450" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Header Box -->
+    <mxCell id="hdr_box" value="TAHAPAN RAPID APPLICATION DEVELOPMENT" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#0369a1;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+      <mxGeometry x="270" y="50" width="360" height="36" as="geometry"/>
+    </mxCell>
+
+    <!-- 1. Perencanaan Kebutuhan (Soft Blue / Teal) -->
+    <mxCell id="step_1" value="&lt;b&gt;Perencanaan&lt;br&gt;Kebutuhan&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=22;fillColor=#2563eb;strokeColor=#1d4ed8;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="70" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 2. Desain Sistem (Emerald / Hijau Toska) -->
+    <mxCell id="step_2" value="&lt;b&gt;Desain Sistem&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=22;fillColor=#059669;strokeColor=#047857;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12.5;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="245" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 3. Pengembangan / Konstruksi (Amber / Oranye Elegan) -->
+    <mxCell id="step_3" value="&lt;b&gt;Pengembangan&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=22;fillColor=#d97706;strokeColor=#b45309;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12.5;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="420" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 4. Implementasi (Royal Violet / Ungu Elegan) -->
+    <mxCell id="step_4" value="&lt;b&gt;Implementasi&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=22;fillColor=#7c3aed;strokeColor=#6d28d9;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12.5;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="595" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- Caption -->
+    <mxCell id="cap_rad" value="&lt;i&gt;Gambar 3. 1 Tahapan Metode RAD&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Times New Roman;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="240" y="230" width="400" height="25" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
