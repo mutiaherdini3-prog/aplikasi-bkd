@@ -1,0 +1,42 @@
+<mxGraphModel dx="1100" dy="650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="980" pageHeight="450" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Header Box (Soft Pastel Pink) -->
+    <mxCell id="hdr_box" value="TAHAPAN RAPID APPLICATION DEVELOPMENT (RAD)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=none;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#e91e63;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+      <mxGeometry x="290" y="45" width="400" height="36" as="geometry"/>
+    </mxCell>
+
+    <!-- 1. Business Modeling (Softest Rose) -->
+    <mxCell id="step_1" value="&lt;b&gt;Business&lt;br&gt;Modeling&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#f8bbd0;strokeColor=#ffffff;strokeWidth=1.5;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="40" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 2. Data Modeling (Soft Rose) -->
+    <mxCell id="step_2" value="&lt;b&gt;Data&lt;br&gt;Modeling&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#f48fb1;strokeColor=#ffffff;strokeWidth=1.5;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="210" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 3. Process Modeling (Medium Rose Pink) -->
+    <mxCell id="step_3" value="&lt;b&gt;Process&lt;br&gt;Modeling&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#ec407a;strokeColor=#ffffff;strokeWidth=1.5;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="380" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 4. Application Generation (Vibrant Rose) -->
+    <mxCell id="step_4" value="&lt;b&gt;Application&lt;br&gt;Generation&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#d81b60;strokeColor=#ffffff;strokeWidth=1.5;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="550" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- 5. Testing and Turnover (Deep Rose Magenta) -->
+    <mxCell id="step_5" value="&lt;b&gt;Testing and&lt;br&gt;Turnover&lt;/b&gt;" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#ad1457;strokeColor=#ffffff;strokeWidth=1.5;fontColor=#ffffff;fontFamily=Times New Roman;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="720" y="125" width="185" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- Caption -->
+    <mxCell id="cap_rad" value="&lt;i&gt;Gambar 3. 1 Tahapan Model Rapid Application Development (RAD)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Times New Roman;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="260" y="235" width="460" height="25" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
