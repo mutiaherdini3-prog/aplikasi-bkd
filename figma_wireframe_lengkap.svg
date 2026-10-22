@@ -1,0 +1,1107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2150 3000" width="2150" height="3000">
+  <defs>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Times+New+Roman&amp;family=Arial:wght@400;600;700&amp;display=swap");
+      .caption { font-family: "Times New Roman", serif; font-style: italic; font-size: 11.5px; fill: #000000; }
+      .title-top { font-family: "Times New Roman", serif; font-weight: bold; font-size: 12.5px; fill: #000000; }
+      .app-font { font-family: Arial, sans-serif; }
+      .bold { font-weight: bold; }
+      .mono { font-family: "Courier New", monospace; }
+    </style>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="2150" height="3000" fill="#f8fafc"/>
+
+  <!-- Top Global Header -->
+  <rect x="50" y="25" width="2050" height="55" rx="8" fill="#1e293b"/>
+  <text x="80" y="60" fill="#ffffff" font-family="Arial" font-size="18" font-weight="bold">RANCANGAN LAYAR SISTEM (LO-FI WIREFRAME SKRIPSI) — FIGMA READY</text>
+  <text x="2060" y="60" fill="#94a3b8" font-family="Arial" font-size="12" text-anchor="end">Format Baku Akademik: Notasi &lt;&lt;display&gt;&gt;, &lt;&lt;input&gt;&gt; &amp; Garis Diagonal Z | 100% Sesuai bkd-app</text>
+  <!-- Rancangan Layar Login Pegawai &amp; Admin -->
+  <g id="screen_1">
+    <text x="50" y="110" class="title-top">23. Rancangan Layar Login Pegawai &amp; Admin</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="50" y="125" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="50" y="125" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="50" y="145" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="70" cy="140" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="86" y="144" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="675" y="144" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Guest</text>
+    <line x1="50" y1="155" x2="690" y2="155" stroke="#000000" stroke-width="1"/>
+    <text x="370" y="522" class="caption" text-anchor="middle">Gambar 4. 23 Rancangan Layar Login Pegawai &amp; Admin</text>
+  </g>
+    <rect x="80" y="180" width="220" height="280" rx="4" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <rect x="95" y="195" width="190" height="150" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="190" y="265" class="app-font" font-size="10" text-anchor="middle">&lt;&lt;display&gt;&gt; Foto Pimpinan</text>
+    <text x="190" y="285" class="app-font" font-size="8.5" text-anchor="middle">(Bupati &amp; Wakil Bupati)</text>
+    <text x="190" y="370" class="app-font bold" font-size="9" text-anchor="middle">&lt;&lt;display&gt;&gt; Markus, S.H. &amp; H. Yus Derahman</text>
+    <text x="190" y="390" class="app-font" font-size="7.5" text-anchor="middle">Pemerintah Kabupaten Bangka Barat</text>
+
+    <!-- Right: Login Form -->
+    <rect x="330" y="180" width="330" height="280" rx="4" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="495" y="215" class="app-font bold" font-size="11" text-anchor="middle">LOGIN SISTEM SIPJP</text>
+    <text x="360" y="250" class="app-font" font-size="8">NIP / ID PEGAWAI :</text>
+    <rect x="360" y="258" width="270" height="24" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="370" y="274" class="app-font" font-size="8" fill="#64748b">&lt;&lt;input&gt;&gt;</text>
+
+    <text x="360" y="305" class="app-font" font-size="8">KATA SANDI :</text>
+    <rect x="360" y="313" width="270" height="24" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="370" y="329" class="app-font" font-size="8" fill="#64748b">&lt;&lt;input&gt;&gt;</text>
+
+    <rect x="360" y="360" width="270" height="28" rx="4" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="495" y="378" class="app-font bold" font-size="9" text-anchor="middle" fill="#ffffff">Masuk Sistem</text>
+    <text x="495" y="420" class="app-font" font-size="7.5" text-anchor="middle">&lt;&lt;display&gt;&gt; Link Bantuan Lupa Password</text>
+  <!-- Rancangan Layar Dashboard Pegawai ASN -->
+  <g id="screen_2">
+    <text x="740" y="110" class="title-top">24. Rancangan Layar Dashboard Pegawai ASN</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="740" y="125" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="740" y="125" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="740" y="145" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="760" cy="140" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="776" y="144" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="1365" y="144" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="740" y1="155" x2="1380" y2="155" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="740" y="155" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <rect x="744" y="163" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="752" y="177" class="app-font bold" font-size="8" fill="#000000">• Beranda</text>
+    <text x="752" y="201" class="app-font" font-size="8" fill="#334155">o Riwayat Pendidikan</text>
+    <text x="752" y="225" class="app-font" font-size="8" fill="#334155">o Riwayat Pelatihan</text>
+    <text x="752" y="249" class="app-font" font-size="8" fill="#334155">o Pengajuan IDP</text>
+    <text x="752" y="273" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1060" y="522" class="caption" text-anchor="middle">Gambar 4. 24 Rancangan Layar Dashboard Pegawai ASN</text>
+  </g>
+    <rect x="875" y="165" width="490" height="60" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <rect x="885" y="175" width="40" height="40" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="905" y="198" class="app-font" font-size="8" text-anchor="middle">Foto</text>
+    <text x="935" y="185" class="app-font bold" font-size="8.5">&lt;&lt;display&gt;&gt; Nama Lengkap Pegawai ASN</text>
+    <text x="935" y="200" class="app-font" font-size="7.5">NIP: &lt;&lt;display&gt;&gt; | Status: &lt;&lt;display&gt;&gt; (PNS/PPPK)</text>
+    <text x="935" y="213" class="app-font" font-size="7.5">Jabatan: &lt;&lt;display&gt;&gt; | Unit Kerja: &lt;&lt;display&gt;&gt;</text>
+
+    <!-- 2 Metric Boxes -->
+    <rect x="875" y="235" width="235" height="70" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="885" y="252" class="app-font bold" font-size="8">CAPAIAN JAM PELAJARAN (JP)</text>
+    <text x="885" y="275" class="app-font" font-size="14">&lt;&lt;display&gt;&gt; JP / 20 JP</text>
+    <text x="885" y="295" class="app-font" font-size="7.5">Status: &lt;&lt;display&gt;&gt; (Tuntas / Belum Tuntas)</text>
+
+    <rect x="1130" y="235" width="235" height="70" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1140" y="252" class="app-font bold" font-size="8">STATUS USULAN IDP TAHUNAN</text>
+    <text x="1140" y="275" class="app-font" font-size="10">&lt;&lt;display&gt;&gt; Judul Usulan IDP</text>
+    <text x="1140" y="295" class="app-font" font-size="7.5">Status Verifikasi: &lt;&lt;display&gt;&gt; (OPD / BKD)</text>
+
+    <!-- Quick Buttons -->
+    <rect x="875" y="315" width="155" height="22" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="952" y="329" class="app-font bold" font-size="7.5" text-anchor="middle">+ Update Pendidikan</text>
+
+    <rect x="1040" y="315" width="155" height="22" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="1117" y="329" class="app-font bold" font-size="7.5" text-anchor="middle">+ Update Pelatihan</text>
+
+    <rect x="1205" y="315" width="160" height="22" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="1285" y="329" class="app-font bold" font-size="7.5" text-anchor="middle">+ Ajukan Usulan IDP</text>
+    <text x="1115" y="315" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Riwayat Pelatihan Terverifikasi Terbaru</text>
+    <rect x="875" y="354" width="200" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="975" y="366" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Nama Pelatihan</text>
+    <!-- Display cell -->
+    <rect x="875" y="372" width="200" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="975" y="384" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="875" y="390" width="200" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="975" y="464" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1075" y="354" width="140" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1145" y="366" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Penyelenggara</text>
+    <!-- Display cell -->
+    <rect x="1075" y="372" width="140" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1145" y="384" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1075" y="390" width="140" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1145" y="464" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1215" y="354" width="50" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1240" y="366" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">JP</text>
+    <!-- Display cell -->
+    <rect x="1215" y="372" width="50" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1240" y="384" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1215" y="390" width="50" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1240" y="464" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1265" y="354" width="100" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1315" y="366" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status JP</text>
+    <!-- Display cell -->
+    <rect x="1265" y="372" width="100" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1315" y="384" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1265" y="390" width="100" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1315" y="464" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Entry Riwayat Pendidikan -->
+  <g id="screen_3">
+    <text x="1430" y="110" class="title-top">25. Rancangan Layar Entry Riwayat Pendidikan</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="1430" y="125" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="1430" y="125" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="1430" y="145" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="1450" cy="140" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1466" y="144" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="2055" y="144" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="1430" y1="155" x2="2070" y2="155" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="1430" y="155" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1442" y="177" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <rect x="1434" y="187" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="1442" y="201" class="app-font bold" font-size="8" fill="#000000">• Riwayat Pendidikan</text>
+    <text x="1442" y="225" class="app-font" font-size="8" fill="#334155">o Riwayat Pelatihan</text>
+    <text x="1442" y="249" class="app-font" font-size="8" fill="#334155">o Pengajuan IDP</text>
+    <text x="1442" y="273" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1750" y="522" class="caption" text-anchor="middle">Gambar 4. 25 Rancangan Layar Entry Riwayat Pendidikan</text>
+  </g>
+    <text x="1805" y="130" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Riwayat Pendidikan Formal Pegawai</text>
+    <rect x="1565" y="143" width="110" height="20" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="1620" y="156" class="app-font bold" font-size="8" text-anchor="middle" fill="#000000">+ Tambah Riwayat Pendidikan</text>
+    <rect x="1565" y="169" width="30" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1580" y="181" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">No</text>
+    <!-- Display cell -->
+    <rect x="1565" y="187" width="30" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1580" y="199" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1565" y="205" width="30" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1580" y="279" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1595" y="169" width="70" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1630" y="181" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Tingkat</text>
+    <!-- Display cell -->
+    <rect x="1595" y="187" width="70" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1630" y="199" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1595" y="205" width="70" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1630" y="279" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1665" y="169" width="170" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1750" y="181" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Fakultas / Program Studi</text>
+    <!-- Display cell -->
+    <rect x="1665" y="187" width="170" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1750" y="199" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1665" y="205" width="170" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1750" y="279" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1835" y="169" width="140" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1905" y="181" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Nama Sekolah / Universitas</text>
+    <!-- Display cell -->
+    <rect x="1835" y="187" width="140" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1905" y="199" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1835" y="205" width="140" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1905" y="279" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1975" y="169" width="45" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1997.5" y="181" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Tahun</text>
+    <!-- Display cell -->
+    <rect x="1975" y="187" width="45" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1997.5" y="199" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1975" y="205" width="45" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1997.5" y="279" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="2020" y="169" width="45" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="2042.5" y="181" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Aksi</text>
+    <!-- Display cell -->
+    <rect x="2020" y="187" width="45" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2042.5" y="199" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="2020" y="205" width="45" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2042.5" y="279" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Tambah Riwayat Pendidikan -->
+  <g id="screen_4">
+    <text x="50" y="600" class="title-top">26. Rancangan Layar Tambah Riwayat Pendidikan</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="50" y="615" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="50" y="615" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="50" y="635" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="70" cy="630" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="86" y="634" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="675" y="634" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="50" y1="645" x2="690" y2="645" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="50" y="645" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="62" y="667" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <rect x="54" y="677" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="62" y="691" class="app-font bold" font-size="8" fill="#000000">• Riwayat Pendidikan</text>
+    <text x="62" y="715" class="app-font" font-size="8" fill="#334155">o Riwayat Pelatihan</text>
+    <text x="62" y="739" class="app-font" font-size="8" fill="#334155">o Pengajuan IDP</text>
+    <text x="62" y="763" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="370" y="1012" class="caption" text-anchor="middle">Gambar 4. 26 Rancangan Layar Tambah Riwayat Pendidikan</text>
+  </g>
+    <text x="425" y="655" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Formulir Entri Riwayat Pendidikan</text>
+    <text x="185" y="680" class="app-font" font-size="8" fill="#000000">NIP Pegawai :</text>
+    <rect x="185" y="684" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="696" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="185" y="714" class="app-font" font-size="8" fill="#000000">Nama Pegawai :</text>
+    <rect x="185" y="718" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="730" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="185" y="748" class="app-font" font-size="8" fill="#000000">Tingkat Pendidikan * :</text>
+    <rect x="185" y="752" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="764" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="782" class="app-font" font-size="8" fill="#000000">Fakultas / Program Studi / Jurusan * :</text>
+    <rect x="185" y="786" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="798" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="816" class="app-font" font-size="8" fill="#000000">Nama Sekolah / Universitas * :</text>
+    <rect x="185" y="820" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="832" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="850" class="app-font" font-size="8" fill="#000000">Tahun Lulus * :</text>
+    <rect x="185" y="854" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="866" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="545" y="884" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="577" y="898" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan</text>
+    <rect x="620" y="884" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="645" y="898" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+  <!-- Rancangan Layar Entry Riwayat Pelatihan &amp; Sertifikasi -->
+  <g id="screen_5">
+    <text x="740" y="600" class="title-top">27. Rancangan Layar Entry Riwayat Pelatihan &amp; Sertifikasi</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="740" y="615" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="740" y="615" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="740" y="635" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="760" cy="630" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="776" y="634" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="1365" y="634" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="740" y1="645" x2="1380" y2="645" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="740" y="645" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="752" y="667" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <text x="752" y="691" class="app-font" font-size="8" fill="#334155">o Riwayat Pendidikan</text>
+    <rect x="744" y="701" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="752" y="715" class="app-font bold" font-size="8" fill="#000000">• Riwayat Pelatihan</text>
+    <text x="752" y="739" class="app-font" font-size="8" fill="#334155">o Pengajuan IDP</text>
+    <text x="752" y="763" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1060" y="1012" class="caption" text-anchor="middle">Gambar 4. 27 Rancangan Layar Entry Riwayat Pelatihan &amp; Sertifikasi</text>
+  </g>
+    <text x="1115" y="620" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Riwayat Pelatihan &amp; Pemenuhan 20 JP</text>
+    <rect x="875" y="633" width="110" height="20" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="930" y="646" class="app-font bold" font-size="8" text-anchor="middle" fill="#000000">+ Tambah Pelatihan</text>
+    <rect x="875" y="659" width="25" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">No</text>
+    <!-- Display cell -->
+    <rect x="875" y="677" width="25" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="875" y="695" width="25" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="900" y="659" width="165" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="982.5" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Nama Pelatihan / Kursus</text>
+    <!-- Display cell -->
+    <rect x="900" y="677" width="165" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="982.5" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="900" y="695" width="165" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="982.5" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1065" y="659" width="120" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1125" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Penyelenggara</text>
+    <!-- Display cell -->
+    <rect x="1065" y="677" width="120" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1125" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1065" y="695" width="120" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1125" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1185" y="659" width="55" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1212.5" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Durasi (JP)</text>
+    <!-- Display cell -->
+    <rect x="1185" y="677" width="55" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1212.5" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1185" y="695" width="55" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1212.5" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1240" y="659" width="40" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1260" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Tahun</text>
+    <!-- Display cell -->
+    <rect x="1240" y="677" width="40" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1260" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1240" y="695" width="40" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1260" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1280" y="659" width="55" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1307.5" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status JP</text>
+    <!-- Display cell -->
+    <rect x="1280" y="677" width="55" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1307.5" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1280" y="695" width="55" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1307.5" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1335" y="659" width="40" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1355" y="671" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Aksi</text>
+    <!-- Display cell -->
+    <rect x="1335" y="677" width="40" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1355" y="689" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1335" y="695" width="40" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1355" y="769" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Tambah Pelatihan &amp; Sertifikasi -->
+  <g id="screen_6">
+    <text x="1430" y="600" class="title-top">28. Rancangan Layar Tambah Pelatihan &amp; Sertifikasi</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="1430" y="615" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="1430" y="615" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="1430" y="635" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="1450" cy="630" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1466" y="634" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="2055" y="634" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="1430" y1="645" x2="2070" y2="645" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="1430" y="645" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1442" y="667" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <text x="1442" y="691" class="app-font" font-size="8" fill="#334155">o Riwayat Pendidikan</text>
+    <rect x="1434" y="701" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="1442" y="715" class="app-font bold" font-size="8" fill="#000000">• Riwayat Pelatihan</text>
+    <text x="1442" y="739" class="app-font" font-size="8" fill="#334155">o Pengajuan IDP</text>
+    <text x="1442" y="763" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1750" y="1012" class="caption" text-anchor="middle">Gambar 4. 28 Rancangan Layar Tambah Pelatihan &amp; Sertifikasi</text>
+  </g>
+    <text x="1805" y="655" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Formulir Entri Pelatihan &amp; Sertifikasi</text>
+    <text x="1565" y="680" class="app-font" font-size="8" fill="#000000">Nama Kursus / Pelatihan * :</text>
+    <rect x="1565" y="684" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="696" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="714" class="app-font" font-size="8" fill="#000000">Jenis Sertifikasi & Klasifikasi Kursus * :</text>
+    <rect x="1565" y="718" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="730" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="748" class="app-font" font-size="8" fill="#000000">Nomor Sertifikat Kursus * :</text>
+    <rect x="1565" y="752" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="764" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="782" class="app-font" font-size="8" fill="#000000">Institusi Penyelenggara * :</text>
+    <rect x="1565" y="786" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="798" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="816" class="app-font" font-size="8" fill="#000000">Durasi Jam Pelajaran (JP) * & Tahun Kursus * :</text>
+    <rect x="1565" y="820" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="832" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="850" class="app-font" font-size="8" fill="#000000">Pilih File Sertifikat (PDF/JPG, Maks 1MB) * :</text>
+    <rect x="1565" y="854" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="866" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="1925" y="884" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1957" y="898" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan Pelatihan</text>
+    <rect x="2000" y="884" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2025" y="898" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+    <rect x="1735" y="894" width="180" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1825" y="908" class="app-font bold" font-size="8" text-anchor="middle" fill="#000000">+ Tambah Pelatihan Lainnya</text>
+  <!-- Rancangan Layar Edit Pelatihan &amp; Sertifikasi -->
+  <g id="screen_7">
+    <text x="50" y="1090" class="title-top">29. Rancangan Layar Edit Pelatihan &amp; Sertifikasi</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="50" y="1105" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="50" y="1105" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="50" y="1125" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="70" cy="1120" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="86" y="1124" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="675" y="1124" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="50" y1="1135" x2="690" y2="1135" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="50" y="1135" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="62" y="1157" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <text x="62" y="1181" class="app-font" font-size="8" fill="#334155">o Riwayat Pendidikan</text>
+    <rect x="54" y="1191" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="62" y="1205" class="app-font bold" font-size="8" fill="#000000">• Riwayat Pelatihan</text>
+    <text x="62" y="1229" class="app-font" font-size="8" fill="#334155">o Pengajuan IDP</text>
+    <text x="62" y="1253" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="370" y="1502" class="caption" text-anchor="middle">Gambar 4. 29 Rancangan Layar Edit Pelatihan &amp; Sertifikasi</text>
+  </g>
+    <text x="425" y="1145" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Formulir Edit Data Pelatihan Pegawai</text>
+    <text x="185" y="1170" class="app-font" font-size="8" fill="#000000">ID Sertifikasi :</text>
+    <rect x="185" y="1174" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="1186" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="185" y="1204" class="app-font" font-size="8" fill="#000000">NIP Pegawai :</text>
+    <rect x="185" y="1208" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="1220" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="185" y="1238" class="app-font" font-size="8" fill="#000000">Nama Kursus / Pelatihan :</text>
+    <rect x="185" y="1242" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="1254" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="1272" class="app-font" font-size="8" fill="#000000">Durasi Jam Pelajaran (JP) :</text>
+    <rect x="185" y="1276" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="1288" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="1306" class="app-font" font-size="8" fill="#000000">Institusi Penyelenggara :</text>
+    <rect x="185" y="1310" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="1322" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="1340" class="app-font" font-size="8" fill="#000000">Unggah File Sertifikat Baru (Opsional) :</text>
+    <rect x="185" y="1344" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="1356" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="545" y="1374" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="577" y="1388" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan Perubahan</text>
+    <rect x="620" y="1374" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="645" y="1388" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+  <!-- Rancangan Layar Entry Usulan Rencana IDP Pegawai -->
+  <g id="screen_8">
+    <text x="740" y="1090" class="title-top">30. Rancangan Layar Entry Usulan Rencana IDP Pegawai</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="740" y="1105" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="740" y="1105" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="740" y="1125" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="760" cy="1120" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="776" y="1124" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="1365" y="1124" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="740" y1="1135" x2="1380" y2="1135" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="740" y="1135" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="752" y="1157" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <text x="752" y="1181" class="app-font" font-size="8" fill="#334155">o Riwayat Pendidikan</text>
+    <text x="752" y="1205" class="app-font" font-size="8" fill="#334155">o Riwayat Pelatihan</text>
+    <rect x="744" y="1215" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="752" y="1229" class="app-font bold" font-size="8" fill="#000000">• Pengajuan IDP</text>
+    <text x="752" y="1253" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1060" y="1502" class="caption" text-anchor="middle">Gambar 4. 30 Rancangan Layar Entry Usulan Rencana IDP Pegawai</text>
+  </g>
+    <text x="1115" y="1110" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Tracking Rencana Pengembangan Kompetensi (IDP)</text>
+    <rect x="875" y="1123" width="110" height="20" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="930" y="1136" class="app-font bold" font-size="8" text-anchor="middle" fill="#000000">+ Ajukan Usulan IDP Baru</text>
+    <rect x="875" y="1149" width="25" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">No</text>
+    <!-- Display cell -->
+    <rect x="875" y="1167" width="25" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="875" y="1185" width="25" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="900" y="1149" width="155" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="977.5" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Kebutuhan Pengembangan</text>
+    <!-- Display cell -->
+    <rect x="900" y="1167" width="155" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="977.5" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="900" y="1185" width="155" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="977.5" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1055" y="1149" width="60" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1085" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Jalur</text>
+    <!-- Display cell -->
+    <rect x="1055" y="1167" width="60" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1085" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1055" y="1185" width="60" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1085" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1115" y="1149" width="45" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1137.5" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Target JP</text>
+    <!-- Display cell -->
+    <rect x="1115" y="1167" width="45" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1137.5" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1115" y="1185" width="45" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1137.5" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1160" y="1149" width="75" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1197.5" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status OPD</text>
+    <!-- Display cell -->
+    <rect x="1160" y="1167" width="75" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1197.5" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1160" y="1185" width="75" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1197.5" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1235" y="1149" width="75" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1272.5" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status BKD</text>
+    <!-- Display cell -->
+    <rect x="1235" y="1167" width="75" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1272.5" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1235" y="1185" width="75" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1272.5" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1310" y="1149" width="55" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1337.5" y="1161" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Aksi</text>
+    <!-- Display cell -->
+    <rect x="1310" y="1167" width="55" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1337.5" y="1179" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1310" y="1185" width="55" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1337.5" y="1259" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Formulir Pengajuan Usulan IDP -->
+  <g id="screen_9">
+    <text x="1430" y="1090" class="title-top">31. Rancangan Layar Formulir Pengajuan Usulan IDP</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="1430" y="1105" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="1430" y="1105" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="1430" y="1125" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="1450" cy="1120" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1466" y="1124" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="2055" y="1124" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Pegawai</text>
+    <line x1="1430" y1="1135" x2="2070" y2="1135" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="1430" y="1135" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1442" y="1157" class="app-font" font-size="8" fill="#334155">o Beranda</text>
+    <text x="1442" y="1181" class="app-font" font-size="8" fill="#334155">o Riwayat Pendidikan</text>
+    <text x="1442" y="1205" class="app-font" font-size="8" fill="#334155">o Riwayat Pelatihan</text>
+    <rect x="1434" y="1215" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="1442" y="1229" class="app-font bold" font-size="8" fill="#000000">• Pengajuan IDP</text>
+    <text x="1442" y="1253" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1750" y="1502" class="caption" text-anchor="middle">Gambar 4. 31 Rancangan Layar Formulir Pengajuan Usulan IDP</text>
+  </g>
+    <text x="1805" y="1145" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Formulir Usulan Individual Development Plan</text>
+    <text x="1565" y="1170" class="app-font" font-size="8" fill="#000000">NIP & Nama Pegawai :</text>
+    <rect x="1565" y="1174" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1186" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="1565" y="1204" class="app-font" font-size="8" fill="#000000">Jabatan Pegawai :</text>
+    <rect x="1565" y="1208" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1220" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="1565" y="1238" class="app-font" font-size="8" fill="#000000">Jenis Kompetensi (Manajerial / Sosio Kultural / Teknis) * :</text>
+    <rect x="1565" y="1242" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1254" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1272" class="app-font" font-size="8" fill="#000000">Jalur Pengembangan (Klasikal / Non-Klasikal) * :</text>
+    <rect x="1565" y="1276" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1288" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1306" class="app-font" font-size="8" fill="#000000">Kebutuhan / Rencana Pengembangan * :</text>
+    <rect x="1565" y="1310" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1322" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1340" class="app-font" font-size="8" fill="#000000">Target Durasi Jam Pelajaran (JP) * & Waktu :</text>
+    <rect x="1565" y="1344" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1356" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="1925" y="1374" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1957" y="1388" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Kirim Rencana IDP</text>
+    <rect x="2000" y="1374" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2025" y="1388" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+    <text x="1565" y="1385" class="app-font" font-size="7" fill="#475569">[v] Saya menyatakan data Rencana IDP yang diisi benar dan dapat dipertanggungjawabkan.</text>
+  <!-- Rancangan Layar Admin - Tab Dashboard Statistik -->
+  <g id="screen_10">
+    <text x="50" y="1580" class="title-top">32. Rancangan Layar Admin - Tab Dashboard Statistik</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="50" y="1595" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="50" y="1595" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="50" y="1615" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="70" cy="1610" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="86" y="1614" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="675" y="1614" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Administrator</text>
+    <line x1="50" y1="1625" x2="690" y2="1625" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="50" y="1625" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <rect x="54" y="1633" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="62" y="1647" class="app-font bold" font-size="8" fill="#000000">• Dashboard Rekap</text>
+    <text x="62" y="1671" class="app-font" font-size="8" fill="#334155">o Kelola Pegawai</text>
+    <text x="62" y="1695" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <text x="62" y="1719" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <text x="62" y="1743" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="62" y="1767" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="62" y="1791" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="370" y="1992" class="caption" text-anchor="middle">Gambar 4. 32 Rancangan Layar Admin - Tab Dashboard Statistik</text>
+  </g>
+    <text x="425" y="1645" class="app-font bold" font-size="11" text-anchor="middle">Dashboard Rekapitulasi Capaian Bangkom Daerah</text>
+    <rect x="185" y="1660" width="155" height="60" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="195" y="1678" class="app-font" font-size="8">TOTAL PEGAWAI ASN</text>
+    <text x="195" y="1702" class="app-font bold" font-size="14">&lt;&lt;display&gt;&gt; 5.293 ASN</text>
+
+    <rect x="350" y="1660" width="155" height="60" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="360" y="1678" class="app-font" font-size="8">TUNTAS 20 JP / TAHUN</text>
+    <text x="360" y="1702" class="app-font bold" font-size="14">&lt;&lt;display&gt;&gt; ASN</text>
+
+    <rect x="515" y="1660" width="160" height="60" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="525" y="1678" class="app-font" font-size="8">TOTAL USULAN IDP</text>
+    <text x="525" y="1702" class="app-font bold" font-size="14">&lt;&lt;display&gt;&gt; Usulan</text>
+    <text x="425" y="1705" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Ringkasan Capaian JP Per OPD</text>
+    <rect x="185" y="1744" width="180" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="275" y="1756" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Unit Kerja / OPD</text>
+    <!-- Display cell -->
+    <rect x="185" y="1762" width="180" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="275" y="1774" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="185" y="1780" width="180" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="275" y="1854" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="365" y="1744" width="65" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="397.5" y="1756" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Total ASN</text>
+    <!-- Display cell -->
+    <rect x="365" y="1762" width="65" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="397.5" y="1774" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="365" y="1780" width="65" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="397.5" y="1854" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="430" y="1744" width="75" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="467.5" y="1756" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Capai 20 JP</text>
+    <!-- Display cell -->
+    <rect x="430" y="1762" width="75" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="467.5" y="1774" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="430" y="1780" width="75" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="467.5" y="1854" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="505" y="1744" width="65" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="537.5" y="1756" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">% Capaian</text>
+    <!-- Display cell -->
+    <rect x="505" y="1762" width="65" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="537.5" y="1774" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="505" y="1780" width="65" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="537.5" y="1854" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="570" y="1744" width="105" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="622.5" y="1756" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status</text>
+    <!-- Display cell -->
+    <rect x="570" y="1762" width="105" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="622.5" y="1774" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="570" y="1780" width="105" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="622.5" y="1854" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Admin - Tab Kelola Data Pegawai -->
+  <g id="screen_11">
+    <text x="740" y="1580" class="title-top">33. Rancangan Layar Admin - Tab Kelola Data Pegawai</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="740" y="1595" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="740" y="1595" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="740" y="1615" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="760" cy="1610" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="776" y="1614" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="1365" y="1614" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Administrator</text>
+    <line x1="740" y1="1625" x2="1380" y2="1625" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="740" y="1625" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="752" y="1647" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <rect x="744" y="1657" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="752" y="1671" class="app-font bold" font-size="8" fill="#000000">• Kelola Pegawai</text>
+    <text x="752" y="1695" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <text x="752" y="1719" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <text x="752" y="1743" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="752" y="1767" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="752" y="1791" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1060" y="1992" class="caption" text-anchor="middle">Gambar 4. 33 Rancangan Layar Admin - Tab Kelola Data Pegawai</text>
+  </g>
+    <rect x="1205" y="1658" width="160" height="20" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1215" y="1671" class="app-font" font-size="7.5" fill="#64748b">Cari NIP / Nama : &lt;&lt;input&gt;&gt;</text>
+    <text x="1115" y="1600" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Data Induk Pegawai ASN (PNS &amp; PPPK)</text>
+    <rect x="875" y="1613" width="110" height="20" rx="3" fill="#f1f5f9" stroke="#000000" stroke-width="0.8"/>
+    <text x="930" y="1626" class="app-font bold" font-size="8" text-anchor="middle" fill="#000000">+ Tambah Pegawai Baru</text>
+    <rect x="875" y="1639" width="25" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">No</text>
+    <!-- Display cell -->
+    <rect x="875" y="1657" width="25" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="875" y="1675" width="25" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="900" y="1639" width="70" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="935" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">NIP</text>
+    <!-- Display cell -->
+    <rect x="900" y="1657" width="70" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="935" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="900" y="1675" width="70" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="935" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="970" y="1639" width="100" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1020" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Nama Pegawai</text>
+    <!-- Display cell -->
+    <rect x="970" y="1657" width="100" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1020" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="970" y="1675" width="100" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1020" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1070" y="1639" width="45" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1092.5" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status</text>
+    <!-- Display cell -->
+    <rect x="1070" y="1657" width="45" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1092.5" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1070" y="1675" width="45" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1092.5" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1115" y="1639" width="90" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1160" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Jabatan</text>
+    <!-- Display cell -->
+    <rect x="1115" y="1657" width="90" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1160" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1115" y="1675" width="90" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1160" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1205" y="1639" width="105" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1257.5" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Unit Kerja</text>
+    <!-- Display cell -->
+    <rect x="1205" y="1657" width="105" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1257.5" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1205" y="1675" width="105" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1257.5" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1310" y="1639" width="55" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1337.5" y="1651" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Aksi</text>
+    <!-- Display cell -->
+    <rect x="1310" y="1657" width="55" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1337.5" y="1669" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1310" y="1675" width="55" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1337.5" y="1749" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Admin - Formulir Tambah Pegawai -->
+  <g id="screen_12">
+    <text x="1430" y="1580" class="title-top">34. Rancangan Layar Admin - Formulir Tambah Pegawai</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="1430" y="1595" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="1430" y="1595" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="1430" y="1615" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="1450" cy="1610" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1466" y="1614" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="2055" y="1614" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Administrator</text>
+    <line x1="1430" y1="1625" x2="2070" y2="1625" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="1430" y="1625" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1442" y="1647" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <rect x="1434" y="1657" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="1442" y="1671" class="app-font bold" font-size="8" fill="#000000">• Kelola Pegawai</text>
+    <text x="1442" y="1695" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <text x="1442" y="1719" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <text x="1442" y="1743" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="1442" y="1767" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="1442" y="1791" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1750" y="1992" class="caption" text-anchor="middle">Gambar 4. 34 Rancangan Layar Admin - Formulir Tambah Pegawai</text>
+  </g>
+    <text x="1805" y="1635" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Formulir Tambah Pegawai ASN Baru</text>
+    <text x="1565" y="1660" class="app-font" font-size="8" fill="#000000">NIP Pegawai * :</text>
+    <rect x="1565" y="1664" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1676" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1694" class="app-font" font-size="8" fill="#000000">Nama Lengkap Pegawai * :</text>
+    <rect x="1565" y="1698" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1710" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1728" class="app-font" font-size="8" fill="#000000">Password Default Akun * :</text>
+    <rect x="1565" y="1732" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1744" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1762" class="app-font" font-size="8" fill="#000000">Status Kepegawaian (PNS / PPPK Penuh / PPPK Paruh) * :</text>
+    <rect x="1565" y="1766" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1778" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1796" class="app-font" font-size="8" fill="#000000">Jabatan Struktural / Fungsional :</text>
+    <rect x="1565" y="1800" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1812" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="1830" class="app-font" font-size="8" fill="#000000">Unit Kerja / OPD Penugasan :</text>
+    <rect x="1565" y="1834" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="1846" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="1925" y="1864" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1957" y="1878" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan Pegawai</text>
+    <rect x="2000" y="1864" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2025" y="1878" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+  <!-- Rancangan Layar Admin - Formulir Edit Pegawai -->
+  <g id="screen_13">
+    <text x="50" y="2070" class="title-top">35. Rancangan Layar Admin - Formulir Edit Pegawai</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="50" y="2085" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="50" y="2085" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="50" y="2105" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="70" cy="2100" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="86" y="2104" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="675" y="2104" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Administrator</text>
+    <line x1="50" y1="2115" x2="690" y2="2115" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="50" y="2115" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="62" y="2137" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <rect x="54" y="2147" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="62" y="2161" class="app-font bold" font-size="8" fill="#000000">• Kelola Pegawai</text>
+    <text x="62" y="2185" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <text x="62" y="2209" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <text x="62" y="2233" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="62" y="2257" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="62" y="2281" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="370" y="2482" class="caption" text-anchor="middle">Gambar 4. 35 Rancangan Layar Admin - Formulir Edit Pegawai</text>
+  </g>
+    <text x="425" y="2125" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Formulir Edit Data Pegawai ASN</text>
+    <text x="185" y="2150" class="app-font" font-size="8" fill="#000000">NIP Pegawai (Primary Key) :</text>
+    <rect x="185" y="2154" width="480" height="18" rx="2" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2166" class="app-font" font-size="7" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <text x="185" y="2184" class="app-font" font-size="8" fill="#000000">Nama Lengkap Pegawai :</text>
+    <rect x="185" y="2188" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2200" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="2218" class="app-font" font-size="8" fill="#000000">Status Kepegawaian (PNS / PPPK) :</text>
+    <rect x="185" y="2222" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2234" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="2252" class="app-font" font-size="8" fill="#000000">Jabatan :</text>
+    <rect x="185" y="2256" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2268" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="2286" class="app-font" font-size="8" fill="#000000">Unit Kerja / OPD Penugasan :</text>
+    <rect x="185" y="2290" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2302" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="2320" class="app-font" font-size="8" fill="#000000">Reset Password Baru (Opsional) :</text>
+    <rect x="185" y="2324" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2336" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="545" y="2354" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="577" y="2368" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan Perubahan</text>
+    <rect x="620" y="2354" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="645" y="2368" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+  <!-- Rancangan Layar Admin - Rekap Sertifikasi &amp; Upload Excel -->
+  <g id="screen_14">
+    <text x="740" y="2070" class="title-top">36. Rancangan Layar Admin - Rekap Sertifikasi &amp; Upload Excel</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="740" y="2085" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="740" y="2085" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="740" y="2105" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="760" cy="2100" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="776" y="2104" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="1365" y="2104" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Administrator</text>
+    <line x1="740" y1="2115" x2="1380" y2="2115" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="740" y="2115" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="752" y="2137" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <text x="752" y="2161" class="app-font" font-size="8" fill="#334155">o Kelola Pegawai</text>
+    <rect x="744" y="2171" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="752" y="2185" class="app-font bold" font-size="8" fill="#000000">• Rekap Sertifikasi</text>
+    <text x="752" y="2209" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <text x="752" y="2233" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="752" y="2257" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="752" y="2281" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1060" y="2482" class="caption" text-anchor="middle">Gambar 4. 36 Rancangan Layar Admin - Rekap Sertifikasi &amp; Upload Excel</text>
+  </g>
+    <rect x="875" y="2145" width="490" height="50" rx="3" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="890" y="2165" class="app-font bold" font-size="8">Upload File Rekap Sertifikasi (Format Excel .xlsx):</text>
+    <text x="890" y="2182" class="app-font" font-size="7.5">Pilih File: &lt;&lt;input&gt;&gt; [ Browse File Excel ]</text>
+    <rect x="1255" y="2160" width="95" height="24" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1302" y="2175" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#ffffff">Unggah &amp; Proses</text>
+    <text x="1115" y="2180" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Rekapitulasi Pelatihan &amp; Sertifikasi Pegawai Daerah</text>
+    <rect x="875" y="2219" width="25" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">No</text>
+    <!-- Display cell -->
+    <rect x="875" y="2237" width="25" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="875" y="2255" width="25" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="900" y="2219" width="70" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="935" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">NIP</text>
+    <!-- Display cell -->
+    <rect x="900" y="2237" width="70" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="935" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="900" y="2255" width="70" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="935" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="970" y="2219" width="100" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1020" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Nama Pegawai</text>
+    <!-- Display cell -->
+    <rect x="970" y="2237" width="100" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1020" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="970" y="2255" width="100" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1020" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1070" y="2219" width="135" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1137.5" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Nama Pelatihan</text>
+    <!-- Display cell -->
+    <rect x="1070" y="2237" width="135" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1137.5" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1070" y="2255" width="135" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1137.5" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1205" y="2219" width="35" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1222.5" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">JP</text>
+    <!-- Display cell -->
+    <rect x="1205" y="2237" width="35" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1222.5" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1205" y="2255" width="35" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1222.5" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1240" y="2219" width="40" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1260" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Tahun</text>
+    <!-- Display cell -->
+    <rect x="1240" y="2237" width="40" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1260" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1240" y="2255" width="40" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1260" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1280" y="2219" width="85" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1322.5" y="2231" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Aksi</text>
+    <!-- Display cell -->
+    <rect x="1280" y="2237" width="85" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1322.5" y="2249" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1280" y="2255" width="85" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1322.5" y="2329" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Verifikasi IDP oleh Admin OPD -->
+  <g id="screen_15">
+    <text x="1430" y="2070" class="title-top">37. Rancangan Layar Verifikasi IDP oleh Admin OPD</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="1430" y="2085" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="1430" y="2085" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="1430" y="2105" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="1450" cy="2100" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1466" y="2104" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="2055" y="2104" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Kasubag OPD</text>
+    <line x1="1430" y1="2115" x2="2070" y2="2115" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="1430" y="2115" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1442" y="2137" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <text x="1442" y="2161" class="app-font" font-size="8" fill="#334155">o Kelola Pegawai</text>
+    <text x="1442" y="2185" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <rect x="1434" y="2195" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="1442" y="2209" class="app-font bold" font-size="8" fill="#000000">• Verifikasi IDP</text>
+    <text x="1442" y="2233" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="1442" y="2257" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="1442" y="2281" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1750" y="2482" class="caption" text-anchor="middle">Gambar 4. 37 Rancangan Layar Verifikasi IDP oleh Admin OPD</text>
+  </g>
+    <text x="1805" y="2135" class="app-font bold" font-size="11" text-anchor="middle">Verifikasi Usulan IDP - Kasubag Kepegawaian OPD</text>
+    <rect x="1565" y="2148" width="490" height="60" rx="3" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1575" y="2164" class="app-font bold" font-size="8">Ringkasan Usulan Bawahan:</text>
+    <text x="1575" y="2180" class="app-font" font-size="7.5">NIP &amp; Nama Pegawai: &lt;&lt;display&gt;&gt; | Unit Kerja: &lt;&lt;display&gt;&gt;</text>
+    <text x="1575" y="2195" class="app-font" font-size="7.5">Kebutuhan Diklat: &lt;&lt;display&gt;&gt; | Target JP: &lt;&lt;display&gt;&gt;</text>
+    <text x="1805" y="2200" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000"></text>
+    <text x="1565" y="2225" class="app-font" font-size="8" fill="#000000">Status Rekomendasi Kasubag / Atasan OPD * :</text>
+    <rect x="1565" y="2229" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2241" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="2259" class="app-font" font-size="8" fill="#000000">Catatan Pertimbangan / Alasan Rekomendasi :</text>
+    <rect x="1565" y="2263" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2275" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="1925" y="2293" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1957" y="2307" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Kirim Rekomendasi OPD</text>
+    <rect x="2000" y="2293" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2025" y="2307" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Kembali</text>
+  <!-- Rancangan Layar Approval Akhir IDP oleh BKPSDMD -->
+  <g id="screen_16">
+    <text x="50" y="2560" class="title-top">38. Rancangan Layar Approval Akhir IDP oleh BKPSDMD</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="50" y="2575" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="50" y="2575" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="50" y="2595" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="70" cy="2590" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="86" y="2594" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="675" y="2594" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Admin BKPSDMD</text>
+    <line x1="50" y1="2605" x2="690" y2="2605" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="50" y="2605" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="62" y="2627" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <text x="62" y="2651" class="app-font" font-size="8" fill="#334155">o Kelola Pegawai</text>
+    <text x="62" y="2675" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <rect x="54" y="2685" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="62" y="2699" class="app-font bold" font-size="8" fill="#000000">• Verifikasi IDP</text>
+    <text x="62" y="2723" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <text x="62" y="2747" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="62" y="2771" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="370" y="2972" class="caption" text-anchor="middle">Gambar 4. 38 Rancangan Layar Approval Akhir IDP oleh BKPSDMD</text>
+  </g>
+    <text x="425" y="2625" class="app-font bold" font-size="11" text-anchor="middle">Persetujuan Akhir Usulan IDP - Bidang Bangkom BKPSDMD</text>
+    <rect x="185" y="2638" width="490" height="60" rx="3" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="195" y="2654" class="app-font bold" font-size="8">Status Rekomendasi Kasubag OPD:</text>
+    <text x="195" y="2670" class="app-font" font-size="7.5">Status OPD: &lt;&lt;display&gt;&gt; (Disetujui Kasubag OPD) | Catatan OPD: &lt;&lt;display&gt;&gt;</text>
+    <text x="195" y="2685" class="app-font" font-size="7.5">NIP &amp; Nama Pegawai: &lt;&lt;display&gt;&gt; | Kebutuhan Diklat: &lt;&lt;display&gt;&gt;</text>
+    <text x="425" y="2690" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000"></text>
+    <text x="185" y="2715" class="app-font" font-size="8" fill="#000000">Status Persetujuan Akhir BKPSDMD (Approved / Rejected) * :</text>
+    <rect x="185" y="2719" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2731" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="185" y="2749" class="app-font" font-size="8" fill="#000000">Alokasi Kuota Diklat & Catatan Anggaran Daerah :</text>
+    <rect x="185" y="2753" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="193" y="2765" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="545" y="2783" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="577" y="2797" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan Approval BKPSDMD</text>
+    <rect x="620" y="2783" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="645" y="2797" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+  <!-- Rancangan Layar Admin - Tren Capaian 20 JP per OPD -->
+  <g id="screen_17">
+    <text x="740" y="2560" class="title-top">39. Rancangan Layar Admin - Tren Capaian 20 JP per OPD</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="740" y="2575" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="740" y="2575" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="740" y="2595" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="760" cy="2590" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="776" y="2594" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="1365" y="2594" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Administrator</text>
+    <line x1="740" y1="2605" x2="1380" y2="2605" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="740" y="2605" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="752" y="2627" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <text x="752" y="2651" class="app-font" font-size="8" fill="#334155">o Kelola Pegawai</text>
+    <text x="752" y="2675" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <text x="752" y="2699" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <rect x="744" y="2709" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="752" y="2723" class="app-font bold" font-size="8" fill="#000000">• Tren 20 JP OPD</text>
+    <text x="752" y="2747" class="app-font" font-size="8" fill="#334155">o Kelola Profil Web</text>
+    <text x="752" y="2771" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1060" y="2972" class="caption" text-anchor="middle">Gambar 4. 39 Rancangan Layar Admin - Tren Capaian 20 JP per OPD</text>
+  </g>
+    <rect x="875" y="2635" width="200" height="20" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="885" y="2648" class="app-font" font-size="7.5">Tahun Anggaran : &lt;&lt;input&gt;&gt; [ 2026 ]</text>
+    <rect x="1245" y="2635" width="120" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1305" y="2649" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#ffffff">Export Laporan Excel</text>
+    <text x="1115" y="2635" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Tren Pemenuhan 20 JP Seluruh OPD Bangka Barat</text>
+    <rect x="875" y="2674" width="25" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">No</text>
+    <!-- Display cell -->
+    <rect x="875" y="2692" width="25" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="875" y="2710" width="25" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="887.5" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="900" y="2674" width="145" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="972.5" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Unit Kerja / OPD</text>
+    <!-- Display cell -->
+    <rect x="900" y="2692" width="145" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="972.5" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="900" y="2710" width="145" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="972.5" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1045" y="2674" width="60" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1075" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Total ASN</text>
+    <!-- Display cell -->
+    <rect x="1045" y="2692" width="60" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1075" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1045" y="2710" width="60" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1075" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1105" y="2674" width="75" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1142.5" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Tuntas 20 JP</text>
+    <!-- Display cell -->
+    <rect x="1105" y="2692" width="75" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1142.5" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1105" y="2710" width="75" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1142.5" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1180" y="2674" width="75" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1217.5" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Belum Tuntas</text>
+    <!-- Display cell -->
+    <rect x="1180" y="2692" width="75" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1217.5" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1180" y="2710" width="75" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1217.5" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1255" y="2674" width="60" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1285" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">% Capaian</text>
+    <!-- Display cell -->
+    <rect x="1255" y="2692" width="60" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1285" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1255" y="2710" width="60" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1285" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+    <rect x="1315" y="2674" width="50" height="18" fill="#f8fafc" stroke="#000000" stroke-width="0.8"/>
+    <text x="1340" y="2686" class="app-font bold" font-size="7.5" text-anchor="middle" fill="#000000">Status</text>
+    <!-- Display cell -->
+    <rect x="1315" y="2692" width="50" height="18" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1340" y="2704" class="app-font" font-size="6.5" text-anchor="middle" fill="#475569">&lt;&lt;display&gt;&gt;</text>
+    <!-- Body cell with Z -->
+    <rect x="1315" y="2710" width="50" height="140" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1340" y="2784" class="app-font" font-size="28" text-anchor="middle" fill="#94a3b8">Z</text>
+  <!-- Rancangan Layar Admin - Kelola Profil Web &amp; Pimpinan -->
+  <g id="screen_18">
+    <text x="1430" y="2560" class="title-top">40. Rancangan Layar Admin - Kelola Profil Web &amp; Pimpinan</text>
+    <!-- Outer Browser Window (640 x 380) -->
+    <rect x="1430" y="2575" width="640" height="380" rx="8" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <!-- Top Nav -->
+    <rect x="1430" y="2575" width="640" height="30" rx="8" fill="#f8fafc" stroke="#000000" stroke-width="1"/>
+    <rect x="1430" y="2595" width="640" height="10" fill="#f8fafc"/>
+    <circle cx="1450" cy="2590" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1466" y="2594" class="app-font bold" font-size="9" fill="#000000">SIPJP-BABAR</text>
+    <text x="2055" y="2594" class="app-font" font-size="8.5" fill="#475569" text-anchor="end">&lt;&lt;display&gt;&gt; Super Admin</text>
+    <line x1="1430" y1="2605" x2="2070" y2="2605" stroke="#000000" stroke-width="1"/>
+    <!-- Sidebar -->
+    <rect x="1430" y="2605" width="125" height="350" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <text x="1442" y="2627" class="app-font" font-size="8" fill="#334155">o Dashboard Rekap</text>
+    <text x="1442" y="2651" class="app-font" font-size="8" fill="#334155">o Kelola Pegawai</text>
+    <text x="1442" y="2675" class="app-font" font-size="8" fill="#334155">o Rekap Sertifikasi</text>
+    <text x="1442" y="2699" class="app-font" font-size="8" fill="#334155">o Verifikasi IDP</text>
+    <text x="1442" y="2723" class="app-font" font-size="8" fill="#334155">o Tren 20 JP OPD</text>
+    <rect x="1434" y="2733" width="117" height="20" rx="3" fill="#e2e8f0"/>
+    <text x="1442" y="2747" class="app-font bold" font-size="8" fill="#000000">• Kelola Profil Web</text>
+    <text x="1442" y="2771" class="app-font" font-size="8" fill="#334155">o Keluar (Logout)</text>
+    <text x="1750" y="2972" class="caption" text-anchor="middle">Gambar 4. 40 Rancangan Layar Admin - Kelola Profil Web &amp; Pimpinan</text>
+  </g>
+    <text x="1805" y="2615" class="app-font bold" font-size="11" text-anchor="middle" fill="#000000">Pengaturan Profil Web &amp; Foto Pimpinan</text>
+    <text x="1565" y="2640" class="app-font" font-size="8" fill="#000000">Path / URL Link Foto Bupati Bangka Barat :</text>
+    <rect x="1565" y="2644" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2656" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="2674" class="app-font" font-size="8" fill="#000000">Path / URL Link Foto Wakil Bupati Bangka Barat :</text>
+    <rect x="1565" y="2678" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2690" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="2708" class="app-font" font-size="8" fill="#000000">Nama Lengkap & Gelar Bupati :</text>
+    <rect x="1565" y="2712" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2724" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="2742" class="app-font" font-size="8" fill="#000000">Nama Lengkap & Gelar Wakil Bupati :</text>
+    <rect x="1565" y="2746" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2758" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <text x="1565" y="2776" class="app-font" font-size="8" fill="#000000">Deskripsi Singkat Sistem di Beranda Login :</text>
+    <rect x="1565" y="2780" width="480" height="18" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="1573" y="2792" class="app-font" font-size="7" fill="#475569">&lt;&lt;input&gt;&gt;</text>
+    <rect x="1925" y="2810" width="65" height="22" rx="3" fill="#334155" stroke="#000000" stroke-width="0.8"/>
+    <text x="1957" y="2824" class="app-font bold" font-size="8" text-anchor="middle" fill="#ffffff">Simpan Pengaturan Profil</text>
+    <rect x="2000" y="2810" width="50" height="22" rx="3" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+    <text x="2025" y="2824" class="app-font" font-size="8" text-anchor="middle" fill="#000000">Batal</text>
+
+</svg>
