@@ -317,7 +317,7 @@ export default function SertifikasiPage() {
                     {kegiatans.map((k, index) => (
                       <div className="form-kegiatan-block bg-light" key={k.id}>
                         <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                          <h6 className="text-primary fw-bold mb-0">Aktifitas {index + 1}</h6>
+                          <h6 className="text-primary fw-bold mb-0">Pelatihan {index + 1}</h6>
                           {kegiatans.length > 1 && (
                             <button type="button" className="btn btn-sm btn-outline-danger py-0 px-2" onClick={() => hapusKegiatan(k.id)}><i className="bi bi-trash"></i> Hapus</button>
                           )}
@@ -497,7 +497,7 @@ export default function SertifikasiPage() {
                     ))}
 
                     <div className="d-flex justify-content-between align-items-center mt-3">
-                      <button type="button" className="btn btn-outline-primary btn-sm" onClick={tambahKegiatan}><i className="bi bi-plus-lg me-1"></i> Tambah Aktifitas Lain</button>
+                      <button type="button" className="btn btn-outline-primary btn-sm" onClick={tambahKegiatan}><i className="bi bi-plus-lg me-1"></i> Tambah Pelatihan Lainnya</button>
                       <div className="fw-bold text-success">Total: <span>{getTotalJP()}</span> JP</div>
                     </div>
                     
@@ -510,12 +510,12 @@ export default function SertifikasiPage() {
                 {step === 2 && (
                   <div>
                     <div className="alert alert-info border-0 bg-info bg-opacity-10 mb-4" style={{fontSize:'0.85rem'}}>
-                      <i className="bi bi-info-circle-fill me-2 text-info"></i> Silakan unggah dokumen sertifikat untuk setiap aktifitas yang Anda daftarkan di Langkah 1. File akan disimpan secara lokal di server.
+                      <i className="bi bi-info-circle-fill me-2 text-info"></i> Silakan unggah dokumen sertifikat untuk setiap pelatihan yang Anda daftarkan di Langkah 1. File akan disimpan secara lokal di server.
                     </div>
                     {kegiatans.map((k, index) => (
                       <div className="upload-block" key={k.id}>
                         <h6 className="mb-2 text-primary" style={{fontSize:'0.85rem'}}>
-                          <span className="badge bg-secondary me-1">Aktifitas {index + 1}</span> {k.nama_kursus} <span className="text-muted fw-normal">(No: {k.nomor_sertifikasi})</span>
+                          <span className="badge bg-secondary me-1">Pelatihan {index + 1}</span> {k.nama_kursus} <span className="text-muted fw-normal">(No: {k.nomor_sertifikasi})</span>
                         </h6>
                         <label className="form-label">Pilih File Sertifikat (PDF/JPG) <span className="text-danger">*</span> <small className="text-muted">(Maks. 1MB)</small></label>
                         <input type="file" className="form-control mb-3" accept=".pdf, .jpg, .jpeg, .png" required={!k.file} onChange={e => handleFileChange(k.id, e)} />
