@@ -215,7 +215,6 @@ export default function IDPPage() {
             <ul className="menu-list">
               <li><a onClick={() => router.push('/dashboard')}><i className="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
               <li><a className="active"><i className="bi bi-person-lines-fill"></i> Layanan ASN</a></li>
-              <li><a href="#"><i className="bi bi-arrow-repeat"></i> Layanan Lainnya</a></li>
             </ul>
           </div>
 
