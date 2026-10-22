@@ -1069,15 +1069,15 @@ export default function AdminPage() {
 
     const workbook = XLSX.utils.book_new();
 
-    // 1. Sheet Template_Sertifikasi (Manual, tanpa formula VLOOKUP yang memberatkan/mengunci)
+    // 1. Sheet Template_Sertifikasi (Manual, NIP sebagai kunci utama, kolom profil opsional)
     const headers = [
-      "NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", 
+      "NIP", "Nama Pegawai (Opsional)", "Status Pegawai (Opsional)", "Jabatan (Opsional)", 
       "Jenis Sertifikasi", "Nama Kursus", "Institusi Penyelenggara", "Nomor Sertifikasi", 
       "Tanggal Mulai", "Tanggal Akhir", "Tahun", "Jumlah JP", "Link Sertifikat", 
       "Jenis Kursus", "Klasifikasi Kursus", "Penanda Tangan", "Biaya Pelatihan"
     ];
 
-    // Berikan contoh pengisian manual tanpa formula otomatis
+    // Berikan contoh pengisian
     const sampleRows = [
       headers,
       [
@@ -1087,7 +1087,7 @@ export default function AdminPage() {
         "Bimbingan teknis", "Aparatur negara/Kepegawaian", "Kepala BKPSDMD", "APBD"
       ],
       [
-        "199208202022212015", "Siti Rahmah, S.Pd", "PPPK", "Guru Ahli Pertama",
+        "199208202022212015", "", "", "",
         "Pelatihan", "Webinar Penguatan Kompetensi Guru Abad 21", "Kemendikbudristek", "KEMEN/098/2026",
         "2026-05-15", "2026-05-15", "2026", 4, "",
         "Webinar", "Pendidikan", "Dirjen GTK", "Gratis"
@@ -1098,9 +1098,9 @@ export default function AdminPage() {
 
     worksheet['!cols'] = [
       { wch: 22 }, // NIP
-      { wch: 30 }, // Nama Pegawai
-      { wch: 18 }, // Status Pegawai
-      { wch: 35 }, // Jabatan
+      { wch: 30 }, // Nama Pegawai (Opsional)
+      { wch: 24 }, // Status Pegawai (Opsional)
+      { wch: 35 }, // Jabatan (Opsional)
       { wch: 18 }, // Jenis Sertifikasi
       { wch: 48 }, // Nama Kursus
       { wch: 32 }, // Institusi Penyelenggara
@@ -1138,11 +1138,11 @@ export default function AdminPage() {
 
     // 3. Sheet Petunjuk_Pengisian
     const petunjukData = [
-      { "Panduan": "PENGISIAN MANUAL", "Keterangan": "Template ini diisi secara manual. Masukkan NIP, Nama, dan detail pelatihan sesuai kolom yang tersedia." },
+      { "Panduan": "CUKUP ISI NIP & SERTIFIKAT", "Keterangan": "Kolom Nama Pegawai, Status, dan Jabatan bersifat OPSIONAL (boleh dikosongkan). Saat file Excel ini di-upload, sistem otomatis membaca NIP dan melengkapi data nama serta unit kerja dari database!" },
       { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit." },
-      { "Kolom": "Nama Pegawai", "Keterangan": "Nama lengkap pegawai beserta gelar." },
-      { "Kolom": "Status Pegawai", "Keterangan": "Pilihan: PNS, PPPK, atau PW." },
-      { "Kolom": "Jabatan", "Keterangan": "Nama jabatan pegawai saat ini." },
+      { "Kolom": "Nama Pegawai (Opsional)", "Keterangan": "Boleh dikosongkan. Sistem akan mengambil otomatis dari database saat diunggah." },
+      { "Kolom": "Status Pegawai (Opsional)", "Keterangan": "Boleh dikosongkan (sistem melengkapi otomatis)." },
+      { "Kolom": "Jabatan (Opsional)", "Keterangan": "Boleh dikosongkan (sistem melengkapi otomatis)." },
       { "Kolom": "Jenis Sertifikasi", "Keterangan": "Contoh: Workshop, Webinar, Bimtek, Seminar, Pelatihan, Diklat Teknis, Paten/Haki." },
       { "Kolom": "Nama Kursus", "Keterangan": "WAJIB diisi. Nama kegiatan diklat (Contoh: Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK)." },
       { "Kolom": "Institusi Penyelenggara", "Keterangan": "Instansi penyelenggara kegiatan (Contoh: BKPSDMD Kabupaten Bangka Barat)." },
@@ -1216,8 +1216,8 @@ export default function AdminPage() {
           const sourceList = (semuaPegawai && semuaPegawai.length > 0) ? semuaPegawai : pegawaiList;
           const pegFound = sourceList.find((p: any) => p.nip?.toString().trim() === nip);
 
-          const statusPeg = (r['Status Pegawai'] || r['status_pegawai'] || r['Status'] || '').toString().trim();
-          const jabatanPeg = (r['Jabatan'] || r['jabatan'] || '').toString().trim();
+          const statusPeg = (r['Status Pegawai (Opsional)'] || r['Status Pegawai'] || r['status_pegawai'] || r['Status'] || '').toString().trim();
+          const jabatanPeg = (r['Jabatan (Opsional)'] || r['Jabatan'] || r['jabatan'] || '').toString().trim();
 
           const isFound = !!pegFound;
           const finalNama = isFound ? (pegFound.nama || namaInput || '-') : 'NIP Tidak Ditemukan';
