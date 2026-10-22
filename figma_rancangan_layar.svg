@@ -1,0 +1,545 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 2500" width="2500" height="2500">
+  <defs>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap");
+      text { font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .title { font-weight: 800; }
+      .bold { font-weight: 700; }
+      .semibold { font-weight: 600; }
+      .medium { font-weight: 500; }
+      .regular { font-weight: 400; }
+      .shadow { filter: drop-shadow(0px 8px 16px rgba(15, 23, 42, 0.08)); }
+      .card-shadow { filter: drop-shadow(0px 4px 8px rgba(15, 23, 42, 0.04)); }
+    </style>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="2500" height="2500" fill="#f1f5f9"/>
+
+  <!-- Top Global Title for Figma -->
+  <rect x="50" y="30" width="2400" height="70" rx="16" fill="url(#darkGrad)"/>
+  <text x="90" y="74" fill="#ffffff" font-size="22" class="title">FIGMA UI DESIGN SYSTEM — SIPJP-BABAR (BKD-APP)</text>
+  <text x="2410" y="74" fill="#94a3b8" font-size="14" class="medium" text-anchor="end">Sistem Informasi Pengembangan Kompetensi &amp; IDP ASN Bangka Barat | 100% Sesuai Web Implementasi</text>
+  <g id="label_50_130">
+    <rect x="50" y="130" width="260" height="28" rx="6" fill="#0284c7"/>
+    <text x="62" y="149" fill="#ffffff" font-size="12" class="bold">FRAME 01 • /login</text>
+    <text x="330" y="149" fill="#334155" font-size="14" class="bold">Halaman Login Pegawai &amp; Administrator</text>
+  </g>
+  <g id="frame_50_130" class="shadow">
+    <rect x="50" y="165" width="1180" height="720" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <rect x="50" y="165" width="1180" height="720" rx="16" fill="#0f172a"/>
+    <!-- Top Bar inside login -->
+    <rect x="50" y="165" width="1180" height="50" rx="16" fill="#1e293b"/>
+    <rect x="50" y="200" width="1180" height="15" fill="#1e293b"/>
+    <circle cx="85" cy="190" r="12" fill="#0284c7"/>
+    <text x="85" y="194" fill="#ffffff" font-size="11" class="bold" text-anchor="middle">S</text>
+    <text x="105" y="195" fill="#ffffff" font-size="14" class="title">SIPJP-BABAR</text>
+    <text x="225" y="195" fill="#94a3b8" font-size="12" class="regular">| Pemerintah Kabupaten Bangka Barat</text>
+
+    <!-- Left Box: Foto Pimpinan Daerah Markus, S.H. & Yus Derahman -->
+    <rect x="120" y="250" width="460" height="570" rx="16" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <rect x="145" y="275" width="410" height="340" rx="12" fill="#334155"/>
+    <circle cx="350" cy="390" r="50" fill="#475569"/>
+    <text x="350" y="398" fill="#94a3b8" font-size="32" class="bold" text-anchor="middle">BKD</text>
+    <text x="350" y="470" fill="#e2e8f0" font-size="12" class="semibold" text-anchor="middle">Foto Pimpinan Pemerintah Daerah</text>
+
+    <!-- Leadership names -->
+    <rect x="145" y="640" width="195" height="70" rx="10" fill="#0f172a"/>
+    <text x="242" y="668" fill="#38bdf8" font-size="12" class="bold" text-anchor="middle">MARKUS, S.H.</text>
+    <text x="242" y="688" fill="#94a3b8" font-size="10" class="regular" text-anchor="middle">Bupati Bangka Barat</text>
+
+    <rect x="360" y="640" width="195" height="70" rx="10" fill="#0f172a"/>
+    <text x="457" y="668" fill="#38bdf8" font-size="12" class="bold" text-anchor="middle">H. YUS DERAHMAN</text>
+    <text x="457" y="688" fill="#94a3b8" font-size="10" class="regular" text-anchor="middle">Wakil Bupati Bangka Barat</text>
+
+    <text x="350" y="755" fill="#64748b" font-size="10.5" class="medium" text-anchor="middle">Badan Kepegawaian &amp; Pengembangan SDM Daerah (BKPSDMD)</text>
+
+    <!-- Right Box: Login Card -->
+    <rect x="640" y="250" width="520" height="570" rx="16" fill="#ffffff" class="card-shadow"/>
+    <text x="690" y="320" fill="#0f172a" font-size="22" class="title">Masuk ke Akun Anda</text>
+    <text x="690" y="345" fill="#64748b" font-size="12" class="regular">Silakan masukkan NIP dan kata sandi yang telah terdaftar</text>
+
+    <!-- Field 1: NIP -->
+    <text x="690" y="395" fill="#334155" font-size="11" class="bold">NIP / ID PEGAWAI</text>
+    <rect x="690" y="408" width="420" height="46" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="706" y="437" fill="#0f172a" font-size="13" class="medium">199203152019031008</text>
+
+    <!-- Field 2: Password -->
+    <text x="690" y="485" fill="#334155" font-size="11" class="bold">KATA SANDI</text>
+    <rect x="690" y="498" width="420" height="46" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="706" y="530" fill="#94a3b8" font-size="16" class="bold">••••••••••••••••</text>
+
+    <!-- Checkbox remember -->
+    <rect x="690" y="568" width="16" height="16" rx="4" fill="#0284c7"/>
+    <text x="698" y="580" fill="#ffffff" font-size="10" class="bold" text-anchor="middle">✓</text>
+    <text x="716" y="581" fill="#475569" font-size="11" class="regular">Ingat NIP di perangkat ini</text>
+
+    <!-- Submit Button -->
+    <rect x="690" y="610" width="420" height="48" rx="10" fill="url(#primaryGrad)"/>
+    <text x="900" y="640" fill="#ffffff" font-size="14" class="bold" text-anchor="middle">Masuk Sekarang</text>
+
+    <text x="900" y="700" fill="#64748b" font-size="11" class="regular" text-anchor="middle">Belum memiliki akun pegawai? Hubungi Admin Kasubag Kepegawaian OPD Anda</text>
+    <rect x="690" y="740" width="420" height="40" rx="8" fill="#f1f5f9"/>
+    <text x="900" y="765" fill="#0369a1" font-size="11" class="semibold" text-anchor="middle">🔐 Sistem Terintegrasi Database ASN Bangka Barat</text>
+  <g id="label_1270_130">
+    <rect x="1270" y="130" width="260" height="28" rx="6" fill="#0284c7"/>
+    <text x="1282" y="149" fill="#ffffff" font-size="12" class="bold">FRAME 02 • /dashboard</text>
+    <text x="1550" y="149" fill="#334155" font-size="14" class="bold">Dashboard Capaian JP &amp; Status IDP Pegawai</text>
+  </g>
+  <g id="frame_1270_130" class="shadow">
+    <rect x="1270" y="165" width="1180" height="720" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <!-- App Header -->
+    <rect x="1270" y="165" width="1180" height="56" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="1270" y="200" width="1180" height="21" fill="#ffffff"/>
+    <circle cx="1305" cy="193" r="14" fill="#0284c7"/>
+    <text x="1305" y="198" fill="#ffffff" font-size="13" class="bold" text-anchor="middle">S</text>
+    <text x="1330" y="198" fill="#0f172a" font-size="15" class="title">SIPJP-BABAR</text>
+    <rect x="1450" y="183" width="165" height="20" rx="10" fill="#e0f2fe"/>
+    <text x="1460" y="197" fill="#0369a1" font-size="9.5" class="bold">SISTEM SERTIFIKASI &amp; JP</text>
+    <rect x="2250" y="181" width="175" height="24" rx="12" fill="#f1f5f9"/>
+    <circle cx="2265" cy="193" r="8" fill="#cbd5e1"/>
+    <text x="2282" y="197" fill="#334155" font-size="10" class="semibold">Ahmad Fauzi, S.Kom</text>
+  <!-- Sidebar -->
+    <rect x="1270" y="221" width="200" height="664" rx="0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="1290" y="255" fill="#64748b" font-size="9" class="bold" letter-spacing="1">MENU UTAMA</text>
+    <rect x="1282" y="270" width="176" height="34" rx="8" fill="#e0f2fe"/>
+    <rect x="1282" y="274" width="3.5" height="26" rx="1.5" fill="#0284c7"/>
+    <text x="1298" y="291" fill="#0369a1" font-size="11" class="bold">Beranda</text>
+    <text x="1298" y="331" fill="#475569" font-size="11" class="medium">Riwayat Pendidikan</text>
+    <text x="1298" y="371" fill="#475569" font-size="11" class="medium">Riwayat Sertifikasi</text>
+    <text x="1298" y="411" fill="#475569" font-size="11" class="medium">Pengajuan IDP</text>
+    <text x="1298" y="451" fill="#475569" font-size="11" class="medium">Keluar</text>
+    <rect x="1500" y="245" width="920" height="110" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" class="card-shadow"/>
+    <circle cx="1555" cy="300" r="35" fill="#e0f2fe"/>
+    <text x="1555" y="308" fill="#0284c7" font-size="22" class="bold" text-anchor="middle">AF</text>
+    <text x="1610" y="287" fill="#0f172a" font-size="18" class="title">Ahmad Fauzi, S.Kom</text>
+    <text x="1610" y="311" fill="#64748b" font-size="11.5" class="medium">NIP: 19920315 201903 1 008 | Gol. Ruang: Penata Muda (III/a)</text>
+    <rect x="1610" y="321" width="50" height="20" rx="4" fill="#dbeafe"/>
+    <text x="1635" y="335" fill="#1e40af" font-size="9" class="bold" text-anchor="middle">PNS</text>
+    <rect x="1668" y="321" width="220" height="20" rx="4" fill="#f1f5f9"/>
+    <text x="1778" y="335" fill="#334155" font-size="9" class="semibold" text-anchor="middle">Pranata Komputer Ahli Pertama</text>
+    <rect x="1896" y="321" width="240" height="20" rx="4" fill="#f1f5f9"/>
+    <text x="2016" y="335" fill="#334155" font-size="9" class="semibold" text-anchor="middle">Badan Kepegawaian &amp; Pengembangan SDM</text>
+
+    <!-- 2 Metric Cards -->
+    <!-- Card 1: Jam Pelajaran (JP) -->
+    <rect x="1500" y="375" width="445" height="150" rx="12" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+    <text x="1525" y="410" fill="#0369a1" font-size="13" class="bold">PEMENUHAN 20 JAM PELAJARAN (JP)</text>
+    <text x="1525" y="460" fill="#0f172a" font-size="36" class="title">24 <tspan font-size="18" fill="#64748b" class="regular">/ 20 JP</tspan></text>
+    <rect x="1525" y="480" width="395" height="10" rx="5" fill="#e0f2fe"/>
+    <rect x="1525" y="480" width="395" height="10" rx="5" fill="#0284c7"/>
+    <rect x="1830" y="395" width="90" height="24" rx="12" fill="#dcfce7"/>
+    <text x="1875" y="411" fill="#166534" font-size="10" class="bold" text-anchor="middle">✓ TUNTAS</text>
+
+    <!-- Card 2: Status IDP -->
+    <rect x="1975" y="375" width="445" height="150" rx="12" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+    <text x="2000" y="410" fill="#15803d" font-size="13" class="bold">INDIVIDUAL DEVELOPMENT PLAN (IDP)</text>
+    <text x="2000" y="455" fill="#0f172a" font-size="18" class="title">Pelatihan Cyber Security SPBE</text>
+    <text x="2000" y="480" fill="#475569" font-size="11" class="medium">Target: 30 JP | Jalur: Klasikal | Pelaksanaan: Semester II 2026</text>
+    <rect x="2240" y="395" width="160" height="24" rx="12" fill="#dbeafe"/>
+    <text x="2320" y="411" fill="#1e40af" font-size="10" class="bold" text-anchor="middle">Disetujui BKPSDMD</text>
+
+    <!-- Quick Actions -->
+    <text x="1500" y="555" fill="#0f172a" font-size="13" class="bold">Layanan Pintas Pemenuhan Kompetensi:</text>
+    <rect x="1500" y="570" width="290" height="50" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1520" y="600" fill="#0284c7" font-size="12" class="bold">+ Update Pendidikan Formal</text>
+
+    <rect x="1815" y="570" width="290" height="50" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1835" y="600" fill="#0284c7" font-size="12" class="bold">+ Tambah Sertifikasi Pelatihan</text>
+
+    <rect x="2130" y="570" width="290" height="50" rx="8" fill="url(#primaryGrad)"/>
+    <text x="2150" y="600" fill="#ffffff" font-size="12" class="bold">+ Ajukan Form Usulan IDP</text>
+
+    <!-- Recent History Table -->
+    <text x="1500" y="650" fill="#0f172a" font-size="13" class="bold">Riwayat Pelatihan Terverifikasi (Tahun 2026):</text>
+    <rect x="1500" y="665" width="920" height="190" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="1500" y="665" width="920" height="35" rx="8" fill="#f8fafc"/>
+    <text x="1520" y="687" fill="#475569" font-size="10" class="bold">NAMA PELATIHAN / DIKLAT</text>
+    <text x="1880" y="687" fill="#475569" font-size="10" class="bold">PENYELENGGARA</text>
+    <text x="2150" y="687" fill="#475569" font-size="10" class="bold">DURASI</text>
+    <text x="2280" y="687" fill="#475569" font-size="10" class="bold">STATUS JP</text>
+
+    <!-- Row 1 -->
+    <line x1="1500" y1="740" x2="2420" y2="740" stroke="#f1f5f9" stroke-width="1"/>
+    <text x="1520" y="720" fill="#0f172a" font-size="11" class="semibold">Pelatihan Analisis Big Data Pemerintahan</text>
+    <text x="1880" y="720" fill="#64748b" font-size="11" class="regular">BPSDM Prov. Kep. Bangka Belitung</text>
+    <text x="2150" y="720" fill="#0f172a" font-size="11" class="bold">24 JP</text>
+    <rect x="2280" y="705" width="85" height="22" rx="11" fill="#dcfce7"/>
+    <text x="2322" y="720" fill="#15803d" font-size="9" class="bold" text-anchor="middle">Terverifikasi</text>
+  <g id="label_50_920">
+    <rect x="50" y="920" width="260" height="28" rx="6" fill="#0284c7"/>
+    <text x="62" y="939" fill="#ffffff" font-size="12" class="bold">FRAME 03 • /pendidikan</text>
+    <text x="330" y="939" fill="#334155" font-size="14" class="bold">Formulir Riwayat Pendidikan Formal ASN</text>
+  </g>
+  <g id="frame_50_920" class="shadow">
+    <rect x="50" y="955" width="1180" height="720" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <!-- App Header -->
+    <rect x="50" y="955" width="1180" height="56" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="50" y="990" width="1180" height="21" fill="#ffffff"/>
+    <circle cx="85" cy="983" r="14" fill="#0284c7"/>
+    <text x="85" y="988" fill="#ffffff" font-size="13" class="bold" text-anchor="middle">S</text>
+    <text x="110" y="988" fill="#0f172a" font-size="15" class="title">SIPJP-BABAR</text>
+    <rect x="230" y="973" width="165" height="20" rx="10" fill="#e0f2fe"/>
+    <text x="240" y="987" fill="#0369a1" font-size="9.5" class="bold">SISTEM SERTIFIKASI &amp; JP</text>
+    <rect x="1030" y="971" width="175" height="24" rx="12" fill="#f1f5f9"/>
+    <circle cx="1045" cy="983" r="8" fill="#cbd5e1"/>
+    <text x="1062" y="987" fill="#334155" font-size="10" class="semibold">Ahmad Fauzi, S.Kom</text>
+  <!-- Sidebar -->
+    <rect x="50" y="1011" width="200" height="664" rx="0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="70" y="1045" fill="#64748b" font-size="9" class="bold" letter-spacing="1">MENU UTAMA</text>
+    <text x="78" y="1081" fill="#475569" font-size="11" class="medium">Beranda</text>
+    <rect x="62" y="1100" width="176" height="34" rx="8" fill="#e0f2fe"/>
+    <rect x="62" y="1104" width="3.5" height="26" rx="1.5" fill="#0284c7"/>
+    <text x="78" y="1121" fill="#0369a1" font-size="11" class="bold">Riwayat Pendidikan</text>
+    <text x="78" y="1161" fill="#475569" font-size="11" class="medium">Riwayat Sertifikasi</text>
+    <text x="78" y="1201" fill="#475569" font-size="11" class="medium">Pengajuan IDP</text>
+    <text x="78" y="1241" fill="#475569" font-size="11" class="medium">Keluar</text>
+    <rect x="280" y="1035" width="920" height="520" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" class="card-shadow"/>
+    <rect x="280" y="1035" width="920" height="50" rx="12" fill="#f8fafc"/>
+    <rect x="280" y="1065" width="920" height="20" fill="#f8fafc"/>
+    <text x="305" y="1067" fill="#0f172a" font-size="14" class="title">Update Riwayat Pendidikan Formal</text>
+
+    <!-- Info banner -->
+    <rect x="305" y="1100" width="870" height="36" rx="8" fill="#f1f5f9"/>
+    <text x="320" y="1123" fill="#334155" font-size="11" class="medium">Pegawai: <tspan class="bold">Ahmad Fauzi, S.Kom</tspan> | NIP: <tspan class="bold">19920315 201903 1 008</tspan> | Instansi: <tspan class="bold">BKPSDMD Bangka Barat</tspan></text>
+
+    <!-- Form Fields -->
+    <!-- Field 1: Tingkat Pendidikan -->
+    <text x="305" y="1165" fill="#334155" font-size="11" class="bold">Tingkat Pendidikan *</text>
+    <rect x="305" y="1177" width="420" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="320" y="1203" fill="#0f172a" font-size="12" class="medium">S-1 / Sarjana</text>
+    <text x="705" y="1203" fill="#64748b" font-size="12">▼</text>
+
+    <!-- Field 2: Program Studi -->
+    <text x="755" y="1165" fill="#334155" font-size="11" class="bold">Fakultas / Program Studi / Jurusan *</text>
+    <rect x="755" y="1177" width="420" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="770" y="1203" fill="#0f172a" font-size="12" class="medium">Teknik Informatika / Ilmu Komputer</text>
+
+    <!-- Field 3: Nama Institusi -->
+    <text x="305" y="1245" fill="#334155" font-size="11" class="bold">Nama Sekolah / Universitas / Perguruan Tinggi *</text>
+    <rect x="305" y="1257" width="420" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="320" y="1283" fill="#0f172a" font-size="12" class="medium">Universitas Bina Darma</text>
+
+    <!-- Field 4: Tahun Kelulusan -->
+    <text x="755" y="1245" fill="#334155" font-size="11" class="bold">Tahun Kelulusan *</text>
+    <rect x="755" y="1257" width="420" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="770" y="1283" fill="#0f172a" font-size="12" class="medium">2015</text>
+
+    <!-- Buttons -->
+    <rect x="305" y="1320" width="180" height="42" rx="8" fill="url(#primaryGrad)"/>
+    <text x="395" y="1346" fill="#ffffff" font-size="12" class="bold" text-anchor="middle">Simpan Pendidikan</text>
+
+    <rect x="500" y="1320" width="90" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="545" y="1346" fill="#475569" font-size="12" class="semibold" text-anchor="middle">Batal</text>
+
+    <!-- Table of Education -->
+    <text x="305" y="1400" fill="#0f172a" font-size="13" class="bold">Daftar Riwayat Pendidikan Terdaftar:</text>
+    <rect x="305" y="1415" width="870" height="110" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="305" y="1415" width="870" height="30" rx="8" fill="#f8fafc"/>
+    <text x="320" y="1435" fill="#475569" font-size="9.5" class="bold">JENJANG</text>
+    <text x="420" y="1435" fill="#475569" font-size="9.5" class="bold">PROGRAM STUDI</text>
+    <text x="700" y="1435" fill="#475569" font-size="9.5" class="bold">INSTITUSI / KAMPUS</text>
+    <text x="980" y="1435" fill="#475569" font-size="9.5" class="bold">TAHUN</text>
+    <text x="1070" y="1435" fill="#475569" font-size="9.5" class="bold">AKSI</text>
+
+    <!-- Row 1 -->
+    <text x="320" y="1470" fill="#0f172a" font-size="11" class="bold">S-1</text>
+    <text x="420" y="1470" fill="#334155" font-size="11" class="medium">Teknik Informatika</text>
+    <text x="700" y="1470" fill="#334155" font-size="11" class="medium">Universitas Bina Darma</text>
+    <text x="980" y="1470" fill="#334155" font-size="11" class="medium">2015</text>
+    <text x="1070" y="1470" fill="#0284c7" font-size="11" class="semibold">[ Edit ]</text>
+  <g id="label_1270_920">
+    <rect x="1270" y="920" width="260" height="28" rx="6" fill="#0284c7"/>
+    <text x="1282" y="939" fill="#ffffff" font-size="12" class="bold">FRAME 04 • /sertifikasi</text>
+    <text x="1550" y="939" fill="#334155" font-size="14" class="bold">Update Riwayat Pelatihan &amp; Sertifikasi 20 JP</text>
+  </g>
+  <g id="frame_1270_920" class="shadow">
+    <rect x="1270" y="955" width="1180" height="720" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <!-- App Header -->
+    <rect x="1270" y="955" width="1180" height="56" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="1270" y="990" width="1180" height="21" fill="#ffffff"/>
+    <circle cx="1305" cy="983" r="14" fill="#0284c7"/>
+    <text x="1305" y="988" fill="#ffffff" font-size="13" class="bold" text-anchor="middle">S</text>
+    <text x="1330" y="988" fill="#0f172a" font-size="15" class="title">SIPJP-BABAR</text>
+    <rect x="1450" y="973" width="165" height="20" rx="10" fill="#e0f2fe"/>
+    <text x="1460" y="987" fill="#0369a1" font-size="9.5" class="bold">SISTEM SERTIFIKASI &amp; JP</text>
+    <rect x="2250" y="971" width="175" height="24" rx="12" fill="#f1f5f9"/>
+    <circle cx="2265" cy="983" r="8" fill="#cbd5e1"/>
+    <text x="2282" y="987" fill="#334155" font-size="10" class="semibold">Ahmad Fauzi, S.Kom</text>
+  <!-- Sidebar -->
+    <rect x="1270" y="1011" width="200" height="664" rx="0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="1290" y="1045" fill="#64748b" font-size="9" class="bold" letter-spacing="1">MENU UTAMA</text>
+    <text x="1298" y="1081" fill="#475569" font-size="11" class="medium">Beranda</text>
+    <text x="1298" y="1121" fill="#475569" font-size="11" class="medium">Riwayat Pendidikan</text>
+    <rect x="1282" y="1140" width="176" height="34" rx="8" fill="#e0f2fe"/>
+    <rect x="1282" y="1144" width="3.5" height="26" rx="1.5" fill="#0284c7"/>
+    <text x="1298" y="1161" fill="#0369a1" font-size="11" class="bold">Riwayat Sertifikasi</text>
+    <text x="1298" y="1201" fill="#475569" font-size="11" class="medium">Pengajuan IDP</text>
+    <text x="1298" y="1241" fill="#475569" font-size="11" class="medium">Keluar</text>
+    <rect x="1500" y="1035" width="920" height="520" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" class="card-shadow"/>
+    <rect x="1500" y="1035" width="920" height="50" rx="12" fill="#f8fafc"/>
+    <rect x="1500" y="1065" width="920" height="20" fill="#f8fafc"/>
+    <text x="1525" y="1067" fill="#0f172a" font-size="14" class="title">Update Riwayat Pelatihan (Sertifikasi 20 JP)</text>
+
+    <!-- Field: Nama Pelatihan -->
+    <text x="1525" y="1120" fill="#334155" font-size="11" class="bold">Nama Kursus / Pelatihan *</text>
+    <rect x="1525" y="1132" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1540" y="1156" fill="#0f172a" font-size="11.5" class="medium">Pelatihan Keamanan Siber dan Tata Kelola SPBE</text>
+
+    <!-- Field: Jenis Sertifikasi -->
+    <text x="1975" y="1120" fill="#334155" font-size="11" class="bold">Jenis Sertifikasi &amp; Kursus *</text>
+    <rect x="1975" y="1132" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1990" y="1156" fill="#0f172a" font-size="11.5" class="medium">Sertifikasi Teknis / Fungsional</text>
+
+    <!-- Field: Nomor Sertifikat & Penyelenggara -->
+    <text x="1525" y="1190" fill="#334155" font-size="11" class="bold">Nomor Sertifikat Kursus *</text>
+    <rect x="1525" y="1202" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1540" y="1226" fill="#0f172a" font-size="11.5" class="medium">800.1.2/BSSN-SPBE/III/2026</text>
+
+    <text x="1975" y="1190" fill="#334155" font-size="11" class="bold">Institusi Penyelenggara *</text>
+    <rect x="1975" y="1202" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1990" y="1226" fill="#0f172a" font-size="11.5" class="medium">Badan Siber dan Sandi Negara (BSSN)</text>
+
+    <!-- Field: Jam Pelajaran (JP) & Tanggal -->
+    <text x="1525" y="1260" fill="#334155" font-size="11" class="bold">Durasi Jam Pelajaran (JP) *</text>
+    <rect x="1525" y="1272" width="200" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1540" y="1296" fill="#0f172a" font-size="11.5" class="bold">24 JP</text>
+
+    <text x="1745" y="1260" fill="#334155" font-size="11" class="bold">Tahun Kursus *</text>
+    <rect x="1745" y="1272" width="200" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1760" y="1296" fill="#0f172a" font-size="11.5" class="medium">2026</text>
+
+    <!-- Field: Upload File Sertifikat (Dashed Box) -->
+    <text x="1975" y="1260" fill="#334155" font-size="11" class="bold">Pilih File Sertifikat (PDF/JPG, Maks 1MB) *</text>
+    <rect x="1975" y="1272" width="420" height="38" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="4 4" stroke-width="1.5"/>
+    <text x="1995" y="1296" fill="#0284c7" font-size="11" class="semibold">📄 Sertifikat_Keamanan_Siber_2026.pdf (380 KB)</text>
+
+    <!-- Buttons exact from user prompt: Tambah Pelatihan Lainnya & Simpan -->
+    <rect x="1525" y="1335" width="210" height="42" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+    <text x="1630" y="1361" fill="#0284c7" font-size="11.5" class="bold" text-anchor="middle">+ Tambah Pelatihan Lainnya</text>
+
+    <rect x="1750" y="1335" width="160" height="42" rx="8" fill="url(#primaryGrad)"/>
+    <text x="1830" y="1361" fill="#ffffff" font-size="11.5" class="bold" text-anchor="middle">Simpan Pelatihan</text>
+
+    <!-- Table of Certificates -->
+    <text x="1525" y="1410" fill="#0f172a" font-size="13" class="bold">Daftar Sertifikat Terverifikasi:</text>
+    <rect x="1525" y="1425" width="870" height="100" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="1525" y="1425" width="870" height="30" rx="8" fill="#f8fafc"/>
+    <text x="1540" y="1445" fill="#475569" font-size="9.5" class="bold">NAMA PELATIHAN</text>
+    <text x="1900" y="1445" fill="#475569" font-size="9.5" class="bold">PENYELENGGARA</text>
+    <text x="2170" y="1445" fill="#475569" font-size="9.5" class="bold">JP</text>
+    <text x="2240" y="1445" fill="#475569" font-size="9.5" class="bold">STATUS JP</text>
+    <text x="2340" y="1445" fill="#475569" font-size="9.5" class="bold">FILE</text>
+
+    <text x="1540" y="1480" fill="#0f172a" font-size="11" class="semibold">Pelatihan Analisis Data Pemerintahan</text>
+    <text x="1900" y="1480" fill="#64748b" font-size="11">BPSDM Prov. Kep. Bangka Belitung</text>
+    <text x="2170" y="1480" fill="#0f172a" font-size="11" class="bold">24 JP</text>
+    <rect x="2240" y="1467" width="80" height="20" rx="10" fill="#dcfce7"/>
+    <text x="2280" y="1481" fill="#166534" font-size="9" class="bold" text-anchor="middle">Tuntas</text>
+    <text x="2340" y="1480" fill="#0284c7" font-size="11">[ Lihat ]</text>
+  <g id="label_50_1710">
+    <rect x="50" y="1710" width="260" height="28" rx="6" fill="#0284c7"/>
+    <text x="62" y="1729" fill="#ffffff" font-size="12" class="bold">FRAME 05 • /idp</text>
+    <text x="330" y="1729" fill="#334155" font-size="14" class="bold">Formulir Usulan Rencana Pengembangan Kompetensi (IDP)</text>
+  </g>
+  <g id="frame_50_1710" class="shadow">
+    <rect x="50" y="1745" width="1180" height="720" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <!-- App Header -->
+    <rect x="50" y="1745" width="1180" height="56" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="50" y="1780" width="1180" height="21" fill="#ffffff"/>
+    <circle cx="85" cy="1773" r="14" fill="#0284c7"/>
+    <text x="85" y="1778" fill="#ffffff" font-size="13" class="bold" text-anchor="middle">S</text>
+    <text x="110" y="1778" fill="#0f172a" font-size="15" class="title">SIPJP-BABAR</text>
+    <rect x="230" y="1763" width="165" height="20" rx="10" fill="#e0f2fe"/>
+    <text x="240" y="1777" fill="#0369a1" font-size="9.5" class="bold">SISTEM SERTIFIKASI &amp; JP</text>
+    <rect x="1030" y="1761" width="175" height="24" rx="12" fill="#f1f5f9"/>
+    <circle cx="1045" cy="1773" r="8" fill="#cbd5e1"/>
+    <text x="1062" y="1777" fill="#334155" font-size="10" class="semibold">Ahmad Fauzi, S.Kom</text>
+  <!-- Sidebar -->
+    <rect x="50" y="1801" width="200" height="664" rx="0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="70" y="1835" fill="#64748b" font-size="9" class="bold" letter-spacing="1">MENU UTAMA</text>
+    <text x="78" y="1871" fill="#475569" font-size="11" class="medium">Beranda</text>
+    <text x="78" y="1911" fill="#475569" font-size="11" class="medium">Riwayat Pendidikan</text>
+    <text x="78" y="1951" fill="#475569" font-size="11" class="medium">Riwayat Sertifikasi</text>
+    <rect x="62" y="1970" width="176" height="34" rx="8" fill="#e0f2fe"/>
+    <rect x="62" y="1974" width="3.5" height="26" rx="1.5" fill="#0284c7"/>
+    <text x="78" y="1991" fill="#0369a1" font-size="11" class="bold">Pengajuan IDP</text>
+    <text x="78" y="2031" fill="#475569" font-size="11" class="medium">Keluar</text>
+    <rect x="280" y="1825" width="920" height="520" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" class="card-shadow"/>
+    <rect x="280" y="1825" width="920" height="50" rx="12" fill="#f8fafc"/>
+    <rect x="280" y="1855" width="920" height="20" fill="#f8fafc"/>
+    <text x="305" y="1857" fill="#0f172a" font-size="14" class="title">Pengajuan Usulan Individual Development Plan (IDP)</text>
+
+    <!-- Info banner -->
+    <rect x="305" y="1890" width="870" height="36" rx="8" fill="#f1f5f9"/>
+    <text x="320" y="1913" fill="#334155" font-size="11" class="medium">Pegawai: <tspan class="bold">Ahmad Fauzi, S.Kom</tspan> | Jabatan: <tspan class="bold">Pranata Komputer Ahli Pertama</tspan> | OPD: <tspan class="bold">BKPSDMD</tspan></text>
+
+    <!-- Field 1 & 2 -->
+    <text x="305" y="1955" fill="#334155" font-size="11" class="bold">Jenis Kompetensi *</text>
+    <rect x="305" y="1967" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="320" y="1991" fill="#0f172a" font-size="11.5" class="medium">Kompetensi Teknis</text>
+
+    <text x="755" y="1955" fill="#334155" font-size="11" class="bold">Jalur Pengembangan *</text>
+    <rect x="755" y="1967" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="770" y="1991" fill="#0f172a" font-size="11.5" class="medium">Klasikal (Pelatihan Tatap Muka / Workshop)</text>
+
+    <!-- Field 3 & 4 -->
+    <text x="305" y="2025" fill="#334155" font-size="11" class="bold">Kebutuhan / Rencana Pengembangan *</text>
+    <rect x="305" y="2037" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="320" y="2061" fill="#0f172a" font-size="11.5" class="medium">Pelatihan Keamanan Siber &amp; Tata Kelola SPBE</text>
+
+    <text x="755" y="2025" fill="#334155" font-size="11" class="bold">Lembaga Penyelenggara *</text>
+    <rect x="755" y="2037" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="770" y="2061" fill="#0f172a" font-size="11.5" class="medium">Badan Siber dan Sandi Negara (BSSN) / BPSDM</text>
+
+    <!-- Field 5 & 6: Durasi JP & Anggaran -->
+    <text x="305" y="2095" fill="#334155" font-size="11" class="bold">Target Durasi (JP) *</text>
+    <rect x="305" y="2107" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="320" y="2131" fill="#0f172a" font-size="11.5" class="bold">30 JP</text>
+
+    <text x="755" y="2095" fill="#334155" font-size="11" class="bold">Rencana Waktu Pelaksanaan *</text>
+    <rect x="755" y="2107" width="420" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="770" y="2131" fill="#0f172a" font-size="11.5" class="medium">Semester II (Agustus - Oktober 2026)</text>
+
+    <!-- Checkbox Statement from idp/page.tsx -->
+    <rect x="305" y="2165" width="16" height="16" rx="4" fill="#16a34a"/>
+    <text x="313" y="2177" fill="#ffffff" font-size="10" class="bold" text-anchor="middle">✓</text>
+    <text x="330" y="2178" fill="#334155" font-size="10.5" class="medium">Saya menyatakan data Rencana IDP yang diisi benar dan dapat dipertanggungjawabkan.</text>
+
+    <!-- Submit Button -->
+    <rect x="305" y="2200" width="220" height="42" rx="8" fill="url(#emeraldGrad)"/>
+    <text x="415" y="2226" fill="#ffffff" font-size="12" class="bold" text-anchor="middle">Kirim Rencana IDP</text>
+
+    <!-- Table Tracking Status -->
+    <text x="305" y="2270" fill="#0f172a" font-size="12" class="bold">Tracking Status Pengajuan IDP:</text>
+    <rect x="305" y="2283" width="870" height="50" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="320" y="2313" fill="#0f172a" font-size="11" class="semibold">Pelatihan Keamanan Siber SPBE (30 JP)</text>
+    <rect x="760" y="2297" width="150" height="22" rx="11" fill="#dcfce7"/>
+    <text x="835" y="2312" fill="#15803d" font-size="9.5" class="bold" text-anchor="middle">✓ Disetujui Atasan OPD</text>
+    <rect x="930" y="2297" width="165" height="22" rx="11" fill="#dbeafe"/>
+    <text x="1012" y="2312" fill="#1e40af" font-size="9.5" class="bold" text-anchor="middle">✓ Disetujui BKPSDMD</text>
+  <g id="label_1270_1710">
+    <rect x="1270" y="1710" width="260" height="28" rx="6" fill="#0284c7"/>
+    <text x="1282" y="1729" fill="#ffffff" font-size="12" class="bold">FRAME 06 • /admin</text>
+    <text x="1550" y="1729" fill="#334155" font-size="14" class="bold">Portal Administrator — Verifikasi &amp; Approval IDP</text>
+  </g>
+  <g id="frame_1270_1710" class="shadow">
+    <rect x="1270" y="1745" width="1180" height="720" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  </g>
+  <!-- App Header -->
+    <rect x="1270" y="1745" width="1180" height="56" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="1270" y="1780" width="1180" height="21" fill="#ffffff"/>
+    <circle cx="1305" cy="1773" r="14" fill="#0284c7"/>
+    <text x="1305" y="1778" fill="#ffffff" font-size="13" class="bold" text-anchor="middle">S</text>
+    <text x="1330" y="1778" fill="#0f172a" font-size="15" class="title">SIPJP-BABAR</text>
+    <rect x="1450" y="1763" width="165" height="20" rx="10" fill="#e0f2fe"/>
+    <text x="1460" y="1777" fill="#0369a1" font-size="9.5" class="bold">SISTEM SERTIFIKASI &amp; JP</text>
+    <rect x="2250" y="1761" width="175" height="24" rx="12" fill="#f1f5f9"/>
+    <circle cx="2265" cy="1773" r="8" fill="#cbd5e1"/>
+    <text x="2282" y="1777" fill="#334155" font-size="10" class="semibold">Administrator BKPSDMD</text>
+  <!-- Sidebar -->
+    <rect x="1270" y="1801" width="200" height="664" rx="0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="1290" y="1835" fill="#64748b" font-size="9" class="bold" letter-spacing="1">MENU UTAMA</text>
+    <text x="1298" y="1871" fill="#475569" font-size="11" class="medium">Dashboard Rekap</text>
+    <text x="1298" y="1911" fill="#475569" font-size="11" class="medium">Kelola Pegawai</text>
+    <text x="1298" y="1951" fill="#475569" font-size="11" class="medium">Rekap Sertifikasi</text>
+    <rect x="1282" y="1970" width="176" height="34" rx="8" fill="#e0f2fe"/>
+    <rect x="1282" y="1974" width="3.5" height="26" rx="1.5" fill="#0284c7"/>
+    <text x="1298" y="1991" fill="#0369a1" font-size="11" class="bold">Verifikasi IDP</text>
+    <text x="1298" y="2031" fill="#475569" font-size="11" class="medium">Tren 20 JP</text>
+    <text x="1298" y="2071" fill="#475569" font-size="11" class="medium">Profil Web</text>
+    <text x="1298" y="2111" fill="#475569" font-size="11" class="medium">Keluar</text>
+    <rect x="1500" y="1825" width="920" height="42" rx="8" fill="#f1f5f9"/>
+    <text x="1520" y="1851" fill="#64748b" font-size="10.5" class="semibold">Dashboard</text>
+    <text x="1620" y="1851" fill="#64748b" font-size="10.5" class="semibold">Kelola Pegawai</text>
+    <text x="1740" y="1851" fill="#64748b" font-size="10.5" class="semibold">Rekap Sertifikasi</text>
+    <!-- Active Tab: Verifikasi IDP -->
+    <rect x="1875" y="1830" width="140" height="32" rx="6" fill="#ffffff" class="card-shadow"/>
+    <text x="1945" y="1851" fill="#0284c7" font-size="11" class="bold" text-anchor="middle">Verifikasi IDP</text>
+    <text x="2040" y="1851" fill="#64748b" font-size="10.5" class="semibold">Tren 20 JP per OPD</text>
+    <text x="2185" y="1851" fill="#64748b" font-size="10.5" class="semibold">Profil Web</text>
+
+    <!-- Main Content Panel -->
+    <rect x="1500" y="1880" width="920" height="465" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" class="card-shadow"/>
+    <text x="1525" y="1910" fill="#0f172a" font-size="14" class="title">Verifikasi &amp; Approval Usulan IDP ASN</text>
+    <text x="1525" y="1930" fill="#64748b" font-size="11" class="regular">Persetujuan rencana pengembangan kompetensi aparatur oleh Kasubag OPD dan BKPSDMD</text>
+
+    <!-- Filter Bar -->
+    <rect x="1525" y="1950" width="250" height="36" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="1540" y="1973" fill="#334155" font-size="11">Filter OPD: Semua OPD</text>
+    <text x="1755" y="1973" fill="#64748b" font-size="11">▼</text>
+
+    <rect x="1790" y="1950" width="200" height="36" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="1805" y="1973" fill="#334155" font-size="11">Status: Menunggu Approval</text>
+    <text x="1970" y="1973" fill="#64748b" font-size="11">▼</text>
+
+    <rect x="2245" y="1950" width="150" height="36" rx="6" fill="#16a34a"/>
+    <text x="2320" y="1973" fill="#ffffff" font-size="11" class="bold" text-anchor="middle">Export Excel</text>
+
+    <!-- Table of IDP Submissions -->
+    <rect x="1525" y="2005" width="870" height="320" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="1525" y="2005" width="870" height="32" rx="8" fill="#f8fafc"/>
+    <text x="1540" y="2026" fill="#475569" font-size="9" class="bold">NIP &amp; NAMA PEGAWAI</text>
+    <text x="1760" y="2026" fill="#475569" font-size="9" class="bold">UNIT KERJA (OPD)</text>
+    <text x="1940" y="2026" fill="#475569" font-size="9" class="bold">KEBUTUHAN DIKLAT</text>
+    <text x="2140" y="2026" fill="#475569" font-size="9" class="bold">JP</text>
+    <text x="2180" y="2026" fill="#475569" font-size="9" class="bold">STATUS OPD</text>
+    <text x="2280" y="2026" fill="#475569" font-size="9" class="bold">STATUS BKD</text>
+
+    <!-- Row 1 -->
+    <line x1="1525" y1="2085" x2="2395" y2="2085" stroke="#f1f5f9" stroke-width="1"/>
+    <text x="1540" y="2058" fill="#0f172a" font-size="10.5" class="bold">199203152019031008</text>
+    <text x="1540" y="2073" fill="#64748b" font-size="10" class="regular">Ahmad Fauzi, S.Kom</text>
+    <text x="1760" y="2065" fill="#334155" font-size="10" class="medium">BKPSDMD Bangka Barat</text>
+    <text x="1940" y="2065" fill="#334155" font-size="10" class="medium">Keamanan Siber SPBE</text>
+    <text x="2140" y="2065" fill="#0f172a" font-size="10" class="bold">30 JP</text>
+    <rect x="2180" y="2053" width="85" height="20" rx="10" fill="#dcfce7"/>
+    <text x="2222" y="2067" fill="#166534" font-size="8.5" class="bold" text-anchor="middle">Disetujui OPD</text>
+    <rect x="2280" y="2053" width="95" height="20" rx="10" fill="#dbeafe"/>
+    <text x="2327" y="2067" fill="#1e40af" font-size="8.5" class="bold" text-anchor="middle">Approved BKD</text>
+
+    <!-- Row 2 -->
+    <line x1="1525" y1="2135" x2="2395" y2="2135" stroke="#f1f5f9" stroke-width="1"/>
+    <text x="1540" y="2108" fill="#0f172a" font-size="10.5" class="bold">198501022010011005</text>
+    <text x="1540" y="2123" fill="#64748b" font-size="10" class="regular">Rudi Hartono, S.AP</text>
+    <text x="1760" y="2115" fill="#334155" font-size="10" class="medium">Dinas Komunikasi &amp; Info</text>
+    <text x="1940" y="2115" fill="#334155" font-size="10" class="medium">Manajemen Talenta ASN</text>
+    <text x="2140" y="2115" fill="#0f172a" font-size="10" class="bold">20 JP</text>
+    <rect x="2180" y="2103" width="85" height="20" rx="10" fill="#dcfce7"/>
+    <text x="2222" y="2117" fill="#166534" font-size="8.5" class="bold" text-anchor="middle">Disetujui OPD</text>
+    <rect x="2280" y="2103" width="95" height="20" rx="10" fill="#fef3c7"/>
+    <text x="2327" y="2117" fill="#92400e" font-size="8.5" class="bold" text-anchor="middle">Menunggu BKD</text>
+
+    <!-- Row 3 -->
+    <text x="1540" y="2158" fill="#0f172a" font-size="10.5" class="bold">199008212014032001</text>
+    <text x="1540" y="2173" fill="#64748b" font-size="10" class="regular">Dewi Anggraini, S.E.</text>
+    <text x="1760" y="2165" fill="#334155" font-size="10" class="medium">BPKAD Kab. Bangka Barat</text>
+    <text x="1940" y="2165" fill="#334155" font-size="10" class="medium">Akuntansi Keuangan SIPD</text>
+    <text x="2140" y="2165" fill="#0f172a" font-size="10" class="bold">24 JP</text>
+    <rect x="2180" y="2153" width="85" height="20" rx="10" fill="#dcfce7"/>
+    <text x="2222" y="2167" fill="#166534" font-size="8.5" class="bold" text-anchor="middle">Disetujui OPD</text>
+    <rect x="2280" y="2153" width="95" height="20" rx="10" fill="#dbeafe"/>
+    <text x="2327" y="2167" fill="#1e40af" font-size="8.5" class="bold" text-anchor="middle">Approved BKD</text>
+
+</svg>
