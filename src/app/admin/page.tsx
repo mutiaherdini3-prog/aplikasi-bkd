@@ -1069,23 +1069,7 @@ export default function AdminPage() {
 
     const workbook = XLSX.utils.book_new();
 
-    // 1. Sheet Referensi Pegawai dari Google Sheet database terkini (semuaPegawai)
-    const refData = [
-      ["NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", "Unit Kerja"],
-      ...sourcePegawai
-        .filter((p: any) => p.nip && p.nip !== 'admin')
-        .map((p: any) => [
-          p.nip?.toString().trim(),
-          p.nama || '-',
-          p.status_pegawai || '-',
-          p.jabatan || '-',
-          p.unit_kerja || '-'
-        ])
-    ];
-    const wsRef = XLSX.utils.aoa_to_sheet(refData);
-    wsRef['!cols'] = [{ wch: 22 }, { wch: 32 }, { wch: 18 }, { wch: 35 }, { wch: 35 }];
-
-    // 2. Sheet Template_Sertifikasi dengan Formula Otomatis
+    // 1. Sheet Template_Sertifikasi (Manual, tanpa formula VLOOKUP yang memberatkan/mengunci)
     const headers = [
       "NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", 
       "Jenis Sertifikasi", "Nama Kursus", "Institusi Penyelenggara", "Nomor Sertifikasi", 
@@ -1093,39 +1077,30 @@ export default function AdminPage() {
       "Jenis Kursus", "Klasifikasi Kursus", "Penanda Tangan", "Biaya Pelatihan"
     ];
 
-    // Sediakan 500 baris kosong berformula agar saat NIP diketik langsung terisi otomatis
-    const rowsAoa: any[][] = [headers];
-    for (let r = 2; r <= 500; r++) {
-      rowsAoa.push(new Array(headers.length).fill(null));
-    }
+    // Berikan contoh pengisian manual tanpa formula otomatis
+    const sampleRows = [
+      headers,
+      [
+        "198705122010011005", "Hendra Wijaya, S.STP", "PNS", "Analis Kebijakan Ahli Muda",
+        "Sertifikasi", "Bimtek Manajemen ASN Berbasis Sistem Merit", "BKPSDMD Kabupaten Bangka Barat", "800/123/BKPSDMD/2026",
+        "2026-04-10", "2026-04-12", "2026", 20, "",
+        "Bimbingan teknis", "Aparatur negara/Kepegawaian", "Kepala BKPSDMD", "APBD"
+      ],
+      [
+        "199208202022212015", "Siti Rahmah, S.Pd", "PPPK", "Guru Ahli Pertama",
+        "Pelatihan", "Webinar Penguatan Kompetensi Guru Abad 21", "Kemendikbudristek", "KEMEN/098/2026",
+        "2026-05-15", "2026-05-15", "2026", 4, "",
+        "Webinar", "Pendidikan", "Dirjen GTK", "Gratis"
+      ]
+    ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet(rowsAoa);
-
-    // Pasang formula otomatis VLOOKUP ke tab Data_Referensi_Pegawai
-    // Sertakan property 'v' kosong agar SheetJS menyertakan formula saat di-write ke file XLSX
-    for (let r = 2; r <= 500; r++) {
-      worksheet[`B${r}`] = { 
-        t: 's', 
-        v: '',
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,2,FALSE),"NIP Tidak Ditemukan"))))` 
-      };
-      worksheet[`C${r}`] = { 
-        t: 's', 
-        v: '',
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,3,FALSE),"NIP Tidak Ditemukan"))))` 
-      };
-      worksheet[`D${r}`] = { 
-        t: 's', 
-        v: '',
-        f: `IF(ISBLANK(A${r}),"",IFERROR(VLOOKUP(A${r},Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),IFERROR(VLOOKUP(TRIM(A${r}&""),Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),IFERROR(VLOOKUP(VALUE(A${r}),Data_Referensi_Pegawai!$A$2:$E$6000,4,FALSE),"NIP Tidak Ditemukan"))))` 
-      };
-    }
+    const worksheet = XLSX.utils.aoa_to_sheet(sampleRows);
 
     worksheet['!cols'] = [
       { wch: 22 }, // NIP
-      { wch: 30 }, // Nama Pegawai (Otomatis)
-      { wch: 18 }, // Status Pegawai (Otomatis)
-      { wch: 35 }, // Jabatan (Otomatis)
+      { wch: 30 }, // Nama Pegawai
+      { wch: 18 }, // Status Pegawai
+      { wch: 35 }, // Jabatan
       { wch: 18 }, // Jenis Sertifikasi
       { wch: 48 }, // Nama Kursus
       { wch: 32 }, // Institusi Penyelenggara
@@ -1144,16 +1119,30 @@ export default function AdminPage() {
     // Sheet 1: Template_Sertifikasi (di posisi pertama)
     XLSX.utils.book_append_sheet(workbook, worksheet, "Template_Sertifikasi");
 
-    // Sheet 2: Data_Referensi_Pegawai (sebagai basis data VLOOKUP)
+    // 2. Sheet Referensi Pegawai (daftar acuan manual untuk melihat NIP jika dibutuhkan)
+    const refData = [
+      ["NIP", "Nama Pegawai", "Status Pegawai", "Jabatan", "Unit Kerja"],
+      ...sourcePegawai
+        .filter((p: any) => p.nip && p.nip !== 'admin')
+        .map((p: any) => [
+          p.nip?.toString().trim(),
+          p.nama || '-',
+          p.status_pegawai || '-',
+          p.jabatan || '-',
+          p.unit_kerja || '-'
+        ])
+    ];
+    const wsRef = XLSX.utils.aoa_to_sheet(refData);
+    wsRef['!cols'] = [{ wch: 22 }, { wch: 32 }, { wch: 18 }, { wch: 35 }, { wch: 35 }];
     XLSX.utils.book_append_sheet(workbook, wsRef, "Data_Referensi_Pegawai");
 
-    // Sheet 3: Petunjuk_Pengisian
+    // 3. Sheet Petunjuk_Pengisian
     const petunjukData = [
-      { "Fitur Otomatis": "AUTO-FILL NIP", "Keterangan": "Cukup masukkan atau paste NIP di Kolom A, maka kolom Nama Pegawai, Status Pegawai, dan Jabatan akan OTOMATIS TERISI dari database! Jika NIP salah / tidak terdaftar di database, otomatis muncul 'NIP Tidak Ditemukan'." },
-      { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit yang terdaftar di database." },
-      { "Kolom": "Nama Pegawai", "Keterangan": "OTOMATIS terisi lewat formula dari tab Data_Referensi_Pegawai." },
-      { "Kolom": "Status Pegawai", "Keterangan": "OTOMATIS terisi (PNS / PPPK / PW)." },
-      { "Kolom": "Jabatan", "Keterangan": "OTOMATIS terisi sesuai data kepegawaian." },
+      { "Panduan": "PENGISIAN MANUAL", "Keterangan": "Template ini diisi secara manual. Masukkan NIP, Nama, dan detail pelatihan sesuai kolom yang tersedia." },
+      { "Kolom": "NIP", "Keterangan": "WAJIB diisi. Nomor Induk Pegawai 18 digit." },
+      { "Kolom": "Nama Pegawai", "Keterangan": "Nama lengkap pegawai beserta gelar." },
+      { "Kolom": "Status Pegawai", "Keterangan": "Pilihan: PNS, PPPK, atau PW." },
+      { "Kolom": "Jabatan", "Keterangan": "Nama jabatan pegawai saat ini." },
       { "Kolom": "Jenis Sertifikasi", "Keterangan": "Contoh: Workshop, Webinar, Bimtek, Seminar, Pelatihan, Diklat Teknis, Paten/Haki." },
       { "Kolom": "Nama Kursus", "Keterangan": "WAJIB diisi. Nama kegiatan diklat (Contoh: Rabu Bertamu: Penguatan Budaya Kerja BerAKHLAK)." },
       { "Kolom": "Institusi Penyelenggara", "Keterangan": "Instansi penyelenggara kegiatan (Contoh: BKPSDMD Kabupaten Bangka Barat)." },
@@ -1166,7 +1155,7 @@ export default function AdminPage() {
       { "Kolom": "Jenis Kursus", "Keterangan": "Pilihan: Webinar, Workshop, Diklat teknis, Seminar, Bimbingan teknis, Sosialisasi, Pelatihan manajerial, dll." },
       { "Kolom": "Klasifikasi Kursus", "Keterangan": "Pilihan: Non-Klasikal / Klasikal / Blended Learning." },
       { "Kolom": "Penanda Tangan", "Keterangan": "Pejabat yang menandatangani (Contoh: Kepala BKPSDMD Kab. Bangka Barat)." },
-      { "Kolom": "Biaya Pelatihan", "Keterangan": "Sumber pembiayaan (Contoh: APBD, Mandiri, Kontribusi, atau 0)." },
+      { "Kolom": "Biaya Pelatihan", "Keterangan": "Sumber pembiayaan (Contoh: APBD, Mandiri, Kontribusi, atau Gratis)." },
     ];
     const wsPetunjuk = XLSX.utils.json_to_sheet(petunjukData);
     wsPetunjuk['!cols'] = [{ wch: 25 }, { wch: 80 }];
