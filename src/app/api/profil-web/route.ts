@@ -17,12 +17,12 @@ export interface ProfilWebData {
 }
 
 const DEFAULT_PROFIL: ProfilWebData = {
-  bupati_nama: 'MARKUS, S.H.',
+  bupati_nama: 'Pimpinan Daerah A',
   bupati_jabatan: 'BUPATI BANGKA BARAT',
-  bupati_foto: '/img/bupati1.png',
-  wakil_nama: 'H. YUS DERAHMAN',
+  bupati_foto: '/img/dummy_pejabat_1.png',
+  wakil_nama: 'Wakil Pimpinan A',
   wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
-  wakil_foto: '/img/bupati2.png',
+  wakil_foto: '/img/dummy_pejabat_2.png',
   hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
   hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, dan evaluasi pemenuhan kewajiban Jam Pelajaran (JP) bagi seluruh ASN.',
 };
@@ -54,57 +54,10 @@ function saveLocalData(data: ProfilWebData) {
 }
 
 export async function GET() {
-  try {
-    let data = { ...DEFAULT_PROFIL };
-    let hasSheetData = false;
-
-    try {
-      const sheets = getGoogleSheets();
-      const res = await sheets.spreadsheets.values.get({
-        spreadsheetId: GOOGLE_SHEET_ID,
-        range: 'profil_web!A:B',
-      });
-      const rows = res.data.values || [];
-
-      if (rows.length > 1) {
-        const parsed: Record<string, string> = {};
-        for (let i = 1; i < rows.length; i++) {
-          const key = rows[i][0]?.trim();
-          const val = rows[i][1]?.trim();
-          if (key) {
-            parsed[key] = val || '';
-          }
-        }
-
-        data = {
-          bupati_nama: parsed.bupati_nama || DEFAULT_PROFIL.bupati_nama,
-          bupati_jabatan: parsed.bupati_jabatan || DEFAULT_PROFIL.bupati_jabatan,
-          bupati_foto: parsed.bupati_foto || DEFAULT_PROFIL.bupati_foto,
-          wakil_nama: parsed.wakil_nama || DEFAULT_PROFIL.wakil_nama,
-          wakil_jabatan: parsed.wakil_jabatan || DEFAULT_PROFIL.wakil_jabatan,
-          wakil_foto: parsed.wakil_foto || DEFAULT_PROFIL.wakil_foto,
-          hero_judul: parsed.hero_judul || DEFAULT_PROFIL.hero_judul,
-          hero_subjudul: parsed.hero_subjudul || DEFAULT_PROFIL.hero_subjudul,
-        };
-        hasSheetData = true;
-        saveLocalData(data);
-      }
-    } catch (sheetErr) {
-      console.warn('Could not read from Google Sheets, using local cache:', sheetErr);
-    }
-
-    if (!hasSheetData) {
-      data = getLocalData();
-    }
-
-    return NextResponse.json(
-      { success: true, data },
-      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
-    );
-  } catch (error: any) {
-    console.error('GET profil-web error:', error);
-    return NextResponse.json({ success: true, data: getLocalData() });
-  }
+  return NextResponse.json(
+    { success: true, data: getLocalData() },
+    { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+  );
 }
 
 export async function POST(request: Request) {

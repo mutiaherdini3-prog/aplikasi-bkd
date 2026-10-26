@@ -1,10 +1,10 @@
 {
-  "bupati_nama": "MARKUS, S.H.",
+  "bupati_nama": "Pimpinan Daerah A",
   "bupati_jabatan": "BUPATI BANGKA BARAT",
-  "bupati_foto": "/api/profil-web/image?target=bupati",
-  "wakil_nama": "H. YUS DERAHMAN",
+  "bupati_foto": "/img/dummy_pejabat_1.png",
+  "wakil_nama": "Wakil Pimpinan A",
   "wakil_jabatan": "WAKIL BUPATI BANGKA BARAT",
-  "wakil_foto": "/api/profil-web/image?target=wakil",
+  "wakil_foto": "/img/dummy_pejabat_2.png",
   "hero_judul": "Sistem Informasi Pengembangan Kompetensi",
-  "hero_subjudul": "Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN."
+  "hero_subjudul": "Wadah digital terpadu untuk pencatatan, pemantauan, dan evaluasi pemenuhan kewajiban Jam Pelajaran (JP) bagi seluruh ASN."
 }

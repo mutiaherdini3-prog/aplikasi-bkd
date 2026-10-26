@@ -11,12 +11,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [profilWeb, setProfilWeb] = useState({
-    bupati_nama: 'MARKUS, S.H.',
+    bupati_nama: 'Pimpinan Daerah A',
     bupati_jabatan: 'BUPATI BANGKA BARAT',
-    bupati_foto: '/img/bupati1.png',
-    wakil_nama: 'H. YUS DERAHMAN',
+    bupati_foto: '/img/dummy_pejabat_1.png',
+    wakil_nama: 'Wakil Pimpinan A',
     wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
-    wakil_foto: '/img/bupati2.png',
+    wakil_foto: '/img/dummy_pejabat_2.png',
     hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
     hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN.',
   });
@@ -529,7 +529,7 @@ export default function LoginPage() {
                             </p>
                         </div>
                         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>
-                          {profilWeb.bupati_nama || 'MARKUS, S.H.'}
+                          {profilWeb.bupati_nama || 'PIMPINAN DAERAH A'}
                         </h3>
                     </div>
                 </div>
@@ -545,7 +545,7 @@ export default function LoginPage() {
                             </p>
                         </div>
                         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textTransform: 'uppercase' }}>
-                          {profilWeb.wakil_nama || 'H. YUS DERAHMAN'}
+                          {profilWeb.wakil_nama || 'WAKIL PIMPINAN A'}
                         </h3>
                     </div>
                 </div>
