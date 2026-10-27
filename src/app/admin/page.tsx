@@ -32,11 +32,15 @@ export default function AdminPage() {
       const nip = localStorage.getItem('loggedInUser') || '';
       let savedTab = (nip ? localStorage.getItem(`admin_active_tab_${nip}`) : null) || localStorage.getItem('admin_active_tab');
       const role = localStorage.getItem('userRole');
+      const isSuperUser = role === 'super_admin' || role === 'admin_bkpsdmd';
+      if (!isSuperUser) {
+        if (!savedTab || savedTab === 'view-dashboard' || savedTab === 'view-tren' || savedTab === 'view-profil-web') {
+          return 'view-pegawai';
+        }
+        return savedTab as any;
+      }
       if (savedTab) {
         if (savedTab === 'view-tren') savedTab = 'view-dashboard';
-        if (role !== 'super_admin' && savedTab === 'view-profil-web') {
-          return 'view-dashboard';
-        }
         return savedTab as any;
       }
       return 'view-dashboard';
@@ -369,16 +373,24 @@ export default function AdminPage() {
     setLoggedInNip(nip);
     setLoggedInNama(nama);
 
+    const isSuperUser = role === 'super_admin' || role === 'admin_bkpsdmd';
     let savedTab = localStorage.getItem(`admin_active_tab_${nip}`) || localStorage.getItem('admin_active_tab');
-    if (savedTab) {
-      if (savedTab === 'view-tren') savedTab = 'view-dashboard';
-      if (role !== 'super_admin' && role !== 'admin_bkpsdmd' && savedTab === 'view-profil-web') {
-        changeTab('view-dashboard');
-      } else {
-        setActiveTab(savedTab as any);
+    if (!isSuperUser) {
+      if (!savedTab || savedTab === 'view-dashboard' || savedTab === 'view-tren' || savedTab === 'view-profil-web') {
+        savedTab = 'view-pegawai';
       }
+      changeTab(savedTab);
     } else {
-      changeTab('view-dashboard');
+      if (savedTab) {
+        if (savedTab === 'view-tren') savedTab = 'view-dashboard';
+        if (savedTab === 'view-profil-web') {
+          setActiveTab('view-profil-web');
+        } else {
+          setActiveTab(savedTab as any);
+        }
+      } else {
+        changeTab('view-dashboard');
+      }
     }
 
     fetchData();
@@ -1872,7 +1884,9 @@ export default function AdminPage() {
               <i className="bi bi-shield-lock-fill text-info me-2"></i> {loggedInNip === 'admin' ? 'Super Admin SIPJP' : (isSuper ? 'Admin BKPSDMD' : 'Portal Atasan OPD')}
             </div>
             <ul className="sidebar-nav">
-              <li><a onClick={() => changeTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
+              {isSuper && (
+                <li><a onClick={() => changeTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
+              )}
               <li><a onClick={() => changeTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {!isSuper && '(OPD)'}</a></li>
               <li><a onClick={() => changeTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
 
@@ -1880,9 +1894,21 @@ export default function AdminPage() {
               {isSuper && (
                 <li><a onClick={() => { changeTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
-              <li className="mt-3 pt-3 border-top border-secondary border-opacity-25">
-                <a href="/dashboard" className="nav-item text-warning fw-semibold" style={{ cursor: 'pointer' }}>
-                  <i className="bi bi-person-workspace text-warning"></i> Dashboard Pegawai
+              <li className="mt-4 px-3">
+                <a 
+                  href="/dashboard" 
+                  className="d-flex align-items-center gap-2 px-3 py-2 text-decoration-none shadow-sm"
+                  style={{
+                    backgroundColor: '#ffffff',
+                    color: '#0d6efd',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.92rem',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <i className="bi bi-person-vcard text-primary fs-5"></i>
+                  <span>Dashboard Pegawai</span>
                 </a>
               </li>
               <li className="mt-2">
@@ -1900,10 +1926,11 @@ export default function AdminPage() {
               <div className="d-flex align-items-center gap-3">
                 <a 
                   href="/dashboard" 
-                  className="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1"
+                  className="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2"
+                  style={{ borderWidth: '1.5px', color: '#0d6efd', borderColor: '#0d6efd', backgroundColor: '#ffffff', fontSize: '0.85rem' }}
                   title="Beralih ke Dashboard Pegawai Pribadi"
                 >
-                  <i className="bi bi-person-workspace"></i> Dashboard Pegawai
+                  <i className="bi bi-person-vcard"></i> Dashboard Pegawai
                 </a>
                 <div className="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill border">
                   <i className="bi bi-calendar3 text-primary" style={{ fontSize: '0.85rem' }}></i>
