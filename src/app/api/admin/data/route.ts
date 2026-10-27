@@ -55,8 +55,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // Jika bukan super_admin dan bukan admin OPD, tolak akses
-    if (adminRole !== 'super_admin' && adminRole !== 'admin' && adminRole !== 'admin_diklat') {
+    // Validasi hak akses (Super Admin, Admin Diklat BKPSDMD, atau Admin/Atasan OPD)
+    if (adminRole !== 'super_admin' && adminRole !== 'admin_diklat' && adminRole !== 'admin') {
       return NextResponse.json({ success: false, error: 'Forbidden: Hak akses tidak mencukupi' }, { status: 403 });
     }
 
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
       if (!row[nipIdx] || row[nipIdx] === 'admin') continue;
 
       const currentUnitKerja = row[unitKerjaIdx] || '';
-      
+
       // Filter for admin_diklat and admin (fuzzy matching for abbreviations like BKPSDMD)
       if (adminRole === 'admin_diklat' || adminRole === 'admin') {
         if (!isUnitKerjaMatch(currentUnitKerja, adminUnitKerja)) continue;
