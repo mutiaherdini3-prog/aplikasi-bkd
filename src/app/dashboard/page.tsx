@@ -409,6 +409,39 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Banner Pengingat Pemenuhan Jam Pelajaran (JP) Seperti di Manual Book SIPEKA */}
+        <div 
+          className="alert border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 rounded-3" 
+          style={{ 
+            background: isMemenuhiJP 
+              ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' 
+              : 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', 
+            borderLeft: `5px solid ${isMemenuhiJP ? '#16a34a' : '#ca8a04'}` 
+          }}
+        >
+          <div className="d-flex align-items-center mb-2 mb-md-0">
+            <i className={`bi ${isMemenuhiJP ? 'bi-patch-check-fill text-success' : 'bi-bell-fill text-warning'} fs-3 me-3`}></i>
+            <div>
+              <strong className="text-dark d-block">
+                {isMemenuhiJP ? 'Standar Jam Pelajaran Terpenuhi' : 'Pengingat Pemenuhan Jam Pelajaran (JP)'}:{' '}
+                <span className={isMemenuhiJP ? 'text-success' : 'text-warning-emphasis'}>
+                  {statusKepatuhanText}
+                </span>
+              </strong>
+              <small className="text-secondary">
+                {isMemenuhiJP 
+                  ? `Target minimal ${statusLabel} (${targetJP} JP per tahun) telah tercapai. Total capaian Anda saat ini: ${totalJP} JP.`
+                  : `Total saat ini: ${totalJP} JP. Anda masih membutuhkan ${sisaJP} JP lagi untuk memenuhi standar minimal ${statusLabel} (${targetJP} JP per tahun).`}
+              </small>
+            </div>
+          </div>
+          {!isMemenuhiJP && (
+            <a href="/sertifikasi" className="btn btn-warning btn-sm px-3 fw-bold rounded-pill text-nowrap shadow-sm">
+              <i className="bi bi-plus-circle me-1"></i> Tambah Pelatihan
+            </a>
+          )}
+        </div>
+
         <div className="card profile-card">
           {/* Banner */}
           <div className="profile-banner">
