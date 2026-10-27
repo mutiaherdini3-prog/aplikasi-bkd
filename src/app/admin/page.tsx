@@ -51,6 +51,7 @@ export default function AdminPage() {
   const [showIdpModal, setShowIdpModal] = useState(false);
   const [idpForm, setIdpForm] = useState<any>({});
   const [semuaPegawai, setSemuaPegawai] = useState<any[]>([]);
+  const isSuper = userRole === 'super_admin' || userRole === 'admin_bkpsdmd';
 
   const changeTab = (tab: any) => {
     setActiveTab(tab);
@@ -360,7 +361,7 @@ export default function AdminPage() {
     const role = localStorage.getItem('userRole') || '';
     const nip = localStorage.getItem('loggedInUser') || '';
     const nama = localStorage.getItem('userName') || '';
-    if (!nip || (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat')) {
+    if (!nip || (role !== 'admin' && role !== 'super_admin' && role !== 'admin_diklat' && role !== 'admin_bkpsdmd')) {
       router.push('/login');
       return;
     }
@@ -371,7 +372,7 @@ export default function AdminPage() {
     let savedTab = localStorage.getItem(`admin_active_tab_${nip}`) || localStorage.getItem('admin_active_tab');
     if (savedTab) {
       if (savedTab === 'view-tren') savedTab = 'view-dashboard';
-      if (role !== 'super_admin' && savedTab === 'view-profil-web') {
+      if (role !== 'super_admin' && role !== 'admin_bkpsdmd' && savedTab === 'view-profil-web') {
         changeTab('view-dashboard');
       } else {
         setActiveTab(savedTab as any);
@@ -381,7 +382,7 @@ export default function AdminPage() {
     }
 
     fetchData();
-    if (role === 'super_admin') {
+    if (role === 'super_admin' || role === 'admin_bkpsdmd') {
       fetchProfilWeb();
     }
   }, [router]);
@@ -1868,18 +1869,23 @@ export default function AdminPage() {
           {/* Sidebar */}
           <div className="col-lg-2 d-none d-lg-block sidebar">
             <div className="sidebar-brand">
-              <i className="bi bi-shield-lock-fill text-info me-2"></i> {userRole === 'super_admin' ? 'Super Admin SIPJP' : 'Portal Atasan OPD'}
+              <i className="bi bi-shield-lock-fill text-info me-2"></i> {loggedInNip === 'admin' ? 'Super Admin SIPJP' : (isSuper ? 'Admin BKPSDMD' : 'Portal Atasan OPD')}
             </div>
             <ul className="sidebar-nav">
               <li><a onClick={() => changeTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
-              <li><a onClick={() => changeTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {userRole !== 'super_admin' && '(OPD)'}</a></li>
+              <li><a onClick={() => changeTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {!isSuper && '(OPD)'}</a></li>
               <li><a onClick={() => changeTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
 
               <li><a onClick={() => changeTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
-              {userRole === 'super_admin' && (
+              {isSuper && (
                 <li><a onClick={() => { changeTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
-              <li className="mt-4">
+              <li className="mt-3 pt-3 border-top border-secondary border-opacity-25">
+                <a href="/dashboard" className="nav-item text-warning fw-semibold" style={{ cursor: 'pointer' }}>
+                  <i className="bi bi-person-workspace text-warning"></i> Dashboard Pegawai
+                </a>
+              </li>
+              <li className="mt-2">
                 <a onClick={handleLogout} className="text-danger" style={{ cursor: 'pointer' }}>
                   <i className="bi bi-box-arrow-left"></i> Logout
                 </a>
@@ -1892,6 +1898,13 @@ export default function AdminPage() {
             <div className="topbar">
               <h5 className="fw-bold text-secondary mb-0">{getTopbarTitle()}</h5>
               <div className="d-flex align-items-center gap-3">
+                <a 
+                  href="/dashboard" 
+                  className="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1"
+                  title="Beralih ke Dashboard Pegawai Pribadi"
+                >
+                  <i className="bi bi-person-workspace"></i> Dashboard Pegawai
+                </a>
                 <div className="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill border">
                   <i className="bi bi-calendar3 text-primary" style={{ fontSize: '0.85rem' }}></i>
                   <span className="text-muted fw-bold" style={{ fontSize: '0.8rem' }}>Tahun:</span>
@@ -1918,10 +1931,10 @@ export default function AdminPage() {
                     <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>
                       {loggedInNip === 'admin'
                         ? 'Administrator Utama'
-                        : (pegawaiList.find(p => p.nip === loggedInNip)?.nama || loggedInNama || (userRole === 'super_admin' ? 'Administrator' : 'Atasan OPD'))}
+                        : (pegawaiList.find(p => p.nip === loggedInNip)?.nama || loggedInNama || (isSuper ? 'Administrator' : 'Atasan OPD'))}
                     </div>
                     <span className="badge bg-primary-subtle text-primary text-uppercase mt-1" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>
-                      {userRole === 'super_admin' ? 'Super Admin' : 'Atasan OPD'}
+                      {loggedInNip === 'admin' ? 'Super Admin' : (isSuper ? 'Admin BKPSDMD' : 'Atasan OPD')}
                     </span>
                   </div>
                 </div>
@@ -2201,7 +2214,7 @@ export default function AdminPage() {
                         </select>
                       </div>
 
-                      {userRole === 'super_admin' && (
+                      {isSuper && (
                         <button className="btn btn-sm btn-success shadow-sm" onClick={() => startAsyncExport(exportTrenToExcel, trenViewMode === 'pegawai' ? 'Excel Pegawai Tren' : 'Excel Rekap OPD Tren')}>
                           <i className="bi bi-file-earmark-excel me-1"></i> {trenViewMode === 'pegawai' ? 'Export Excel Pegawai' : 'Export Excel Rekap OPD'}
                         </button>
@@ -2546,11 +2559,11 @@ export default function AdminPage() {
               {/* DATA PEGAWAI TAB */}
               {activeTab === 'view-pegawai' && (
                 <div className="table-card">
-                  {userRole !== 'super_admin' && (
+                  {!isSuper && (
                     <div className="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between shadow-sm" style={{ borderRadius: '8px', fontSize: '0.85rem' }}>
                       <div>
                         <i className="bi bi-info-circle-fill me-2 text-primary"></i>
-                        <strong>Mode Pemantauan OPD (Hanya Lihat):</strong> Anda dapat melihat data profil dan perkembangan JP pegawai di instansi Anda. Hak kelola data dan ekspor sistem dikhususkan untuk Super Admin.
+                        <strong>Mode Pemantauan OPD (Hanya Lihat):</strong> Anda dapat melihat data profil dan perkembangan JP pegawai di instansi Anda. Hak kelola data dan ekspor sistem dikhususkan untuk Administrator.
                       </div>
                       <span className="badge bg-secondary">View Only</span>
                     </div>
@@ -2569,7 +2582,7 @@ export default function AdminPage() {
                           />
                           <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
                         </div>
-                        {userRole === 'super_admin' && (
+                        {isSuper && (
                           <button className="btn btn-sm btn-primary" onClick={() => {
                             setPegawaiForm({ isEdit: false, password: '123', status_aktif: 'Aktif', jp: 0, email: '' });
                             setShowPegawaiModal(true);
@@ -2586,7 +2599,7 @@ export default function AdminPage() {
                         <span className="badge bg-primary fs-6">PNS: {pnsList.length}</span>
                         <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                       </div>
-                      {userRole === 'super_admin' && (
+                      {isSuper && (
                         <div className="dropdown position-relative">
                           <button
                             className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1"
@@ -2663,9 +2676,9 @@ export default function AdminPage() {
                             <td>{p.unit_kerja || '-'}</td>
                             <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
                             <td className="text-center">
-                              {userRole === 'super_admin' ? (
+                              {isSuper ? (
                                 <button
-                                  className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' ? 'btn-success' : 'btn-outline-secondary'}`}
+                                  className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' || p.role === 'admin_bkpsdmd' ? 'btn-success' : 'btn-outline-secondary'}`}
                                   onClick={() => {
                                     if (p.role === 'super_admin') {
                                       alert('Tidak dapat mengubah akses Super Admin');
@@ -2673,18 +2686,18 @@ export default function AdminPage() {
                                     }
                                     toggleAdminRole(p);
                                   }}
-                                  title={p.role === 'admin' ? 'Cabut Izin Approval IDP' : 'Berikan Izin Approval IDP'}
+                                  title={p.role === 'admin' || p.role === 'admin_bkpsdmd' ? 'Cabut Izin Approval IDP' : 'Berikan Izin Approval IDP'}
                                 >
-                                  {p.role === 'admin' || p.role === 'super_admin' ? <><i className="bi bi-check-circle-fill"></i> Aktif</> : 'Nonaktif'}
+                                  {p.role === 'admin' || p.role === 'super_admin' || p.role === 'admin_bkpsdmd' ? <><i className="bi bi-check-circle-fill"></i> Aktif</> : 'Nonaktif'}
                                 </button>
                               ) : (
-                                <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' ? 'bg-success' : 'bg-secondary'}`}>
-                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin' ? 'Admin / Atasan' : 'Pegawai'}
+                                <span className={`badge ${p.role === 'admin' || p.role === 'super_admin' || p.role === 'admin_bkpsdmd' ? 'bg-success' : 'bg-secondary'}`}>
+                                  {p.role === 'super_admin' ? 'Super Admin' : p.role === 'admin_bkpsdmd' ? 'Admin BKPSDMD' : p.role === 'admin' ? 'Admin / Atasan' : 'Pegawai'}
                                 </span>
                               )}
                             </td>
                             <td className="text-center">
-                              {userRole === 'super_admin' ? (
+                              {isSuper ? (
                                 <>
                                   <button className="btn btn-sm btn-outline-primary me-1" title="Edit Pegawai" onClick={() => {
                                     const jenkelOptions = ['LAKI-LAKI', 'PEREMPUAN'];
@@ -2819,7 +2832,7 @@ export default function AdminPage() {
                             <option value="Pelatihan manajerial">Pelatihan manajerial</option>
                             <option value="Pelatihan sosial kultural">Pelatihan sosial kultural</option>
                           </select>
-                          {userRole === 'super_admin' && (
+                          {isSuper && (
                             <div className="dropdown position-relative">
                               <button
                                 className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1"
@@ -2861,7 +2874,7 @@ export default function AdminPage() {
                               )}
                             </div>
                           )}
-                          {userRole === 'super_admin' && (
+                          {isSuper && (
                             <>
                               <button
                                 className="btn btn-sm btn-outline-success shadow-sm"
@@ -3016,12 +3029,12 @@ export default function AdminPage() {
                         />
                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
                       </div>
-                      {userRole === 'super_admin' && (
+                      {isSuper && (
                         <button className="btn btn-sm btn-success shadow-sm" onClick={() => startAsyncExport(exportIdpToExcel, 'Rekap IDP ASN')}>
                           <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
                         </button>
                       )}
-                      {userRole === 'super_admin' && (
+                      {isSuper && (
                         <button className="btn btn-sm btn-primary shadow-sm" onClick={() => {
                           setIdpForm({ isEdit: false });
                           setShowIdpModal(true);
@@ -3043,8 +3056,8 @@ export default function AdminPage() {
                           <th>Waktu</th>
                           <th>JP</th>
                           <th>Status Verifikasi</th>
-                          <th className="text-center">{userRole === 'super_admin' ? 'Aksi Verifikasi (BKPSDMD)' : 'Status Aksi'}</th>
-                          {userRole === 'super_admin' && <th className="text-center">Aksi Admin</th>}
+                          <th className="text-center">{isSuper ? 'Aksi Verifikasi (BKPSDMD)' : 'Status Aksi'}</th>
+                          {isSuper && <th className="text-center">Aksi Admin</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -3091,7 +3104,7 @@ export default function AdminPage() {
                                 )}
                               </td>
                               <td className="text-center">
-                                {userRole !== 'super_admin' ? (
+                                {!isSuper ? (
                                   /* ADMIN OPD: VIEW ONLY / TIDAK BISA MENGUBAH DATA */
                                   <span className="badge bg-light text-muted border py-1 px-2" title="Mode Pemantauan OPD (Hanya Melihat)">
                                     <i className="bi bi-eye me-1"></i>Hanya Pantau
@@ -3145,7 +3158,7 @@ export default function AdminPage() {
                                   )
                                 )}
                               </td>
-                              {userRole === 'super_admin' && (
+                              {isSuper && (
                                 <td className="text-center">
                                   <button className="btn btn-sm btn-outline-primary me-1" title="Edit IDP" onClick={() => {
                                     setIdpForm({ ...idp, nip: p.nip, isEdit: true });
@@ -3159,7 +3172,7 @@ export default function AdminPage() {
                         })}
                         {filteredIdpItems.length === 0 && (
                           <tr>
-                            <td colSpan={userRole === 'super_admin' ? 10 : 9} className="text-center text-muted py-4">
+                            <td colSpan={isSuper ? 10 : 9} className="text-center text-muted py-4">
                               {allIdpItems.length === 0 ? 'Belum ada pengajuan IDP dari pegawai.' : 'Tidak ada pengajuan IDP yang sesuai pencarian / filter tahun.'}
                             </td>
                           </tr>
@@ -3172,7 +3185,7 @@ export default function AdminPage() {
               )}
 
               {/* TAB PROFIL PIMPINAN WEB */}
-              {userRole === 'super_admin' && activeTab === 'view-profil-web' && (
+              {isSuper && activeTab === 'view-profil-web' && (
                 <div className="card border-0 shadow-sm rounded-4 p-4 mb-4">
                   <div className="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom gap-3">
                     <div>
@@ -3667,7 +3680,7 @@ export default function AdminPage() {
       )}
 
       {/* Modal Form Pegawai */}
-      {userRole === 'super_admin' && showPegawaiModal && (
+      {isSuper && showPegawaiModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content border-0 shadow">
@@ -3767,7 +3780,8 @@ export default function AdminPage() {
                       <label className="form-label">Hak Akses (Role)</label>
                       <select className="form-select" value={pegawaiForm.role || 'pegawai'} onChange={e => setPegawaiForm({ ...pegawaiForm, role: e.target.value })}>
                         <option value="pegawai">Pegawai Biasa</option>
-                        <option value="admin">Admin</option>
+                        <option value="admin">Admin / Atasan OPD</option>
+                        <option value="admin_bkpsdmd">Admin BKPSDMD</option>
                         <option value="super_admin">Super Admin</option>
                       </select>
                     </div>
@@ -3807,7 +3821,7 @@ export default function AdminPage() {
       )}
 
       {/* Modal Form IDP */}
-      {userRole === 'super_admin' && showIdpModal && (
+      {isSuper && showIdpModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content border-0 shadow">
@@ -4081,7 +4095,7 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-      {userRole === 'super_admin' && showImportSertifikasiModal && (
+      {isSuper && showImportSertifikasiModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1060 }}>
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div className="modal-content border-0 shadow-lg">

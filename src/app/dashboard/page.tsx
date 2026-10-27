@@ -377,15 +377,6 @@ export default function DashboardPage() {
             <i className="bi bi-shield-lock-fill me-2 text-info"></i> Portal SIPJP-BABAR
           </a>
           <div className="d-flex align-items-center gap-2">
-            {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin') && (
-              <button 
-                onClick={() => router.push('/admin')} 
-                className="btn btn-warning btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1 text-dark"
-                title="Beralih ke Dashboard Admin & Panel Pengelolaan"
-              >
-                <i className="bi bi-speedometer2"></i> Dashboard Admin
-              </button>
-            )}
             <span className="text-white-50 me-2 ms-2"><i className="bi bi-clock me-1"></i> Terakhir login: Baru saja</span>
             <button onClick={handleLogout} className="btn btn-outline-light btn-sm rounded-pill px-3">Keluar</button>
           </div>
@@ -843,7 +834,7 @@ export default function DashboardPage() {
                   <div className="menu-desc">Penyusunan rencana pengembangan kompetensi individu.</div>
                 </a>
 
-                {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin' || isAtasan) && (
+                {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin' || pegawai?.role === 'admin_bkpsdmd' || isAtasan) && (
                   <a onClick={() => router.push('/admin')} className="menu-card mb-3 text-decoration-none" style={{ borderColor: '#86efac' }}>
                     <div className="menu-icon" style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}><i className="bi bi-shield-lock-fill"></i></div>
                     <div className="menu-title text-success">Panel Admin</div>
