@@ -455,15 +455,6 @@ export default function DashboardPage() {
                       <i className="bi bi-exclamation-circle-fill me-1"></i> Profil Belum Lengkap
                     </span>
                   )}
-
-                  {/* Indikator Pemenuhan Standar JP (PNS 20 JP / P3K 24 JP) - Desain Simpel & Bersih */}
-                  <span 
-                    className={`badge rounded-pill fw-medium ${isMemenuhiJP ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'}`}
-                    style={{ fontSize: '0.8rem', padding: '5px 12px' }}
-                  >
-                    <i className={`bi ${isMemenuhiJP ? 'bi-check-circle-fill' : 'bi-info-circle-fill'} me-1`}></i>
-                    {statusKepatuhanText}
-                  </span>
                 </div>
               </div>
               <div>
@@ -530,16 +521,11 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Riwayat Sertifikasi Tersimpan */}
-                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 flex-wrap gap-2">
+                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
                   <h5 className="fw-bold mb-0"><i className="bi bi-award-fill me-2 text-primary"></i> Riwayat Sertifikasi Tersimpan</h5>
-                  <div className="d-flex align-items-center gap-2">
-                    <span className="badge rounded-pill bg-light text-secondary border fw-normal" style={{ fontSize: '0.78rem' }}>
-                      {statusKepatuhanText}
-                    </span>
-                    <span className="badge rounded-pill bg-primary" style={{ fontSize: '0.8rem' }}>
-                      Total: {totalJP} JP
-                    </span>
-                  </div>
+                  <span className="badge rounded-pill bg-primary" style={{ fontSize: '0.8rem' }}>
+                    Total: {totalJP} JP
+                  </span>
                 </div>
                 
                 <div className="table-responsive border rounded-3 bg-white mb-4">
