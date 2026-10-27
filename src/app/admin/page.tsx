@@ -34,12 +34,12 @@ export default function AdminPage() {
       const role = localStorage.getItem('userRole');
       if (savedTab) {
         if (savedTab === 'view-tren') savedTab = 'view-dashboard';
-        if (role !== 'super_admin' && (savedTab === 'view-dashboard' || savedTab === 'view-profil-web')) {
-          return 'view-pegawai';
+        if (role !== 'super_admin' && savedTab === 'view-profil-web') {
+          return 'view-dashboard';
         }
         return savedTab as any;
       }
-      return role === 'super_admin' ? 'view-dashboard' : 'view-pegawai';
+      return 'view-dashboard';
     }
     return 'view-dashboard';
   });
@@ -98,7 +98,7 @@ export default function AdminPage() {
     onConfirm: () => void;
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'lulus' | 'belum'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'PNS' | 'PPPK' | 'PW'>('all');
@@ -124,12 +124,12 @@ export default function AdminPage() {
 
   // State Profil Pimpinan Web
   const [profilWebData, setProfilWebData] = useState({
-    bupati_nama: 'MARKUS, S.H.',
+    bupati_nama: 'Pimpinan Daerah A',
     bupati_jabatan: 'BUPATI BANGKA BARAT',
-    bupati_foto: '/img/bupati1.png',
-    wakil_nama: 'H. YUS DERAHMAN',
+    bupati_foto: '/img/dummy_pejabat_1.png',
+    wakil_nama: 'Wakil Pimpinan A',
     wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
-    wakil_foto: '/img/bupati2.png',
+    wakil_foto: '/img/dummy_pejabat_2.png',
     hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
     hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN.',
   });
@@ -144,7 +144,7 @@ export default function AdminPage() {
     setLoadingProfilWeb(true);
     setProfilWebErrorMsg('');
     try {
-      const res = await fetch(`/api/profil-web?t=${Date.now()}`, { 
+      const res = await fetch(`/api/profil-web?t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
       });
@@ -341,12 +341,12 @@ export default function AdminPage() {
         fetch(`/api/admin/data?nip=${encodeURIComponent(userNip)}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
         fetch(`/api/pegawai/all?all=true`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
       ]);
-      
+
       const json = await resData.json();
       if (json.success && json.data) {
         setRawPegawaiList(json.data);
       }
-      
+
       const jsonAll = await resAll.json();
       if (jsonAll.success) {
         setSemuaPegawai(jsonAll.data);
@@ -371,17 +371,13 @@ export default function AdminPage() {
     let savedTab = localStorage.getItem(`admin_active_tab_${nip}`) || localStorage.getItem('admin_active_tab');
     if (savedTab) {
       if (savedTab === 'view-tren') savedTab = 'view-dashboard';
-      if (role !== 'super_admin' && (savedTab === 'view-dashboard' || savedTab === 'view-profil-web')) {
-        changeTab('view-pegawai');
+      if (role !== 'super_admin' && savedTab === 'view-profil-web') {
+        changeTab('view-dashboard');
       } else {
         setActiveTab(savedTab as any);
       }
     } else {
-      if (role !== 'super_admin') {
-        changeTab('view-pegawai');
-      } else {
-        changeTab('view-dashboard');
-      }
+      changeTab('view-dashboard');
     }
 
     fetchData();
@@ -392,16 +388,26 @@ export default function AdminPage() {
 
   useEffect(() => {
     const computed = rawPegawaiList.map(p => {
-      const filteredSertifikasi = tahunFilter === 'all' 
-        ? p.sertifikasi 
+      const filteredSertifikasi = tahunFilter === 'all'
+        ? p.sertifikasi
         : p.sertifikasi?.filter((s: any) => s.tahun === tahunFilter);
       const jp = filteredSertifikasi?.reduce((acc: number, curr: any) => acc + (curr.jumlah_jp || 0), 0) || 0;
       return { ...p, jp, filteredSertifikasi };
     });
-    
-    // Sort by JP terbanyak
-    computed.sort((a, b) => b.jp - a.jp);
-    
+
+    // Sort by dummy NIP order jika data dummy, atau JP terbanyak
+    const dummyOrder = ['123', '321', '456', '654', '789', '987'];
+    if (computed.some(p => dummyOrder.includes(p.nip))) {
+      computed.sort((a, b) => {
+        const idxA = dummyOrder.indexOf(a.nip);
+        const idxB = dummyOrder.indexOf(b.nip);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        return idxA !== -1 ? -1 : (idxB !== -1 ? 1 : 0);
+      });
+    } else {
+      computed.sort((a, b) => b.jp - a.jp);
+    }
+
     setPegawaiList(computed);
   }, [rawPegawaiList, tahunFilter]);
 
@@ -433,9 +439,9 @@ export default function AdminPage() {
   const getGolonganOptions = () => {
     if (pegawaiForm.status_pegawai === 'PNS') {
       return [
-        "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I", 
-        "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I", 
-        "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I", 
+        "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I",
+        "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I",
+        "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I",
         "IV/a - Pembina", "IV/b - Pembina Tk. I", "IV/c - Pembina Utama Muda", "IV/d - Pembina Utama Madya", "IV/e - Pembina Utama"
       ];
     } else if (pegawaiForm.status_pegawai === 'PPPK') {
@@ -448,7 +454,7 @@ export default function AdminPage() {
     e.preventDefault();
     try {
       const dataToSave = { ...pegawaiForm };
-      
+
       let valGolongan = '-';
       let valPangkat = '-';
       if (dataToSave.golonganPangkat && dataToSave.status_pegawai === 'PNS') {
@@ -478,7 +484,7 @@ export default function AdminPage() {
       } else {
         alert('Gagal menyimpan data pegawai: ' + (json.message || json.error));
       }
-    } catch(e) {
+    } catch (e) {
       alert('Terjadi kesalahan');
     }
   };
@@ -497,7 +503,7 @@ export default function AdminPage() {
       } else {
         alert('Gagal mengupdate akses');
       }
-    } catch(e) {
+    } catch (e) {
       alert('Terjadi kesalahan');
     }
   };
@@ -530,7 +536,7 @@ export default function AdminPage() {
           setShowIdpModal(false);
         } else alert('Gagal menambah IDP: ' + (json.message || json.error));
       }
-    } catch(e) {
+    } catch (e) {
       alert('Terjadi kesalahan');
     }
   };
@@ -599,8 +605,8 @@ export default function AdminPage() {
       if (input === null) return; // Dibatalkan oleh admin
       alasan = input.trim() || defaultAlasan;
     } else {
-      const defaultMsg = newStatus === 'Disetujui' 
-        ? 'Yakin ingin memberikan Persetujuan FINAL (BKPSDMD) untuk pengajuan IDP ini?' 
+      const defaultMsg = newStatus === 'Disetujui'
+        ? 'Yakin ingin memberikan Persetujuan FINAL (BKPSDMD) untuk pengajuan IDP ini?'
         : 'Yakin ingin menyetujui usulan IDP ini dan meneruskannya ke verifikasi BKPSDMD?';
       if (!confirm(confirmMsg || defaultMsg)) return;
     }
@@ -681,7 +687,7 @@ export default function AdminPage() {
     const lls = pegawaiList.filter(p => checkLulusJP(p)).length;
     const blm = pegawaiList.length - lls;
     const sdh = pegawaiList.filter(p => p.jp > 0).length;
-    
+
     const pns = pegawaiList.filter(p => (p.status_pegawai || '').toUpperCase().includes('PNS'));
     const pppk = pegawaiList.filter(p => {
       const s = (p.status_pegawai || '').toUpperCase();
@@ -752,15 +758,15 @@ export default function AdminPage() {
   };
 
   const generateExcelSheet = (
-    pegawaiData: any[], 
-    sheetName: string, 
-    workbook: any, 
-    statusKelulusanLabel?: string, 
+    pegawaiData: any[],
+    sheetName: string,
+    workbook: any,
+    statusKelulusanLabel?: string,
     showTargetAndStatus = false,
     includeCerts = true
   ) => {
     if (pegawaiData.length === 0) return;
-    
+
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     let excelData: any[] = [];
 
@@ -856,10 +862,10 @@ export default function AdminPage() {
   };
 
   const handleExport = (
-    title: string, 
-    mode: 'all' | 'lulus' | 'belum', 
-    targetType?: 'PNS' | 'PPPK', 
-    onlyWithJP = false, 
+    title: string,
+    mode: 'all' | 'lulus' | 'belum',
+    targetType?: 'PNS' | 'PPPK',
+    onlyWithJP = false,
     showTargetAndStatus = false,
     includeCerts = true
   ) => {
@@ -903,11 +909,11 @@ export default function AdminPage() {
 
     const workbook = XLSX.utils.book_new();
     const statusLabel = mode === 'lulus' ? "MEMENUHI" : mode === 'belum' ? "BELUM MEMENUHI" : undefined;
-    
+
     if ((!targetType || targetType === 'PNS') && pnsData.length > 0) generateExcelSheet(pnsData, "PNS", workbook, statusLabel, showTargetAndStatus, includeCerts);
     if ((!targetType || targetType === 'PPPK') && pppkData.length > 0) generateExcelSheet(pppkData, "PPPK", workbook, statusLabel, showTargetAndStatus, includeCerts);
     if (!targetType && pwData.length > 0) generateExcelSheet(pwData, "PW-Lainnya", workbook, statusLabel, showTargetAndStatus, includeCerts);
-    
+
     if (workbook.SheetNames.length === 0) {
       alert('Tidak ada data untuk di-export');
       return;
@@ -951,7 +957,7 @@ export default function AdminPage() {
     const excelData = idpItems.map((item, index) => {
       const p = item.p;
       const idp = item.idp;
-      
+
       const formatRupiah = (angka: any) => {
         if (!angka) return "Rp 0";
         return "Rp " + Number(angka).toLocaleString('id-ID');
@@ -1006,9 +1012,9 @@ export default function AdminPage() {
           row[`${year} (JP)`] = jp;
           row[`${year} (Status)`] = lulus ? 'Memenuhi Syarat' : 'Belum Memenuhi';
         });
-        row["Status Tren"] = 
+        row["Status Tren"] =
           p.statusTren === 'naik' ? 'Naik (Meningkat)' :
-          p.statusTren === 'turun' ? 'Turun (Menurun)' : 'Stabil';
+            p.statusTren === 'turun' ? 'Turun (Menurun)' : 'Stabil';
         return row;
       });
       const worksheet = XLSX.utils.json_to_sheet(excelRows);
@@ -1032,10 +1038,10 @@ export default function AdminPage() {
         row[`${year} (Rata-rata JP)`] = stats?.avgJp || 0;
       });
 
-      row["Status Tren"] = 
+      row["Status Tren"] =
         item.statusTren === 'naik' ? 'Naik (Meningkat)' :
-        item.statusTren === 'turun' ? 'Turun (Menurun)' :
-        item.statusTren === 'fluktuatif' ? 'Fluktuatif (Naik-Turun)' : 'Stabil';
+          item.statusTren === 'turun' ? 'Turun (Menurun)' :
+            item.statusTren === 'fluktuatif' ? 'Fluktuatif (Naik-Turun)' : 'Stabil';
 
       return row;
     });
@@ -1071,9 +1077,9 @@ export default function AdminPage() {
 
     // 1. Sheet Template_Sertifikasi (Manual, NIP sebagai kunci utama, kolom profil opsional)
     const headers = [
-      "NIP", "Nama Pegawai (Opsional)", "Status Pegawai (Opsional)", "Jabatan (Opsional)", 
-      "Jenis Sertifikasi", "Nama Kursus", "Institusi Penyelenggara", "Nomor Sertifikasi", 
-      "Tanggal Mulai", "Tanggal Akhir", "Tahun", "Jumlah JP", "Link Sertifikat", 
+      "NIP", "Nama Pegawai (Opsional)", "Status Pegawai (Opsional)", "Jabatan (Opsional)",
+      "Jenis Sertifikasi", "Nama Kursus", "Institusi Penyelenggara", "Nomor Sertifikasi",
+      "Tanggal Mulai", "Tanggal Akhir", "Tahun", "Jumlah JP", "Link Sertifikat",
       "Jenis Kursus", "Klasifikasi Kursus", "Penanda Tangan", "Biaya Pelatihan"
     ];
 
@@ -1323,7 +1329,7 @@ export default function AdminPage() {
         let bestMatch = null;
         let bestScore = 0;
 
-        PARSED_UNIT_KERJA_OPTIONS.forEach(({opt, words}) => {
+        PARSED_UNIT_KERJA_OPTIONS.forEach(({ opt, words }) => {
           const score = wordMatchScore(rawWords, words);
           if (score > bestScore) {
             bestScore = score;
@@ -1345,7 +1351,7 @@ export default function AdminPage() {
       if (!grouped[matchedOpd]) grouped[matchedOpd] = [];
       grouped[matchedOpd].push(p);
     });
-    
+
     return {
       groupedByOPD: grouped,
       sortedOPDs: Object.keys(grouped).sort()
@@ -1357,27 +1363,27 @@ export default function AdminPage() {
       let opdPegawai = groupedByOPD[opd] || [];
       if (searchSertifikasi) {
         const query = searchSertifikasi.toLowerCase();
-        opdPegawai = opdPegawai.filter(p => 
-          (p.nama && p.nama.toLowerCase().includes(query)) || 
+        opdPegawai = opdPegawai.filter(p =>
+          (p.nama && p.nama.toLowerCase().includes(query)) ||
           (p.nip && p.nip.toLowerCase().includes(query))
         );
       }
       return opdPegawai.length > 0;
     });
-    
+
     const processed: Record<string, any[]> = {};
     resultOPDs.forEach(opd => {
       let opdPegawai = groupedByOPD[opd] || [];
       if (searchSertifikasi) {
         const query = searchSertifikasi.toLowerCase();
-        opdPegawai = opdPegawai.filter(p => 
-          (p.nama && p.nama.toLowerCase().includes(query)) || 
+        opdPegawai = opdPegawai.filter(p =>
+          (p.nama && p.nama.toLowerCase().includes(query)) ||
           (p.nip && p.nip.toLowerCase().includes(query))
         );
       }
       processed[opd] = opdPegawai;
     });
-    
+
     return { filteredOPDs: resultOPDs, processedOPDs: processed };
   }, [sortedOPDs, groupedByOPD, searchSertifikasi]);
 
@@ -1587,8 +1593,8 @@ export default function AdminPage() {
   const filteredPegawaiList = useMemo(() => {
     if (!searchPegawai) return pegawaiList;
     const query = searchPegawai.toLowerCase().trim();
-    return pegawaiList.filter(p => 
-      (p.nama && p.nama.toLowerCase().includes(query)) || 
+    return pegawaiList.filter(p =>
+      (p.nama && p.nama.toLowerCase().includes(query)) ||
       (p.nip && p.nip.toLowerCase().includes(query))
     );
   }, [pegawaiList, searchPegawai]);
@@ -1608,8 +1614,8 @@ export default function AdminPage() {
       if (!searchIdp) return true;
       const query = searchIdp.toLowerCase().trim();
       return (item.p.nama && item.p.nama.toLowerCase().includes(query)) ||
-             (item.p.nip && item.p.nip.toLowerCase().includes(query)) ||
-             (item.idp.jenis_kompetensi && item.idp.jenis_kompetensi.toLowerCase().includes(query));
+        (item.p.nip && item.p.nip.toLowerCase().includes(query)) ||
+        (item.idp.jenis_kompetensi && item.idp.jenis_kompetensi.toLowerCase().includes(query));
     });
   }, [allIdpItems, tahunFilter, searchIdp]);
 
@@ -1617,7 +1623,8 @@ export default function AdminPage() {
     <>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         body, html { min-height: 100%; margin: 0; font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .sidebar { background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: #f8fafc; min-height: 100vh; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar-brand { padding: 20px; font-weight: 800; font-size: 1.4rem; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; }
@@ -1857,36 +1864,22 @@ export default function AdminPage() {
 
       <div className="container-fluid p-0">
         <div className="row g-0">
-          
+
           {/* Sidebar */}
           <div className="col-lg-2 d-none d-lg-block sidebar">
             <div className="sidebar-brand">
               <i className="bi bi-shield-lock-fill text-info me-2"></i> {userRole === 'super_admin' ? 'Super Admin SIPJP' : 'Portal Atasan OPD'}
             </div>
             <ul className="sidebar-nav">
-              {userRole === 'super_admin' && (
-                <li><a onClick={() => changeTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
-              )}
+              <li><a onClick={() => changeTab('view-dashboard')} className={`nav-item ${activeTab === 'view-dashboard' ? 'active' : ''}`}><i className="bi bi-speedometer2"></i> Dashboard</a></li>
               <li><a onClick={() => changeTab('view-pegawai')} className={`nav-item ${activeTab === 'view-pegawai' ? 'active' : ''}`}><i className="bi bi-people-fill"></i> Data Pegawai {userRole !== 'super_admin' && '(OPD)'}</a></li>
               <li><a onClick={() => changeTab('view-sertifikasi')} className={`nav-item ${activeTab === 'view-sertifikasi' ? 'active' : ''}`}><i className="bi bi-journal-check"></i> Rekap Sertifikasi</a></li>
-              
+
               <li><a onClick={() => changeTab('view-idp')} className={`nav-item ${activeTab === 'view-idp' ? 'active' : ''}`}><i className="bi bi-calendar2-check"></i> Approval IDP</a></li>
               {userRole === 'super_admin' && (
                 <li><a onClick={() => { changeTab('view-profil-web'); fetchProfilWeb(); }} className={`nav-item ${activeTab === 'view-profil-web' ? 'active' : ''}`}><i className="bi bi-person-badge-fill"></i> Profil Pimpinan Web</a></li>
               )}
-              {loggedInNip !== 'admin' && (
-                <li className="mt-4">
-                  <a 
-                    onClick={() => router.push('/dashboard')} 
-                    className="nav-item fw-bold text-primary shadow-sm" 
-                    style={{ backgroundColor: '#eff6ff', borderRadius: '8px', cursor: 'pointer', border: '1px solid #bfdbfe' }}
-                    title="Beralih ke Dashboard & Layanan Pegawai Pribadi Anda (Upload Diklat, IDP, dll)"
-                  >
-                    <i className="bi bi-person-workspace text-primary"></i> Dashboard Pegawai
-                  </a>
-                </li>
-              )}
-              <li className={loggedInNip === 'admin' ? 'mt-4' : 'mt-2'}>
+              <li className="mt-4">
                 <a onClick={handleLogout} className="text-danger" style={{ cursor: 'pointer' }}>
                   <i className="bi bi-box-arrow-left"></i> Logout
                 </a>
@@ -1899,22 +1892,11 @@ export default function AdminPage() {
             <div className="topbar">
               <h5 className="fw-bold text-secondary mb-0">{getTopbarTitle()}</h5>
               <div className="d-flex align-items-center gap-3">
-                {loggedInNip !== 'admin' && (
-                  <button 
-                    onClick={() => router.push('/dashboard')} 
-                    className="btn btn-sm btn-outline-primary shadow-sm fw-bold d-flex align-items-center gap-1 px-3" 
-                    style={{ borderRadius: '20px' }}
-                    title="Beralih ke Dashboard & Layanan Pegawai Pribadi Anda (Upload Diklat, IDP, dll)"
-                  >
-                    <i className="bi bi-person-workspace"></i>
-                    <span>Dashboard Pegawai</span>
-                  </button>
-                )}
                 <div className="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill border">
                   <i className="bi bi-calendar3 text-primary" style={{ fontSize: '0.85rem' }}></i>
                   <span className="text-muted fw-bold" style={{ fontSize: '0.8rem' }}>Tahun:</span>
-                  <select 
-                    className="form-select form-select-sm border-0 bg-transparent shadow-none p-0 pe-3" 
+                  <select
+                    className="form-select form-select-sm border-0 bg-transparent shadow-none p-0 pe-3"
                     style={{ width: 'auto', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
                     value={tahunFilter}
                     onChange={(e) => setTahunFilter(e.target.value)}
@@ -1928,18 +1910,18 @@ export default function AdminPage() {
                 <i className="bi bi-bell fs-5 text-muted ms-1"></i>
                 <div className="d-flex align-items-center gap-2">
                   <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '36px', height: '36px', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    {loggedInNip === 'admin' 
-                      ? 'SA' 
+                    {loggedInNip === 'admin'
+                      ? 'SA'
                       : (((pegawaiList.find(p => p.nip === loggedInNip)?.nama || loggedInNama || 'Admin').substring(0, 2)).toUpperCase())}
                   </div>
                   <div>
                     <div className="fw-semibold text-dark lh-1" style={{ fontSize: '0.88rem' }}>
-                      {loggedInNip === 'admin' 
-                        ? 'Administrator Utama' 
+                      {loggedInNip === 'admin'
+                        ? 'Administrator Utama'
                         : (pegawaiList.find(p => p.nip === loggedInNip)?.nama || loggedInNama || (userRole === 'super_admin' ? 'Administrator' : 'Atasan OPD'))}
                     </div>
                     <span className="badge bg-primary-subtle text-primary text-uppercase mt-1" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>
-                      {userRole === 'super_admin' ? 'Super Admin BKPSDMD' : 'Atasan OPD'}
+                      {userRole === 'super_admin' ? 'Super Admin' : 'Atasan OPD'}
                     </span>
                   </div>
                 </div>
@@ -1947,9 +1929,9 @@ export default function AdminPage() {
             </div>
 
             <div className="p-4 p-md-5">
-              
+
               {/* DASHBOARD & ANALISIS TREN TERPADU */}
-              {userRole === 'super_admin' && activeTab === 'view-dashboard' && (
+              {activeTab === 'view-dashboard' && (
                 <div>
                   {/* KPI Summary Cards */}
                   <div className="row g-3 mb-4">
@@ -2032,24 +2014,24 @@ export default function AdminPage() {
                               <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
                                 <defs>
                                   <linearGradient id="colorLulusDash" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.35}/>
-                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
+                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                   </linearGradient>
                                   <linearGradient id="colorBelumDash" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.35}/>
-                                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.35} />
+                                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                                   </linearGradient>
                                 </defs>
                                 <XAxis dataKey="year" stroke="#94a3b8" axisLine={false} tickLine={false} />
                                 <YAxis stroke="#94a3b8" axisLine={false} tickLine={false} />
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <RechartsTooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: '#ffffff', 
-                                    borderRadius: '12px', 
-                                    border: '1px solid #e2e8f0', 
-                                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' 
-                                  }} 
+                                <RechartsTooltip
+                                  contentStyle={{
+                                    backgroundColor: '#ffffff',
+                                    borderRadius: '12px',
+                                    border: '1px solid #e2e8f0',
+                                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'
+                                  }}
                                 />
                                 <Legend wrapperStyle={{ paddingTop: '10px' }} iconType="circle" />
                                 <Area type="monotone" dataKey="Memenuhi Syarat" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorLulusDash)" activeDot={{ r: 6, strokeWidth: 0 }} />
@@ -2075,13 +2057,13 @@ export default function AdminPage() {
                               Tren Capaian per OPD
                             </h5>
                             <span className="text-muted small">
-                              {selectedOpdChart === 'all' 
-                                ? 'Rata-rata capaian seluruh OPD' 
+                              {selectedOpdChart === 'all'
+                                ? 'Rata-rata capaian seluruh OPD'
                                 : selectedOpdChart}
                             </span>
                           </div>
                           <div className="d-flex align-items-center gap-1">
-                            <select 
+                            <select
                               className="form-select form-select-sm border-secondary shadow-sm"
                               style={{ maxWidth: '210px', fontWeight: 'bold', fontSize: '0.8rem' }}
                               value={selectedOpdChart}
@@ -2093,7 +2075,7 @@ export default function AdminPage() {
                               ))}
                             </select>
                             {selectedOpdChart !== 'all' && (
-                              <button 
+                              <button
                                 className="btn btn-sm btn-outline-secondary py-1 px-2"
                                 onClick={() => setSelectedOpdChart('all')}
                                 title="Reset ke semua OPD"
@@ -2111,7 +2093,7 @@ export default function AdminPage() {
                               <XAxis dataKey="tahun" stroke="#64748b" />
                               <YAxis yAxisId="left" domain={[0, 100]} unit="%" stroke="#10b981" />
                               <YAxis yAxisId="right" orientation="right" unit=" JP" stroke="#6366f1" />
-                              <RechartsTooltip 
+                              <RechartsTooltip
                                 contentStyle={{ background: '#ffffff', borderRadius: 12, border: '1px solid #e2e8f0', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                                 formatter={(value, name) => [
                                   name === 'Persentase Capai Target (%)' ? `${value}%` : `${value} JP`,
@@ -2119,24 +2101,24 @@ export default function AdminPage() {
                                 ]}
                               />
                               <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                              <Line 
-                                yAxisId="left" 
-                                type="monotone" 
-                                dataKey="Persentase Capai Target (%)" 
-                                stroke="#10b981" 
-                                strokeWidth={3} 
-                                dot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} 
-                                activeDot={{ r: 7 }} 
+                              <Line
+                                yAxisId="left"
+                                type="monotone"
+                                dataKey="Persentase Capai Target (%)"
+                                stroke="#10b981"
+                                strokeWidth={3}
+                                dot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 7 }}
                               />
-                              <Line 
-                                yAxisId="right" 
-                                type="monotone" 
-                                dataKey="Rata-rata JP" 
-                                stroke="#6366f1" 
-                                strokeWidth={3} 
-                                strokeDasharray="4 4" 
-                                dot={{ r: 5, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }} 
-                                activeDot={{ r: 7 }} 
+                              <Line
+                                yAxisId="right"
+                                type="monotone"
+                                dataKey="Rata-rata JP"
+                                stroke="#6366f1"
+                                strokeWidth={3}
+                                strokeDasharray="4 4"
+                                dot={{ r: 5, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 7 }}
                               />
                             </LineChart>
                           </ResponsiveContainer>
@@ -2160,15 +2142,15 @@ export default function AdminPage() {
 
                       {/* Mode Switcher: Rekap per Pegawai vs Rekap per OPD */}
                       <div className="btn-group p-1 bg-light rounded-pill border shadow-sm" role="group">
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           className={`btn btn-sm rounded-pill px-3 fw-bold ${trenViewMode === 'pegawai' ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary border-0'}`}
                           onClick={() => setTrenViewMode('pegawai')}
                         >
                           <i className="bi bi-people-fill me-1"></i> Rekap per Pegawai (5/Hal)
                         </button>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           className={`btn btn-sm rounded-pill px-3 fw-bold ${trenViewMode === 'opd' ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary border-0'}`}
                           onClick={() => setTrenViewMode('opd')}
                         >
@@ -2181,18 +2163,18 @@ export default function AdminPage() {
                     <div className="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4 p-3 bg-light rounded-4 border">
                       <div className="d-flex flex-wrap gap-2 align-items-center flex-grow-1">
                         <div className="position-relative" style={{ minWidth: '220px', maxWidth: '300px' }}>
-                          <input 
-                            type="text" 
-                            className="form-control form-control-sm pe-4" 
+                          <input
+                            type="text"
+                            className="form-control form-control-sm pe-4"
                             placeholder={trenViewMode === 'pegawai' ? "Cari Nama Pegawai, NIP, OPD..." : "Cari Nama OPD..."}
                             value={searchTren}
                             onChange={e => setSearchTren(e.target.value)}
                           />
-                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
                         </div>
 
                         {trenViewMode === 'pegawai' && (
-                          <select 
+                          <select
                             className="form-select form-select-sm border-secondary shadow-sm"
                             style={{ maxWidth: '240px', cursor: 'pointer' }}
                             value={filterTrenOpd}
@@ -2205,7 +2187,7 @@ export default function AdminPage() {
                           </select>
                         )}
 
-                        <select 
+                        <select
                           className="form-select form-select-sm border-secondary shadow-sm"
                           style={{ width: '175px', cursor: 'pointer' }}
                           value={filterTrenStatus}
@@ -2312,10 +2294,10 @@ export default function AdminPage() {
                           </table>
                         </div>
 
-                        <PaginationControls 
-                          currentPage={currentPageTrenPegawai} 
-                          setCurrentPage={setCurrentPageTrenPegawai} 
-                          totalItems={filteredPegawaiTrendList.length} 
+                        <PaginationControls
+                          currentPage={currentPageTrenPegawai}
+                          setCurrentPage={setCurrentPageTrenPegawai}
+                          totalItems={filteredPegawaiTrendList.length}
                           itemsPerPage={ITEMS_PER_PAGE_PEGAWAI}
                         />
                       </>
@@ -2361,7 +2343,7 @@ export default function AdminPage() {
                                           <div className="fw-bold text-dark">{item.opd}</div>
                                         </td>
                                         <td className="text-center">
-                                          <button 
+                                          <button
                                             type="button"
                                             className={`btn btn-sm ${isExpanded ? 'btn-primary text-white' : 'btn-light border text-dark'} py-0 px-2 shadow-none`}
                                             style={{ fontSize: '0.8rem' }}
@@ -2389,14 +2371,14 @@ export default function AdminPage() {
                                               <div className="d-flex flex-column align-items-center">
                                                 <div className="d-flex align-items-center gap-1">
                                                   <span className="fw-bold small">{stats.lulus}</span>
-                                                  <span className="text-muted" style={{fontSize: '0.75rem'}}>/{item.totalMembers}</span>
+                                                  <span className="text-muted" style={{ fontSize: '0.75rem' }}>/{item.totalMembers}</span>
                                                   <span className={`badge ${badgeColor} ms-1`} style={{ fontSize: '0.75rem' }}>
                                                     {pct}%
                                                   </span>
                                                 </div>
                                                 <div className="progress w-100 mt-1" style={{ height: '4px', maxWidth: '80px', background: '#e2e8f0' }}>
-                                                  <div 
-                                                    className={`progress-bar ${pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning' : 'bg-primary'}`} 
+                                                  <div
+                                                    className={`progress-bar ${pct >= 60 ? 'bg-success' : pct >= 25 ? 'bg-warning' : 'bg-primary'}`}
                                                     style={{ width: `${Math.min(100, pct)}%` }}
                                                   ></div>
                                                 </div>
@@ -2427,7 +2409,7 @@ export default function AdminPage() {
                                           )}
                                         </td>
                                         <td className="text-center">
-                                          <button 
+                                          <button
                                             className={`btn btn-sm ${selectedOpdChart === item.opd ? 'btn-primary' : 'btn-outline-primary'}`}
                                             onClick={() => {
                                               setSelectedOpdChart(item.opd);
@@ -2518,16 +2500,16 @@ export default function AdminPage() {
                                                     Halaman {pageTrenPegawai} dari {totalPagesMembers} ({totalMembersCount} Pegawai - 5 per halaman)
                                                   </span>
                                                   <div className="d-flex gap-1">
-                                                    <button 
-                                                      className="btn btn-outline-secondary btn-sm py-1 px-2" 
+                                                    <button
+                                                      className="btn btn-outline-secondary btn-sm py-1 px-2"
                                                       style={{ fontSize: '0.78rem' }}
                                                       disabled={pageTrenPegawai === 1}
                                                       onClick={() => setPageTrenPegawai(p => p - 1)}
                                                     >
                                                       Prev
                                                     </button>
-                                                    <button 
-                                                      className="btn btn-outline-secondary btn-sm py-1 px-2" 
+                                                    <button
+                                                      className="btn btn-outline-secondary btn-sm py-1 px-2"
                                                       style={{ fontSize: '0.78rem' }}
                                                       disabled={pageTrenPegawai === totalPagesMembers}
                                                       onClick={() => setPageTrenPegawai(p => p + 1)}
@@ -2549,10 +2531,10 @@ export default function AdminPage() {
                           </table>
                         </div>
 
-                        <PaginationControls 
-                          currentPage={currentPageTren} 
-                          setCurrentPage={setCurrentPageTren} 
-                          totalItems={filteredOpdTrendList.length} 
+                        <PaginationControls
+                          currentPage={currentPageTren}
+                          setCurrentPage={setCurrentPageTren}
+                          totalItems={filteredOpdTrendList.length}
                           itemsPerPage={ITEMS_PER_PAGE_TREN}
                         />
                       </>
@@ -2568,7 +2550,7 @@ export default function AdminPage() {
                     <div className="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between shadow-sm" style={{ borderRadius: '8px', fontSize: '0.85rem' }}>
                       <div>
                         <i className="bi bi-info-circle-fill me-2 text-primary"></i>
-                        <strong>Mode Pemantauan OPD (Hanya Lihat):</strong> Anda dapat melihat data profil dan perkembangan JP pegawai di instansi Anda. Hak kelola data dan ekspor sistem dikhususkan untuk Super Admin BKPSDMD.
+                        <strong>Mode Pemantauan OPD (Hanya Lihat):</strong> Anda dapat melihat data profil dan perkembangan JP pegawai di instansi Anda. Hak kelola data dan ekspor sistem dikhususkan untuk Super Admin.
                       </div>
                       <span className="badge bg-secondary">View Only</span>
                     </div>
@@ -2578,14 +2560,14 @@ export default function AdminPage() {
                       <h5 className="fw-bold mb-0">Master Data Pegawai</h5>
                       <div className="d-flex gap-2">
                         <div className="position-relative">
-                          <input 
-                            type="text" 
-                            className="form-control form-control-sm pe-4" 
-                            placeholder="Cari Nama / NIP..." 
+                          <input
+                            type="text"
+                            className="form-control form-control-sm pe-4"
+                            placeholder="Cari Nama / NIP..."
                             value={searchPegawai}
                             onChange={e => setSearchPegawai(e.target.value)}
                           />
-                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                          <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
                         </div>
                         {userRole === 'super_admin' && (
                           <button className="btn btn-sm btn-primary" onClick={() => {
@@ -2597,7 +2579,7 @@ export default function AdminPage() {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                       <div className="d-flex align-items-center gap-2">
                         <span className="badge bg-secondary fs-6">Seluruh Pegawai: {pegawaiList.length}</span>
@@ -2606,22 +2588,22 @@ export default function AdminPage() {
                       </div>
                       {userRole === 'super_admin' && (
                         <div className="dropdown position-relative">
-                          <button 
-                            className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1" 
-                            type="button" 
+                          <button
+                            className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1"
+                            type="button"
                             onClick={() => setOpenExportPegawaiDropdown(!openExportPegawaiDropdown)}
                           >
                             <i className="bi bi-file-earmark-excel"></i>
                             <span>Export Excel</span>
                           </button>
                           {openExportPegawaiDropdown && (
-                            <ul 
-                              className="dropdown-menu show shadow-lg border-0 mt-1 py-1" 
-                              style={{ 
-                                position: 'absolute', 
-                                top: '100%', 
-                                right: 0, 
-                                zIndex: 1055, 
+                            <ul
+                              className="dropdown-menu show shadow-lg border-0 mt-1 py-1"
+                              style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                zIndex: 1055,
                                 display: 'block',
                                 minWidth: '200px',
                                 borderRadius: '10px'
@@ -2651,7 +2633,7 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="table-responsive">
                     <table className="table table-sm table-hover align-middle" style={{ fontSize: '0.85rem' }}>
                       <thead className="table-light">
@@ -2682,7 +2664,7 @@ export default function AdminPage() {
                             <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
                             <td className="text-center">
                               {userRole === 'super_admin' ? (
-                                <button 
+                                <button
                                   className={`btn btn-sm ${p.role === 'admin' || p.role === 'super_admin' ? 'btn-success' : 'btn-outline-secondary'}`}
                                   onClick={() => {
                                     if (p.role === 'super_admin') {
@@ -2729,9 +2711,9 @@ export default function AdminPage() {
                                       const pGolonganTrimmed = p.golongan.trim().toLowerCase();
                                       if (matchedStatusPegawai === 'PNS') {
                                         const pnsOptions = [
-                                          "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I", 
-                                          "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I", 
-                                          "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I", 
+                                          "I/a - Juru Muda", "I/b - Juru Muda Tk. I", "I/c - Juru", "I/d - Juru Tk. I",
+                                          "II/a - Pengatur Muda", "II/b - Pengatur Muda Tk. I", "II/c - Pengatur", "II/d - Pengatur Tk. I",
+                                          "III/a - Penata Muda", "III/b - Penata Muda Tk. I", "III/c - Penata", "III/d - Penata Tk. I",
                                           "IV/a - Pembina", "IV/b - Pembina Tk. I", "IV/c - Pembina Utama Muda", "IV/d - Pembina Utama Madya", "IV/e - Pembina Utama"
                                         ];
                                         const matched = pnsOptions.find(o => o.toLowerCase().startsWith(pGolonganTrimmed));
@@ -2747,8 +2729,8 @@ export default function AdminPage() {
                                       }
                                     }
 
-                                    setPegawaiForm({ 
-                                      ...p, 
+                                    setPegawaiForm({
+                                      ...p,
                                       status_pegawai: matchedStatusPegawai,
                                       jenkel: matchedJenkel,
                                       unit_kerja: matchedUnitKerja,
@@ -2781,18 +2763,18 @@ export default function AdminPage() {
                         <h5 className="fw-bold mb-0">Rekapitulasi Sertifikasi per OPD</h5>
                         <div className="d-flex gap-2">
                           <div className="position-relative">
-                            <input 
-                              type="text" 
-                              className="form-control form-control-sm pe-4" 
-                              placeholder="Cari Nama / NIP..." 
+                            <input
+                              type="text"
+                              className="form-control form-control-sm pe-4"
+                              placeholder="Cari Nama / NIP..."
                               value={searchSertifikasi}
                               onChange={e => setSearchSertifikasi(e.target.value)}
                             />
-                            <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                            <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div className="d-flex align-items-center gap-2">
                           <span className="badge bg-secondary fs-6">Total Pegawai: {pegawaiList.length}</span>
@@ -2802,8 +2784,8 @@ export default function AdminPage() {
                           <span className="badge bg-info text-dark fs-6">PPPK: {pppkList.length}</span>
                         </div>
                         <div className="d-flex gap-2 align-items-center">
-                          <select 
-                            className="form-select form-select-sm border-secondary shadow-sm" 
+                          <select
+                            className="form-select form-select-sm border-secondary shadow-sm"
                             style={{ width: '180px', cursor: 'pointer' }}
                             value={exportJenisKursusFilter}
                             onChange={(e) => setExportJenisKursusFilter(e.target.value)}
@@ -2839,22 +2821,22 @@ export default function AdminPage() {
                           </select>
                           {userRole === 'super_admin' && (
                             <div className="dropdown position-relative">
-                              <button 
-                                className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1" 
-                                type="button" 
+                              <button
+                                className="btn btn-sm btn-success dropdown-toggle shadow-sm d-flex align-items-center gap-1"
+                                type="button"
                                 onClick={() => setOpenExportSertDropdown(!openExportSertDropdown)}
                               >
                                 <i className="bi bi-file-earmark-excel"></i>
                                 <span>Export Excel</span>
                               </button>
                               {openExportSertDropdown && (
-                                <ul 
-                                  className="dropdown-menu show shadow-lg border-0 mt-1 py-1" 
-                                  style={{ 
-                                    position: 'absolute', 
-                                    top: '100%', 
-                                    right: 0, 
-                                    zIndex: 1055, 
+                                <ul
+                                  className="dropdown-menu show shadow-lg border-0 mt-1 py-1"
+                                  style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    right: 0,
+                                    zIndex: 1055,
                                     display: 'block',
                                     minWidth: '220px',
                                     borderRadius: '10px'
@@ -2881,15 +2863,15 @@ export default function AdminPage() {
                           )}
                           {userRole === 'super_admin' && (
                             <>
-                              <button 
-                                className="btn btn-sm btn-outline-success shadow-sm" 
+                              <button
+                                className="btn btn-sm btn-outline-success shadow-sm"
                                 onClick={downloadTemplateSertifikasi}
                                 title="Download format Excel untuk input massal kegiatan (misal: Rabu Bertamu)"
                               >
                                 <i className="bi bi-download me-1"></i> Download Template
                               </button>
-                              <button 
-                                className="btn btn-sm btn-primary shadow-sm" 
+                              <button
+                                className="btn btn-sm btn-primary shadow-sm"
                                 onClick={() => { setShowImportSertifikasiModal(true); setImportResult(null); }}
                                 title="Upload file Excel sertifikasi massal"
                               >
@@ -2913,9 +2895,9 @@ export default function AdminPage() {
                               return (
                                 <div className="accordion-item mb-2 border rounded" key={opdIndex}>
                                   <h2 className="accordion-header">
-                                    <button 
-                                      className={`accordion-button fw-bold ${openOPD === opd ? '' : 'collapsed'}`} 
-                                      type="button" 
+                                    <button
+                                      className={`accordion-button fw-bold ${openOPD === opd ? '' : 'collapsed'}`}
+                                      type="button"
                                       onClick={() => setOpenOPD(openOPD === opd ? null : opd)}
                                     >
                                       {opd} <span className="badge bg-secondary ms-2">{opdPegawai.length} Pegawai</span>
@@ -2928,72 +2910,72 @@ export default function AdminPage() {
                                     const paginatedPegawai = opdPegawai.slice((pagePegawai - 1) * ITEMS_PER_PAGE_PEGAWAI, pagePegawai * ITEMS_PER_PAGE_PEGAWAI);
 
                                     return (
-                                    <div className="accordion-collapse">
-                                      <div className="accordion-body p-0 border-top">
-                                        <div className="table-responsive">
-                                          <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
-                                            <thead className="table-light">
-                                              <tr>
-                                                <th>No</th>
-                                                <th>NIP</th>
-                                                <th>Nama Pegawai</th>
-                                                <th>Jabatan</th>
-                                                <th className="text-center">Total JP</th>
-                                                <th className="text-center">Aksi</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {paginatedPegawai.length === 0 ? (
+                                      <div className="accordion-collapse">
+                                        <div className="accordion-body p-0 border-top">
+                                          <div className="table-responsive">
+                                            <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: '0.85rem' }}>
+                                              <thead className="table-light">
                                                 <tr>
-                                                  <td colSpan={6} className="text-center py-3 text-muted">Belum ada pegawai di OPD ini.</td>
+                                                  <th>No</th>
+                                                  <th>NIP</th>
+                                                  <th>Nama Pegawai</th>
+                                                  <th>Jabatan</th>
+                                                  <th className="text-center">Total JP</th>
+                                                  <th className="text-center">Aksi</th>
                                                 </tr>
-                                              ) : (
-                                                paginatedPegawai.map((p, pIndex) => (
-                                                  <tr key={p.nip || pIndex}>
-                                                    <td>{(pagePegawai - 1) * ITEMS_PER_PAGE_PEGAWAI + pIndex + 1}</td>
-                                                    <td>{p.nip}</td>
-                                                    <td className="fw-bold">{p.nama || '-'}</td>
-                                                    <td>{p.jabatan || '-'}</td>
-                                                    <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
-                                                    <td className="text-center">
-                                                      <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
-                                                        <i className="bi bi-eye"></i> Detail
-                                                      </button>
-                                                    </td>
+                                              </thead>
+                                              <tbody>
+                                                {paginatedPegawai.length === 0 ? (
+                                                  <tr>
+                                                    <td colSpan={6} className="text-center py-3 text-muted">Belum ada pegawai di OPD ini.</td>
                                                   </tr>
-                                                ))
-                                              )}
-                                            </tbody>
-                                          </table>
-                                        </div>
-
-                                        {totalPagesPegawaiOPD > 1 && (
-                                          <div className="d-flex justify-content-between align-items-center p-2 px-3 bg-light border-top">
-                                            <span className="small text-muted fw-semibold">
-                                              Halaman {pagePegawai} dari {totalPagesPegawaiOPD} ({totalPegawaiOPD} Pegawai - 5 per halaman)
-                                            </span>
-                                            <div className="d-flex gap-1">
-                                              <button 
-                                                className="btn btn-outline-secondary btn-sm py-1 px-2" 
-                                                style={{ fontSize: '0.78rem' }}
-                                                disabled={pagePegawai === 1} 
-                                                onClick={() => setPagePegawaiPerOPD(prev => ({ ...prev, [opd]: pagePegawai - 1 }))}
-                                              >
-                                                Prev
-                                              </button>
-                                              <button 
-                                                className="btn btn-outline-secondary btn-sm py-1 px-2" 
-                                                style={{ fontSize: '0.78rem' }}
-                                                disabled={pagePegawai === totalPagesPegawaiOPD} 
-                                                onClick={() => setPagePegawaiPerOPD(prev => ({ ...prev, [opd]: pagePegawai + 1 }))}
-                                              >
-                                                Next
-                                              </button>
-                                            </div>
+                                                ) : (
+                                                  paginatedPegawai.map((p, pIndex) => (
+                                                    <tr key={p.nip || pIndex}>
+                                                      <td>{(pagePegawai - 1) * ITEMS_PER_PAGE_PEGAWAI + pIndex + 1}</td>
+                                                      <td>{p.nip}</td>
+                                                      <td className="fw-bold">{p.nama || '-'}</td>
+                                                      <td>{p.jabatan || '-'}</td>
+                                                      <td className="text-center"><span className="fw-bold text-primary">{p.jp} JP</span></td>
+                                                      <td className="text-center">
+                                                        <button className="btn btn-sm btn-outline-info" title="Lihat Detail Sertifikat" onClick={() => { setSelectedPegawai(p); setShowModal(true); }}>
+                                                          <i className="bi bi-eye"></i> Detail
+                                                        </button>
+                                                      </td>
+                                                    </tr>
+                                                  ))
+                                                )}
+                                              </tbody>
+                                            </table>
                                           </div>
-                                        )}
+
+                                          {totalPagesPegawaiOPD > 1 && (
+                                            <div className="d-flex justify-content-between align-items-center p-2 px-3 bg-light border-top">
+                                              <span className="small text-muted fw-semibold">
+                                                Halaman {pagePegawai} dari {totalPagesPegawaiOPD} ({totalPegawaiOPD} Pegawai - 5 per halaman)
+                                              </span>
+                                              <div className="d-flex gap-1">
+                                                <button
+                                                  className="btn btn-outline-secondary btn-sm py-1 px-2"
+                                                  style={{ fontSize: '0.78rem' }}
+                                                  disabled={pagePegawai === 1}
+                                                  onClick={() => setPagePegawaiPerOPD(prev => ({ ...prev, [opd]: pagePegawai - 1 }))}
+                                                >
+                                                  Prev
+                                                </button>
+                                                <button
+                                                  className="btn btn-outline-secondary btn-sm py-1 px-2"
+                                                  style={{ fontSize: '0.78rem' }}
+                                                  disabled={pagePegawai === totalPagesPegawaiOPD}
+                                                  onClick={() => setPagePegawaiPerOPD(prev => ({ ...prev, [opd]: pagePegawai + 1 }))}
+                                                >
+                                                  Next
+                                                </button>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
                                     );
                                   })()}
                                 </div>
@@ -3016,7 +2998,7 @@ export default function AdminPage() {
                     <div>
                       <div className="fw-bold text-dark">Sistem Verifikasi IDP Berlapis (2 Tahap):</div>
                       <div className="small text-muted">
-                        <strong>Tahap 1 (Admin/Atasan OPD):</strong> Memverifikasi usulan kompetensi pegawai di instansi terkait untuk diteruskan ke BKPSDMD.<br/>
+                        <strong>Tahap 1 (Admin/Atasan OPD):</strong> Memverifikasi usulan kompetensi pegawai di instansi terkait untuk diteruskan ke BKPSDMD.<br />
                         <strong>Tahap 2 (Admin Instansi BKPSDMD / Approval Nyata):</strong> Penentu keputusan final penetapan IDP. Jika BKPSDMD tidak menyetujui, maka usulan tetap <strong>TIDAK DISETUJUI</strong> meskipun telah disetujui oleh OPD.
                       </div>
                     </div>
@@ -3025,14 +3007,14 @@ export default function AdminPage() {
                     <h5 className="fw-bold mb-0">Daftar Pengajuan IDP Pegawai</h5>
                     <div className="d-flex gap-2">
                       <div className="position-relative">
-                        <input 
-                          type="text" 
-                          className="form-control form-control-sm pe-4" 
-                          placeholder="Cari Nama / Kompetensi..." 
+                        <input
+                          type="text"
+                          className="form-control form-control-sm pe-4"
+                          placeholder="Cari Nama / Kompetensi..."
                           value={searchIdp}
                           onChange={e => setSearchIdp(e.target.value)}
                         />
-                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{fontSize: '0.8rem'}}></i>
+                        <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted" style={{ fontSize: '0.8rem' }}></i>
                       </div>
                       {userRole === 'super_admin' && (
                         <button className="btn btn-sm btn-success shadow-sm" onClick={() => startAsyncExport(exportIdpToExcel, 'Rekap IDP ASN')}>
@@ -3050,7 +3032,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="table-responsive">
-                    <table className="table table-sm table-hover align-middle" style={{fontSize: '0.85rem'}}>
+                    <table className="table table-sm table-hover align-middle" style={{ fontSize: '0.85rem' }}>
                       <thead className="table-light">
                         <tr>
                           <th>No</th>
@@ -3073,9 +3055,9 @@ export default function AdminPage() {
                           return (
                             <tr key={idp._rowIndex || item.p.nip + "-" + idx}>
                               <td>{displayNo}</td>
-                              <td className="fw-bold">{p.nama}<br/><span className="text-muted fw-normal" style={{fontSize: '0.75rem'}}>{p.nip}</span></td>
+                              <td className="fw-bold">{p.nama}<br /><span className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>{p.nip}</span></td>
                               <td>{idp.jenis_kompetensi}</td>
-                              <td>{idp.jenis_pengembangan}<br/><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
+                              <td>{idp.jenis_pengembangan}<br /><span className="badge bg-secondary">{idp.jalur_pengembangan}</span></td>
                               <td>{idp.penyelenggara}</td>
                               <td>{idp.waktu_pelaksanaan_awal} s.d. {idp.waktu_pelaksanaan_akhir}</td>
                               <td><span className="badge bg-info text-dark rounded-pill">{idp.jp} JP</span></td>
@@ -3085,24 +3067,24 @@ export default function AdminPage() {
                                 ) : (idp.status === 'Menunggu Persetujuan Admin' || idp.status === 'Menunggu Persetujuan BKPSDMD') ? (
                                   <div>
                                     <span className="badge bg-info text-dark"><i className="bi bi-arrow-right-circle me-1"></i>Disetujui OPD</span>
-                                    <div className="text-muted mt-1" style={{fontSize: '0.7rem'}}>Menunggu Final BKPSDMD</div>
+                                    <div className="text-muted mt-1" style={{ fontSize: '0.7rem' }}>Menunggu Final BKPSDMD</div>
                                   </div>
                                 ) : (idp.status === 'Menunggu Persetujuan Ketua' || idp.status === 'Menunggu Persetujuan Atasan OPD' || !idp.status) ? (
                                   <span className="badge bg-warning text-dark"><i className="bi bi-clock-history me-1"></i>Menunggu Verifikasi OPD</span>
                                 ) : idp.status === 'Ditolak BKPSDMD' ? (
                                   <div>
                                     <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak BKPSDMD</span>
-                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{ fontSize: '0.72rem', maxWidth: '170px' }}>Alasan: {idp.alasan_tolak}</div>}
                                   </div>
                                 ) : (idp.status === 'Ditolak OPD' || idp.status === 'Ditolak Atasan OPD') ? (
                                   <div>
                                     <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>Ditolak OPD</span>
-                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{ fontSize: '0.72rem', maxWidth: '170px' }}>Alasan: {idp.alasan_tolak}</div>}
                                   </div>
                                 ) : idp.status.toLowerCase().includes('ditolak') ? (
                                   <div>
                                     <span className="badge bg-danger"><i className="bi bi-x-circle-fill me-1"></i>{idp.status}</span>
-                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{fontSize: '0.72rem', maxWidth: '170px'}}>Alasan: {idp.alasan_tolak}</div>}
+                                    {idp.alasan_tolak && <div className="text-muted mt-1" style={{ fontSize: '0.72rem', maxWidth: '170px' }}>Alasan: {idp.alasan_tolak}</div>}
                                   </div>
                                 ) : (
                                   <span className="badge bg-secondary">{idp.status}</span>
@@ -3122,16 +3104,16 @@ export default function AdminPage() {
                                     </span>
                                   ) : (idp.status !== 'Disetujui' && !idp.status.toLowerCase().includes('ditolak')) ? (
                                     <div className="d-flex justify-content-center gap-1">
-                                      <button 
-                                        className="btn btn-sm btn-success" 
-                                        title="Berikan Persetujuan Final (BKPSDMD)" 
+                                      <button
+                                        className="btn btn-sm btn-success"
+                                        title="Berikan Persetujuan Final (BKPSDMD)"
                                         onClick={() => updateIdpStatus(idp._rowIndex, 'Disetujui', 'Berikan Persetujuan FINAL (BKPSDMD) pada pengajuan IDP ini?')}
                                       >
                                         <i className="bi bi-check-circle-fill me-1"></i>Setujui Final
                                       </button>
-                                      <button 
-                                        className="btn btn-sm btn-danger" 
-                                        title="Tolak Pengajuan IDP (BKPSDMD)" 
+                                      <button
+                                        className="btn btn-sm btn-danger"
+                                        title="Tolak Pengajuan IDP (BKPSDMD)"
                                         onClick={() => {
                                           setIdpRejectData({
                                             rowIndex: idp._rowIndex,
@@ -3151,10 +3133,10 @@ export default function AdminPage() {
                                   ) : (
                                     <div className="d-flex align-items-center justify-content-center gap-1">
                                       <span className="badge bg-danger py-1 px-2"><i className="bi bi-x-circle me-1"></i>{idp.status}</span>
-                                      <button 
-                                        className="btn btn-xs btn-outline-secondary" 
-                                        style={{fontSize: '0.7rem', padding: '1px 5px'}} 
-                                        title="Tinjau Ulang / Reset Status" 
+                                      <button
+                                        className="btn btn-xs btn-outline-secondary"
+                                        style={{ fontSize: '0.7rem', padding: '1px 5px' }}
+                                        title="Tinjau Ulang / Reset Status"
                                         onClick={() => updateIdpStatus(idp._rowIndex, 'Menunggu Persetujuan Admin', 'Buka kembali usulan IDP ini menjadi Menunggu Verifikasi BKPSDMD?')}
                                       >
                                         <i className="bi bi-arrow-counterclockwise"></i>
@@ -3202,19 +3184,19 @@ export default function AdminPage() {
                       </p>
                     </div>
                     <div className="d-flex gap-2">
-                      <a 
-                        href="/login" 
-                        target="_blank" 
-                        rel="noreferrer" 
+                      <a
+                        href="/login"
+                        target="_blank"
+                        rel="noreferrer"
                         className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1 shadow-sm"
                         title="Buka halaman login di tab baru"
                       >
                         <i className="bi bi-box-arrow-up-right"></i> Lihat Halaman Login
                       </a>
-                      <button 
-                        type="button" 
-                        onClick={fetchProfilWeb} 
-                        disabled={loadingProfilWeb} 
+                      <button
+                        type="button"
+                        onClick={fetchProfilWeb}
+                        disabled={loadingProfilWeb}
                         className="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1"
                         title="Muat ulang dari database"
                       >
@@ -3250,7 +3232,7 @@ export default function AdminPage() {
                       </span>
                     </div>
 
-                    <div 
+                    <div
                       className="rounded-4 p-4 text-white position-relative overflow-hidden shadow-sm"
                       style={{
                         background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0369a1 100%)',
@@ -3262,7 +3244,7 @@ export default function AdminPage() {
                         <div className="col-md-5">
                           <span className="badge bg-warning text-dark fw-bold mb-2">SIMULATOR HERO</span>
                           <h4 className="fw-bold text-white mb-2" style={{ lineHeight: 1.3 }}>
-                            Sistem Informasi<br/><span style={{ color: '#38bdf8' }}>Pengembangan</span> Kompetensi
+                            Sistem Informasi<br /><span style={{ color: '#38bdf8' }}>Pengembangan</span> Kompetensi
                           </h4>
                           <p className="small text-white-50 mb-0" style={{ whiteSpace: 'pre-line' }}>
                             {profilWebData.hero_subjudul}
@@ -3274,13 +3256,13 @@ export default function AdminPage() {
                           <div className="d-flex justify-content-center align-items-end gap-3 flex-wrap">
                             {/* Kartu Bupati */}
                             <div className="text-center" style={{ width: '45%', maxWidth: '200px' }}>
-                              <div 
+                              <div
                                 className="bg-white bg-opacity-10 rounded-3 p-2 mb-2 shadow"
                                 style={{ backdropFilter: 'blur(5px)', border: '1px solid rgba(255,255,255,0.2)' }}
                               >
-                                <img 
-                                  src={profilWebData.bupati_foto || '/img/bupati1.png'} 
-                                  alt="Bupati" 
+                                <img
+                                  src={profilWebData.bupati_foto || '/img/bupati1.png'}
+                                  alt="Bupati"
                                   style={{ width: '100%', height: '170px', objectFit: 'contain' }}
                                 />
                               </div>
@@ -3294,13 +3276,13 @@ export default function AdminPage() {
 
                             {/* Kartu Wakil Bupati */}
                             <div className="text-center" style={{ width: '45%', maxWidth: '200px' }}>
-                              <div 
+                              <div
                                 className="bg-white bg-opacity-10 rounded-3 p-2 mb-2 shadow"
                                 style={{ backdropFilter: 'blur(5px)', border: '1px solid rgba(255,255,255,0.2)' }}
                               >
-                                <img 
-                                  src={profilWebData.wakil_foto || '/img/bupati2.png'} 
-                                  alt="Wakil Bupati" 
+                                <img
+                                  src={profilWebData.wakil_foto || '/img/bupati2.png'}
+                                  alt="Wakil Bupati"
                                   style={{ width: '100%', height: '170px', objectFit: 'contain' }}
                                 />
                               </div>
@@ -3319,7 +3301,7 @@ export default function AdminPage() {
 
                   {/* FORM EDITOR BUPATI & WAKIL BUPATI (2 KOLOM) */}
                   <div className="row g-4 mb-4">
-                    
+
                     {/* KOLOM 1: FORM BUPATI */}
                     <div className="col-lg-6">
                       <div className="card h-100 border rounded-4 shadow-sm">
@@ -3331,11 +3313,11 @@ export default function AdminPage() {
                           <span className="badge bg-white text-secondary border rounded-pill px-2 py-1 small">Kepala Daerah</span>
                         </div>
                         <div className="card-body p-4">
-                          
+
                           {/* Upload / Ganti Foto Bupati */}
                           <div className="text-center mb-4 pb-3 border-bottom">
                             <div className="position-relative d-inline-block">
-                              <div 
+                              <div
                                 className="rounded-4 overflow-hidden border border-2 border-primary border-opacity-25 shadow-sm bg-light d-flex align-items-center justify-content-center mx-auto"
                                 style={{ width: '150px', height: '190px' }}
                               >
@@ -3345,21 +3327,21 @@ export default function AdminPage() {
                                     <div className="small text-muted">Mengunggah foto...</div>
                                   </div>
                                 ) : (
-                                  <img 
-                                    src={profilWebData.bupati_foto || '/img/bupati1.png'} 
-                                    alt="Foto Bupati" 
+                                  <img
+                                    src={profilWebData.bupati_foto || '/img/bupati1.png'}
+                                    alt="Foto Bupati"
                                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                   />
                                 )}
                               </div>
                             </div>
-                            
+
                             <div className="mt-3">
                               <label className="btn btn-primary btn-sm rounded-pill px-3 shadow-sm mb-1" style={{ cursor: 'pointer' }}>
                                 <i className="bi bi-upload me-1"></i> Unggah Foto Bupati Baru
-                                <input 
-                                  type="file" 
-                                  accept="image/png,image/jpeg,image/jpg,image/webp" 
+                                <input
+                                  type="file"
+                                  accept="image/png,image/jpeg,image/jpg,image/webp"
                                   className="d-none"
                                   disabled={uploadingBupatiFoto}
                                   onChange={(e) => {
@@ -3384,9 +3366,9 @@ export default function AdminPage() {
                               <span className="input-group-text bg-light text-muted border-end-0">
                                 <i className="bi bi-person-fill"></i>
                               </span>
-                              <input 
-                                type="text" 
-                                className="form-control border-start-0" 
+                              <input
+                                type="text"
+                                className="form-control border-start-0"
                                 placeholder="Contoh: MARKUS, S.H."
                                 value={profilWebData.bupati_nama}
                                 onChange={(e) => setProfilWebData({ ...profilWebData, bupati_nama: e.target.value })}
@@ -3406,9 +3388,9 @@ export default function AdminPage() {
                               <span className="input-group-text bg-light text-muted border-end-0">
                                 <i className="bi bi-award-fill"></i>
                               </span>
-                              <input 
-                                type="text" 
-                                className="form-control border-start-0" 
+                              <input
+                                type="text"
+                                className="form-control border-start-0"
                                 placeholder="Contoh: BUPATI BANGKA BARAT"
                                 value={profilWebData.bupati_jabatan}
                                 onChange={(e) => setProfilWebData({ ...profilWebData, bupati_jabatan: e.target.value })}
@@ -3424,9 +3406,9 @@ export default function AdminPage() {
                             <label className="form-label fw-semibold text-secondary small mb-1">
                               Path / Link URL Foto Bupati
                             </label>
-                            <input 
-                              type="text" 
-                              className="form-control form-control-sm text-muted bg-light" 
+                            <input
+                              type="text"
+                              className="form-control form-control-sm text-muted bg-light"
                               placeholder="/img/bupati1.png atau URL Drive"
                               value={profilWebData.bupati_foto}
                               onChange={(e) => setProfilWebData({ ...profilWebData, bupati_foto: e.target.value })}
@@ -3448,11 +3430,11 @@ export default function AdminPage() {
                           <span className="badge bg-white text-secondary border rounded-pill px-2 py-1 small">Wakil Kepala Daerah</span>
                         </div>
                         <div className="card-body p-4">
-                          
+
                           {/* Upload / Ganti Foto Wakil Bupati */}
                           <div className="text-center mb-4 pb-3 border-bottom">
                             <div className="position-relative d-inline-block">
-                              <div 
+                              <div
                                 className="rounded-4 overflow-hidden border border-2 border-info border-opacity-25 shadow-sm bg-light d-flex align-items-center justify-content-center mx-auto"
                                 style={{ width: '150px', height: '190px' }}
                               >
@@ -3462,21 +3444,21 @@ export default function AdminPage() {
                                     <div className="small text-muted">Mengunggah foto...</div>
                                   </div>
                                 ) : (
-                                  <img 
-                                    src={profilWebData.wakil_foto || '/img/bupati2.png'} 
-                                    alt="Foto Wakil Bupati" 
+                                  <img
+                                    src={profilWebData.wakil_foto || '/img/bupati2.png'}
+                                    alt="Foto Wakil Bupati"
                                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                   />
                                 )}
                               </div>
                             </div>
-                            
+
                             <div className="mt-3">
                               <label className="btn btn-info text-white btn-sm rounded-pill px-3 shadow-sm mb-1" style={{ cursor: 'pointer' }}>
                                 <i className="bi bi-upload me-1"></i> Unggah Foto Wakil Bupati Baru
-                                <input 
-                                  type="file" 
-                                  accept="image/png,image/jpeg,image/jpg,image/webp" 
+                                <input
+                                  type="file"
+                                  accept="image/png,image/jpeg,image/jpg,image/webp"
                                   className="d-none"
                                   disabled={uploadingWakilFoto}
                                   onChange={(e) => {
@@ -3501,9 +3483,9 @@ export default function AdminPage() {
                               <span className="input-group-text bg-light text-muted border-end-0">
                                 <i className="bi bi-person-fill"></i>
                               </span>
-                              <input 
-                                type="text" 
-                                className="form-control border-start-0" 
+                              <input
+                                type="text"
+                                className="form-control border-start-0"
                                 placeholder="Contoh: H. YUS DERAHMAN"
                                 value={profilWebData.wakil_nama}
                                 onChange={(e) => setProfilWebData({ ...profilWebData, wakil_nama: e.target.value })}
@@ -3523,9 +3505,9 @@ export default function AdminPage() {
                               <span className="input-group-text bg-light text-muted border-end-0">
                                 <i className="bi bi-award-fill"></i>
                               </span>
-                              <input 
-                                type="text" 
-                                className="form-control border-start-0" 
+                              <input
+                                type="text"
+                                className="form-control border-start-0"
                                 placeholder="Contoh: WAKIL BUPATI BANGKA BARAT"
                                 value={profilWebData.wakil_jabatan}
                                 onChange={(e) => setProfilWebData({ ...profilWebData, wakil_jabatan: e.target.value })}
@@ -3541,9 +3523,9 @@ export default function AdminPage() {
                             <label className="form-label fw-semibold text-secondary small mb-1">
                               Path / Link URL Foto Wakil Bupati
                             </label>
-                            <input 
-                              type="text" 
-                              className="form-control form-control-sm text-muted bg-light" 
+                            <input
+                              type="text"
+                              className="form-control form-control-sm text-muted bg-light"
                               placeholder="/img/bupati2.png atau URL Drive"
                               value={profilWebData.wakil_foto}
                               onChange={(e) => setProfilWebData({ ...profilWebData, wakil_foto: e.target.value })}
@@ -3568,8 +3550,8 @@ export default function AdminPage() {
                         <label className="form-label fw-semibold text-secondary small mb-1">
                           Deskripsi Singkat Sistem di Bawah Judul
                         </label>
-                        <textarea 
-                          className="form-control" 
+                        <textarea
+                          className="form-control"
                           rows={3}
                           value={profilWebData.hero_subjudul}
                           onChange={(e) => setProfilWebData({ ...profilWebData, hero_subjudul: e.target.value })}
@@ -3581,19 +3563,19 @@ export default function AdminPage() {
 
                   {/* ACTION BUTTONS */}
                   <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 border-top">
-                    <button 
-                      type="button" 
-                      onClick={() => handleResetProfilWeb()} 
+                    <button
+                      type="button"
+                      onClick={() => handleResetProfilWeb()}
                       className="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1"
                     >
                       <i className="bi bi-arrow-counterclockwise"></i> Reset ke Default (Semula)
                     </button>
 
                     <div className="d-flex gap-2">
-                      <button 
-                        type="button" 
-                        onClick={() => handleSaveProfilWeb()} 
-                        disabled={savingProfilWeb} 
+                      <button
+                        type="button"
+                        onClick={() => handleSaveProfilWeb()}
+                        disabled={savingProfilWeb}
                         className="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow d-flex align-items-center gap-2"
                         style={{ background: 'linear-gradient(135deg, #1d4ed8, #0284c7)' }}
                       >
@@ -3639,7 +3621,7 @@ export default function AdminPage() {
                     <span className="text-muted" style={{ fontSize: '0.85rem' }}>NIP. {selectedPegawai?.nip || '-'}</span>
                   </div>
                 </div>
-                
+
                 <h6 className="fw-bold text-secondary mb-3">Daftar Sertifikat Terunggah:</h6>
                 <div className="table-responsive bg-white border rounded-3">
                   <table className="table table-sm table-hover mb-0" style={{ fontSize: '0.85rem' }}>
@@ -3698,35 +3680,35 @@ export default function AdminPage() {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label">NIP *</label>
-                      <input type="text" className="form-control" required value={pegawaiForm.nip || ''} onChange={e => setPegawaiForm({...pegawaiForm, nip: e.target.value})} disabled={pegawaiForm.isEdit} />
+                      <input type="text" className="form-control" required value={pegawaiForm.nip || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, nip: e.target.value })} disabled={pegawaiForm.isEdit} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Nama Lengkap *</label>
-                      <input type="text" className="form-control" required value={pegawaiForm.nama || ''} onChange={e => setPegawaiForm({...pegawaiForm, nama: e.target.value})} />
+                      <input type="text" className="form-control" required value={pegawaiForm.nama || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, nama: e.target.value })} />
                     </div>
                     {!pegawaiForm.isEdit && (
                       <div className="col-md-6">
                         <label className="form-label">Password Default *</label>
-                        <input type="text" className="form-control" required value={pegawaiForm.password || ''} onChange={e => setPegawaiForm({...pegawaiForm, password: e.target.value})} />
+                        <input type="text" className="form-control" required value={pegawaiForm.password || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, password: e.target.value })} />
                       </div>
                     )}
                     <div className="col-md-6">
                       <label className="form-label">Email Pegawai</label>
                       <div className="input-group">
                         <span className="input-group-text"><i className="bi bi-envelope"></i></span>
-                        <input 
-                          type="email" 
-                          className="form-control" 
-                          placeholder="contoh: nama@gmail.com (opsional)" 
-                          value={pegawaiForm.email || ''} 
-                          onChange={e => setPegawaiForm({...pegawaiForm, email: e.target.value})} 
+                        <input
+                          type="email"
+                          className="form-control"
+                          placeholder="contoh: nama@gmail.com (opsional)"
+                          value={pegawaiForm.email || ''}
+                          onChange={e => setPegawaiForm({ ...pegawaiForm, email: e.target.value })}
                         />
                       </div>
                       <small className="text-muted" style={{ fontSize: '0.75rem' }}>Untuk menerima notifikasi pengajuan & persetujuan IDP</small>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Status Pegawai</label>
-                      <select className="form-select" required value={pegawaiForm.status_pegawai || ''} onChange={e => setPegawaiForm({...pegawaiForm, status_pegawai: e.target.value, golonganPangkat: ''})}>
+                      <select className="form-select" required value={pegawaiForm.status_pegawai || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, status_pegawai: e.target.value, golonganPangkat: '' })}>
                         <option value="">- Pilih Status Pegawai -</option>
                         <option value="PNS">PNS (Pegawai Negeri Sipil)</option>
                         <option value="PPPK">PPPK (Pegawai Pemerintah dengan Perjanjian Kerja)</option>
@@ -3735,7 +3717,7 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Golongan / Pangkat *</label>
-                      <select className="form-select" required={pegawaiForm.status_pegawai !== 'PW'} disabled={!pegawaiForm.status_pegawai || pegawaiForm.status_pegawai === 'PW'} value={pegawaiForm.golonganPangkat || ''} onChange={e => setPegawaiForm({...pegawaiForm, golonganPangkat: e.target.value})}>
+                      <select className="form-select" required={pegawaiForm.status_pegawai !== 'PW'} disabled={!pegawaiForm.status_pegawai || pegawaiForm.status_pegawai === 'PW'} value={pegawaiForm.golonganPangkat || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, golonganPangkat: e.target.value })}>
                         <option value="">- Pilih Golongan / Pangkat -</option>
                         {getGolonganOptions().map((opt, i) => (
                           <option key={i} value={opt}>{opt}</option>
@@ -3744,7 +3726,7 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Jenis Kelamin *</label>
-                      <select className="form-select" required value={pegawaiForm.jenkel || ''} onChange={e => setPegawaiForm({...pegawaiForm, jenkel: e.target.value})}>
+                      <select className="form-select" required value={pegawaiForm.jenkel || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, jenkel: e.target.value })}>
                         <option value="">- PILIH JENIS KELAMIN -</option>
                         <option value="LAKI-LAKI">LAKI-LAKI</option>
                         <option value="PEREMPUAN">PEREMPUAN</option>
@@ -3752,24 +3734,30 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Jabatan</label>
-                      <input type="text" className="form-control" value={pegawaiForm.jabatan || ''} onChange={e => setPegawaiForm({...pegawaiForm, jabatan: e.target.value})} />
+                      <input type="text" className="form-control" value={pegawaiForm.jabatan || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, jabatan: e.target.value })} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Unit Kerja</label>
-                      <select 
-                        className="form-select" 
-                        value={pegawaiForm.unit_kerja || ''} 
-                        onChange={e => setPegawaiForm({...pegawaiForm, unit_kerja: e.target.value})}
+                      <select
+                        className="form-select"
+                        value={pegawaiForm.unit_kerja || ''}
+                        onChange={e => setPegawaiForm({ ...pegawaiForm, unit_kerja: e.target.value })}
                       >
                         <option value="">- PILIH UNIT KERJA -</option>
-                        {UNIT_KERJA_OPTIONS.map(opd => (
-                          <option key={opd} value={opd.toUpperCase()}>{opd.toUpperCase()}</option>
-                        ))}
+                        {sortedOPDs.length > 0 && sortedOPDs.some(o => o.startsWith('UNIT KERJA')) ? (
+                          sortedOPDs.map(opd => (
+                            <option key={opd} value={opd.toUpperCase()}>{opd.toUpperCase()}</option>
+                          ))
+                        ) : (
+                          UNIT_KERJA_OPTIONS.map(opd => (
+                            <option key={opd} value={opd.toUpperCase()}>{opd.toUpperCase()}</option>
+                          ))
+                        )}
                       </select>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Status Aktif</label>
-                      <select className="form-select" value={pegawaiForm.status_aktif || 'Aktif'} onChange={e => setPegawaiForm({...pegawaiForm, status_aktif: e.target.value})}>
+                      <select className="form-select" value={pegawaiForm.status_aktif || 'Aktif'} onChange={e => setPegawaiForm({ ...pegawaiForm, status_aktif: e.target.value })}>
                         <option value="Aktif">Aktif</option>
                         <option value="Tidak Aktif">Tidak Aktif</option>
                         <option value="Mutasi">Mutasi</option>
@@ -3777,7 +3765,7 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Hak Akses (Role)</label>
-                      <select className="form-select" value={pegawaiForm.role || 'pegawai'} onChange={e => setPegawaiForm({...pegawaiForm, role: e.target.value})}>
+                      <select className="form-select" value={pegawaiForm.role || 'pegawai'} onChange={e => setPegawaiForm({ ...pegawaiForm, role: e.target.value })}>
                         <option value="pegawai">Pegawai Biasa</option>
                         <option value="admin">Admin</option>
                         <option value="super_admin">Super Admin</option>
@@ -3789,7 +3777,7 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Tingkat Pendidikan</label>
-                      <select className="form-select" value={pegawaiForm.tingkat_pendidikan || ''} onChange={e => setPegawaiForm({...pegawaiForm, tingkat_pendidikan: e.target.value})}>
+                      <select className="form-select" value={pegawaiForm.tingkat_pendidikan || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, tingkat_pendidikan: e.target.value })}>
                         <option value="">- Pilih Tingkat -</option>
                         <option value="SD">SD / Sederajat</option>
                         <option value="SMP">SMP / Sederajat</option>
@@ -3803,7 +3791,7 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Fakultas / Program Studi / Jurusan</label>
-                      <input type="text" className="form-control" value={pegawaiForm.jurusan || ''} onChange={e => setPegawaiForm({...pegawaiForm, jurusan: e.target.value})} placeholder="Cth: Ilmu Hukum" />
+                      <input type="text" className="form-control" value={pegawaiForm.jurusan || ''} onChange={e => setPegawaiForm({ ...pegawaiForm, jurusan: e.target.value })} placeholder="Cth: Ilmu Hukum" />
                     </div>
 
                   </div>
@@ -3832,13 +3820,13 @@ export default function AdminPage() {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label">Pegawai Pemilik IDP *</label>
-                      <input 
+                      <input
                         list="pemilikList"
-                        className="form-control" 
-                        required 
+                        className="form-control"
+                        required
                         placeholder="Ketik Nama atau NIP..."
-                        value={idpForm.nip || ''} 
-                        onChange={e => setIdpForm({...idpForm, nip: e.target.value})}
+                        value={idpForm.nip || ''}
+                        onChange={e => setIdpForm({ ...idpForm, nip: e.target.value })}
                       />
                       <datalist id="pemilikList">
                         {semuaPegawai.map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
@@ -3846,30 +3834,30 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Atasan / Ketua Penilai *</label>
-                      <input 
+                      <input
                         list="ketuaList"
-                        className="form-control" 
-                        required 
+                        className="form-control"
+                        required
                         placeholder="Ketik Nama atau NIP..."
-                        value={idpForm.nip_ketua || ''} 
+                        value={idpForm.nip_ketua || ''}
                         onChange={e => {
                           const val = e.target.value;
                           const selected = semuaPegawai.find(p => p.nip === val);
-                          setIdpForm({...idpForm, nip_ketua: val, nama_ketua: selected ? selected.nama : ''});
+                          setIdpForm({ ...idpForm, nip_ketua: val, nama_ketua: selected ? selected.nama : '' });
                         }}
                       />
                       <datalist id="ketuaList">
                         {semuaPegawai.filter(p => p.nip !== idpForm.nip).map(p => <option key={p.nip} value={p.nip}>{p.nama} (NIP. {p.nip})</option>)}
                       </datalist>
                     </div>
-                    <div className="col-md-12"><hr/></div>
+                    <div className="col-md-12"><hr /></div>
                     <div className="col-md-6">
                       <label className="form-label">Jenis Kompetensi *</label>
-                      <input type="text" className="form-control" required value={idpForm.jenis_kompetensi || ''} onChange={e => setIdpForm({...idpForm, jenis_kompetensi: e.target.value})} />
+                      <input type="text" className="form-control" required value={idpForm.jenis_kompetensi || ''} onChange={e => setIdpForm({ ...idpForm, jenis_kompetensi: e.target.value })} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Jenis Pengembangan *</label>
-                      <select className="form-select" required value={idpForm.jenis_pengembangan || ''} onChange={e => setIdpForm({...idpForm, jenis_pengembangan: e.target.value})}>
+                      <select className="form-select" required value={idpForm.jenis_pengembangan || ''} onChange={e => setIdpForm({ ...idpForm, jenis_pengembangan: e.target.value })}>
                         <option value="">- Pilih -</option>
                         <option value="Pelatihan Non Klasikal">Pelatihan Non Klasikal</option>
                         <option value="Pelatihan Klasikal">Pelatihan Klasikal</option>
@@ -3878,31 +3866,31 @@ export default function AdminPage() {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Jalur Pengembangan *</label>
-                      <input type="text" className="form-control" required value={idpForm.jalur_pengembangan || ''} onChange={e => setIdpForm({...idpForm, jalur_pengembangan: e.target.value})} />
+                      <input type="text" className="form-control" required value={idpForm.jalur_pengembangan || ''} onChange={e => setIdpForm({ ...idpForm, jalur_pengembangan: e.target.value })} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label">Penyelenggara *</label>
-                      <input type="text" className="form-control" required value={idpForm.penyelenggara || ''} onChange={e => setIdpForm({...idpForm, penyelenggara: e.target.value})} />
+                      <input type="text" className="form-control" required value={idpForm.penyelenggara || ''} onChange={e => setIdpForm({ ...idpForm, penyelenggara: e.target.value })} />
                     </div>
                     <div className="col-md-3">
                       <label className="form-label">Waktu Awal *</label>
-                      <input type="date" className="form-control" required value={idpForm.waktu_pelaksanaan_awal || ''} onChange={e => setIdpForm({...idpForm, waktu_pelaksanaan_awal: e.target.value})} />
+                      <input type="date" className="form-control" required value={idpForm.waktu_pelaksanaan_awal || ''} onChange={e => setIdpForm({ ...idpForm, waktu_pelaksanaan_awal: e.target.value })} />
                     </div>
                     <div className="col-md-3">
                       <label className="form-label">Waktu Akhir *</label>
-                      <input type="date" className="form-control" required value={idpForm.waktu_pelaksanaan_akhir || ''} onChange={e => setIdpForm({...idpForm, waktu_pelaksanaan_akhir: e.target.value})} />
+                      <input type="date" className="form-control" required value={idpForm.waktu_pelaksanaan_akhir || ''} onChange={e => setIdpForm({ ...idpForm, waktu_pelaksanaan_akhir: e.target.value })} />
                     </div>
                     <div className="col-md-3">
                       <label className="form-label">JP *</label>
-                      <input type="number" className="form-control" required value={idpForm.jp || ''} onChange={e => setIdpForm({...idpForm, jp: e.target.value})} />
+                      <input type="number" className="form-control" required value={idpForm.jp || ''} onChange={e => setIdpForm({ ...idpForm, jp: e.target.value })} />
                     </div>
                     <div className="col-md-3">
                       <label className="form-label">Anggaran</label>
-                      <input type="number" className="form-control" value={idpForm.anggaran || ''} onChange={e => setIdpForm({...idpForm, anggaran: e.target.value})} />
+                      <input type="number" className="form-control" value={idpForm.anggaran || ''} onChange={e => setIdpForm({ ...idpForm, anggaran: e.target.value })} />
                     </div>
                     <div className="col-md-12">
                       <label className="form-label">Status Verifikasi</label>
-                      <select className="form-select" value={idpForm.status || 'Menunggu Persetujuan Ketua'} onChange={e => setIdpForm({...idpForm, status: e.target.value})}>
+                      <select className="form-select" value={idpForm.status || 'Menunggu Persetujuan Ketua'} onChange={e => setIdpForm({ ...idpForm, status: e.target.value })}>
                         <option value="Menunggu Persetujuan Ketua">Tahap 1: Menunggu Persetujuan OPD</option>
                         <option value="Menunggu Persetujuan Admin">Tahap 2: Disetujui OPD (Menunggu BKPSDMD)</option>
                         <option value="Disetujui">Disetujui Final (BKPSDMD)</option>
@@ -3913,12 +3901,12 @@ export default function AdminPage() {
                     {idpForm.status?.toLowerCase().includes('ditolak') && (
                       <div className="col-md-12">
                         <label className="form-label text-danger fw-bold">Alasan Penolakan</label>
-                        <input 
-                          type="text" 
-                          className="form-control border-danger" 
-                          placeholder="Masukkan alasan penolakan..." 
-                          value={idpForm.alasan_tolak || ''} 
-                          onChange={e => setIdpForm({...idpForm, alasan_tolak: e.target.value})} 
+                        <input
+                          type="text"
+                          className="form-control border-danger"
+                          placeholder="Masukkan alasan penolakan..."
+                          value={idpForm.alasan_tolak || ''}
+                          onChange={e => setIdpForm({ ...idpForm, alasan_tolak: e.target.value })}
                         />
                       </div>
                     )}
@@ -3950,6 +3938,15 @@ export default function AdminPage() {
                   <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto', padding: '20px' }}>
                     <img src={previewUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' }} alt="Sertifikat" />
                   </div>
+                ) : (previewUrl.match(/\.(docx?|doc)($|[?#])/i) || previewUrl.match(/[?&]name=[^&]+\.(docx?|doc)/i)) && !previewUrl.includes('drive.google.com') ? (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '30px' }}>
+                    <i className="bi bi-file-earmark-word-fill text-primary display-1 mb-3"></i>
+                    <h4 className="fw-bold text-dark mb-2">Dokumen Microsoft Word</h4>
+                    <p className="text-muted mb-4 text-center" style={{ maxWidth: '420px' }}>File sertifikat ini berformat Word (.doc / .docx). Anda dapat mengunduh dan membukanya di komputer atau perangkat Anda.</p>
+                    <a href={previewUrl} download className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                      <i className="bi bi-download me-2"></i> Unduh File Word
+                    </a>
+                  </div>
                 ) : (
                   <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Dokumen Preview" />
                 )}
@@ -3969,15 +3966,15 @@ export default function AdminPage() {
             <div className="delete-confirm-title">{deleteConfirmData.title}</div>
             <div className="delete-confirm-msg">{deleteConfirmData.message}</div>
             <div className="delete-confirm-actions">
-              <button 
-                className="btn-cancel" 
+              <button
+                className="btn-cancel"
                 onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmData(null); }}
                 disabled={isDeleting}
               >
                 Batal
               </button>
-              <button 
-                className="btn-delete" 
+              <button
+                className="btn-delete"
                 onClick={deleteConfirmData.onConfirm}
                 disabled={isDeleting}
               >
@@ -4001,9 +3998,9 @@ export default function AdminPage() {
                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2 mb-0 fs-6">
                   <i className="bi bi-x-circle-fill fs-5"></i> Keterangan Penolakan Pengajuan IDP
                 </h5>
-                <button 
-                  type="button" 
-                  className="btn-close btn-close-white" 
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
                   onClick={() => !isSubmittingReject && setIdpRejectData(null)}
                   disabled={isSubmittingReject}
                 ></button>
@@ -4024,8 +4021,8 @@ export default function AdminPage() {
                     'Kuota peserta pelatihan telah penuh',
                     'Lainnya'
                   ].map((alasan) => (
-                    <div 
-                      key={alasan} 
+                    <div
+                      key={alasan}
                       className={`p-2 px-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between transition-all ${rejectReason === alasan ? 'border-danger bg-danger bg-opacity-10 fw-bold text-danger' : 'bg-white text-dark'}`}
                       style={{ cursor: 'pointer' }}
                       onClick={() => setRejectReason(alasan)}
@@ -4034,9 +4031,9 @@ export default function AdminPage() {
                         {alasan === 'Tidak tersedia anggaran' && <i className="bi bi-cash-coin me-2 text-danger"></i>}
                         {alasan}
                       </label>
-                      <input 
-                        type="radio" 
-                        name="rejectReason" 
+                      <input
+                        type="radio"
+                        name="rejectReason"
                         className="form-check-input"
                         checked={rejectReason === alasan}
                         onChange={() => setRejectReason(alasan)}
@@ -4048,7 +4045,7 @@ export default function AdminPage() {
                 {rejectReason === 'Lainnya' && (
                   <div className="mt-2">
                     <label className="form-label small text-muted">Ketik Keterangan Alasan Lainnya:</label>
-                    <textarea 
+                    <textarea
                       className="form-control form-control-sm"
                       rows={2}
                       placeholder="Masukkan keterangan penolakan..."
@@ -4059,17 +4056,17 @@ export default function AdminPage() {
                 )}
               </div>
               <div className="modal-footer bg-light border-0 py-3 px-4">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary btn-sm px-3" 
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm px-3"
                   onClick={() => setIdpRejectData(null)}
                   disabled={isSubmittingReject}
                 >
                   Batal
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-danger btn-sm px-3" 
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm px-3"
                   onClick={handleConfirmRejectIdp}
                   disabled={isSubmittingReject}
                 >
@@ -4135,15 +4132,15 @@ export default function AdminPage() {
                     </div>
                     <h6 className="fw-bold mb-1">Pilih File Hasil Pengisian Template</h6>
                     <p className="text-muted small mb-3">Mendukung format <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>, atau Apple Numbers (<code>.numbers</code>)</p>
-                    
+
                     <div className="d-flex justify-content-center">
                       <label className="btn btn-outline-primary px-4 py-2 cursor-pointer shadow-sm">
                         <i className="bi bi-folder2-open me-2"></i>
                         {importFile ? importFile.name : 'Pilih File Excel / Numbers...'}
-                        <input 
-                          type="file" 
-                          accept=".xlsx, .xls, .csv, .numbers, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv, application/x-iwork-numbers-sffnumbers, application/vnd.apple.numbers" 
-                          className="d-none" 
+                        <input
+                          type="file"
+                          accept=".xlsx, .xls, .csv, .numbers, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv, application/x-iwork-numbers-sffnumbers, application/vnd.apple.numbers"
+                          className="d-none"
                           onChange={handleImportFileChange}
                         />
                       </label>
@@ -4173,10 +4170,10 @@ export default function AdminPage() {
                           </span>
                         </div>
                         <div className="position-relative" style={{ width: '250px' }}>
-                          <input 
-                            type="text" 
-                            className="form-control form-control-sm pe-4" 
-                            placeholder="Cari NIP / Nama / Kegiatan..." 
+                          <input
+                            type="text"
+                            className="form-control form-control-sm pe-4"
+                            placeholder="Cari NIP / Nama / Kegiatan..."
                             value={importSearchPreview}
                             onChange={(e) => setImportSearchPreview(e.target.value)}
                           />
@@ -4279,17 +4276,17 @@ export default function AdminPage() {
               </div>
 
               <div className="modal-footer border-0 bg-light py-3">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary px-3" 
+                <button
+                  type="button"
+                  className="btn btn-secondary px-3"
                   onClick={() => { setShowImportSertifikasiModal(false); setImportFile(null); setImportPreviewData([]); setImportResult(null); }}
                   disabled={importLoading}
                 >
                   Batal
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-primary px-4 fw-bold shadow-sm" 
+                <button
+                  type="button"
+                  className="btn btn-primary px-4 fw-bold shadow-sm"
                   onClick={handleProcessImport}
                   disabled={importLoading || importPreviewData.length === 0}
                 >
@@ -4312,7 +4309,7 @@ export default function AdminPage() {
       )}
 
       {isExporting && (
-        <div 
+        <div
           style={{
             position: 'fixed',
             bottom: '24px',

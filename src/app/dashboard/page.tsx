@@ -8,6 +8,17 @@ export default function DashboardPage() {
   const [pegawai, setPegawai] = useState<any>(() => {
     if (typeof window !== 'undefined') {
       const currentNip = localStorage.getItem('loggedInUser');
+      const cachedNip = sessionStorage.getItem('cached_nip');
+
+      // Bersihkan seluruh cache jika NIP di session berbeda dengan user aktif
+      if (cachedNip && currentNip && cachedNip !== currentNip) {
+        sessionStorage.removeItem('cached_nip');
+        sessionStorage.removeItem('cached_pegawai');
+        sessionStorage.removeItem('cached_sertifikasi');
+        sessionStorage.removeItem('cached_pendidikan');
+        sessionStorage.removeItem('cached_idp');
+      }
+
       const cached = sessionStorage.getItem('cached_pegawai');
       if (cached && currentNip) {
         try {
@@ -29,54 +40,74 @@ export default function DashboardPage() {
     }
     return null;
   });
+
   const [sertifikasi, setSertifikasi] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('cached_sertifikasi');
-      if (cached) {
-        try {
-          const list = JSON.parse(cached);
-          if (Array.isArray(list)) return list;
-        } catch (e) {}
+      const currentNip = localStorage.getItem('loggedInUser');
+      const cachedNip = sessionStorage.getItem('cached_nip');
+      if (currentNip && cachedNip === currentNip) {
+        const cached = sessionStorage.getItem('cached_sertifikasi');
+        if (cached) {
+          try {
+            const list = JSON.parse(cached);
+            if (Array.isArray(list)) return list;
+          } catch (e) {}
+        }
       }
     }
     return [];
   });
+
   const [pendidikan, setPendidikan] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('cached_pendidikan');
-      if (cached) {
-        try {
-          const list = JSON.parse(cached);
-          if (Array.isArray(list)) return list;
-        } catch (e) {}
+      const currentNip = localStorage.getItem('loggedInUser');
+      const cachedNip = sessionStorage.getItem('cached_nip');
+      if (currentNip && cachedNip === currentNip) {
+        const cached = sessionStorage.getItem('cached_pendidikan');
+        if (cached) {
+          try {
+            const list = JSON.parse(cached);
+            if (Array.isArray(list)) return list;
+          } catch (e) {}
+        }
       }
     }
     return [];
   });
+
   const [idpList, setIdpList] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('cached_idp');
-      if (cached) {
-        try {
-          const list = JSON.parse(cached);
-          if (Array.isArray(list)) return list;
-        } catch (e) {}
+      const currentNip = localStorage.getItem('loggedInUser');
+      const cachedNip = sessionStorage.getItem('cached_nip');
+      if (currentNip && cachedNip === currentNip) {
+        const cached = sessionStorage.getItem('cached_idp');
+        if (cached) {
+          try {
+            const list = JSON.parse(cached);
+            if (Array.isArray(list)) return list;
+          } catch (e) {}
+        }
       }
     }
     return [];
   });
+
   const [idpBawahan, setIdpBawahan] = useState<any[]>([]);
   const [isAtasan, setIsAtasan] = useState(false);
   const [totalJP, setTotalJP] = useState<number>(() => {
     if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('cached_sertifikasi');
-      if (cached) {
-        try {
-          const list = JSON.parse(cached);
-          if (Array.isArray(list)) {
-            return list.reduce((sum, item) => sum + (item.jumlah_jp || 0), 0);
-          }
-        } catch (e) {}
+      const currentNip = localStorage.getItem('loggedInUser');
+      const cachedNip = sessionStorage.getItem('cached_nip');
+      if (currentNip && cachedNip === currentNip) {
+        const cached = sessionStorage.getItem('cached_sertifikasi');
+        if (cached) {
+          try {
+            const list = JSON.parse(cached);
+            if (Array.isArray(list)) {
+              return list.reduce((sum, item) => sum + (item.jumlah_jp || 0), 0);
+            }
+          } catch (e) {}
+        }
       }
     }
     return 0;
@@ -104,9 +135,9 @@ export default function DashboardPage() {
     try {
       const isSuper = storedRole === 'super_admin';
       const [res, resBawahan] = await Promise.all([
-        fetch(`/api/pegawai?nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/api/pegawai?nip=${encodeURIComponent(nip)}&_t=${Date.now()}`, { cache: 'no-store' }),
         !isSuper 
-          ? fetch(`/api/pegawai?ketua_nip=${nip}&_t=${Date.now()}`, { cache: 'no-store' }) 
+          ? fetch(`/api/pegawai?ketua_nip=${encodeURIComponent(nip)}&_t=${Date.now()}`, { cache: 'no-store' }) 
           : Promise.resolve(null)
       ]);
 
@@ -115,12 +146,22 @@ export default function DashboardPage() {
         if (result.data.pegawai) {
           setPegawai(result.data.pegawai);
           if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('cached_nip', nip);
             sessionStorage.setItem('cached_pegawai', JSON.stringify(result.data.pegawai));
           }
+        } else {
+          setPegawai((prev: any) => prev || {
+            nip: nip,
+            nama: localStorage.getItem('userName') || '',
+            jabatan: localStorage.getItem('userJabatan') || '',
+            unit_kerja: localStorage.getItem('userUnitKerja') || '',
+            role: localStorage.getItem('userRole') || 'pegawai'
+          });
         }
         if (result.data.sertifikasi) {
           setSertifikasi(result.data.sertifikasi);
           if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('cached_nip', nip);
             sessionStorage.setItem('cached_sertifikasi', JSON.stringify(result.data.sertifikasi));
           }
           let sum = 0;
@@ -130,12 +171,14 @@ export default function DashboardPage() {
         if (result.data.pendidikan) {
           setPendidikan(result.data.pendidikan);
           if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('cached_nip', nip);
             sessionStorage.setItem('cached_pendidikan', JSON.stringify(result.data.pendidikan));
           }
         }
         if (result.data.idp) {
           setIdpList(result.data.idp);
           if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('cached_nip', nip);
             sessionStorage.setItem('cached_idp', JSON.stringify(result.data.idp));
           }
         }
@@ -297,9 +340,11 @@ export default function DashboardPage() {
   const statusPegawaiStr = (pegawai?.status_pegawai || '').toUpperCase();
   const isPPPK = statusPegawaiStr.includes('P3K') || statusPegawaiStr.includes('PPPK');
   const targetJP = isPPPK ? 24 : 20;
+  const statusLabel = isPPPK ? 'P3K' : 'PNS';
   const isMemenuhiJP = totalJP >= targetJP;
   const persentaseJP = Math.min(100, Math.round((totalJP / targetJP) * 100));
   const sisaJP = Math.max(0, targetJP - totalJP);
+  const statusKepatuhanText = `${statusLabel} ${targetJP} JP (${isMemenuhiJP ? 'Memenuhi' : 'Belum Memenuhi'})`;
 
   return (
     <>
@@ -331,8 +376,17 @@ export default function DashboardPage() {
           <a className="navbar-brand" href="#">
             <i className="bi bi-shield-lock-fill me-2 text-info"></i> Portal SIPJP-BABAR
           </a>
-          <div className="d-flex align-items-center">
-            <span className="text-white-50 me-3"><i className="bi bi-clock me-1"></i> Terakhir login: Baru saja</span>
+          <div className="d-flex align-items-center gap-2">
+            {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin') && (
+              <button 
+                onClick={() => router.push('/admin')} 
+                className="btn btn-warning btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1 text-dark"
+                title="Beralih ke Dashboard Admin & Panel Pengelolaan"
+              >
+                <i className="bi bi-speedometer2"></i> Dashboard Admin
+              </button>
+            )}
+            <span className="text-white-50 me-2 ms-2"><i className="bi bi-clock me-1"></i> Terakhir login: Baru saja</span>
             <button onClick={handleLogout} className="btn btn-outline-light btn-sm rounded-pill px-3">Keluar</button>
           </div>
         </div>
@@ -402,22 +456,55 @@ export default function DashboardPage() {
                     </span>
                   )}
 
-                  {/* Badge Indikator Pemenuhan JP */}
-                  {isMemenuhiJP ? (
-                    <span className="badge-status" style={{ backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #86efac' }}>
-                      <i className="bi bi-patch-check-fill me-1"></i> Sudah Memenuhi ({totalJP}/{targetJP} JP)
-                    </span>
-                  ) : (
-                    <span className="badge-status" style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5' }}>
-                      <i className="bi bi-exclamation-triangle-fill me-1"></i> Belum Memenuhi ({totalJP}/{targetJP} JP)
-                    </span>
-                  )}
+                  {/* Indikator Pemenuhan Standar JP (PNS 20 JP / P3K 24 JP) */}
+                  <span 
+                    className="badge-status shadow-sm d-inline-flex align-items-center" 
+                    style={{ 
+                      backgroundColor: isMemenuhiJP ? '#dcfce7' : '#fee2e2', 
+                      color: isMemenuhiJP ? '#166534' : '#991b1b',
+                      border: `1px solid ${isMemenuhiJP ? '#86efac' : '#fca5a5'}`,
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      padding: '6px 14px',
+                      borderRadius: '20px'
+                    }}
+                  >
+                    <i className={`bi ${isMemenuhiJP ? 'bi-patch-check-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} me-1`}></i>
+                    {statusKepatuhanText}
+                  </span>
                 </div>
               </div>
               <div>
                 <a href="/edit-profil" className="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-medium">
                   <i className="bi bi-pencil-square me-1"></i> Edit Profil
                 </a>
+              </div>
+            </div>
+
+            {/* Banner Status Pemenuhan JP */}
+            <div className={`p-3 rounded-3 mt-4 shadow-sm border ${isMemenuhiJP ? 'bg-success-subtle border-success-subtle' : 'bg-danger-subtle border-danger-subtle'}`}>
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div className="d-flex align-items-center gap-3">
+                  <div className={`fs-2 ${isMemenuhiJP ? 'text-success' : 'text-danger'}`}>
+                    <i className={`bi ${isMemenuhiJP ? 'bi-patch-check-fill' : 'bi-shield-exclamation'}`}></i>
+                  </div>
+                  <div>
+                    <div className="fw-bold fs-6">
+                      Status Kepatuhan Pengembangan Kompetensi:{' '}
+                      <span className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'} px-3 py-1 ms-1`}>
+                        {statusKepatuhanText}
+                      </span>
+                    </div>
+                    <small className="text-secondary d-block mt-1">
+                      Kategori Pegawai: <strong>{statusLabel}</strong> (Standar minimal: <strong>{targetJP} JP</strong> per tahun). Total perolehan saat ini: <strong className={isMemenuhiJP ? 'text-success' : 'text-danger'}>{totalJP} JP</strong>.
+                    </small>
+                  </div>
+                </div>
+                {!isMemenuhiJP && (
+                  <a href="/sertifikasi" className="btn btn-danger btn-sm rounded-pill px-3 fw-bold text-nowrap shadow-sm">
+                    <i className="bi bi-upload me-1"></i> Upload Sertifikat (Kurang {sisaJP} JP)
+                  </a>
+                )}
               </div>
             </div>
 
@@ -463,110 +550,37 @@ export default function DashboardPage() {
                   </div>
                   <div className="col-sm-6">
                     <div className="info-label">Total Jam Pelajaran (JP)</div>
-                    <div className="info-value" style={{ color: '#0ea5e9', fontWeight: 'bold' }}>
-                      {totalJP} JP <span className="text-muted fw-normal" style={{ fontSize: '0.85rem' }}>(Target: {targetJP} JP {isPPPK ? 'PPPK' : 'PNS'})</span>
-                    </div>
-                  </div>
-                  <div className="col-sm-6">
-                    <div className="info-label">Status Pemenuhan Standar JP</div>
-                    <div className="info-value">
-                      {isMemenuhiJP ? (
-                        <span className="badge bg-success-subtle text-success border border-success px-2 py-1 rounded-pill" style={{ fontSize: '0.85rem' }}>
-                          <i className="bi bi-check-circle-fill me-1"></i> Sudah Memenuhi Syarat
-                        </span>
-                      ) : (
-                        <span className="badge bg-danger-subtle text-danger border border-danger px-2 py-1 rounded-pill" style={{ fontSize: '0.85rem' }}>
-                          <i className="bi bi-x-circle-fill me-1"></i> Belum Memenuhi (Kurang {sisaJP} JP)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Kartu Status Pemenuhan Jam Pelajaran (JP) */}
-                <div className="p-4 mb-4 rounded-4 shadow-sm border" style={{
-                  background: isMemenuhiJP 
-                    ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' 
-                    : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-                  borderColor: isMemenuhiJP ? '#86efac' : '#fed7aa',
-                }}>
-                  <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-                    <div className="d-flex align-items-center gap-3">
-                      <div style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '12px',
-                        background: isMemenuhiJP ? '#16a34a' : '#dc2626',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.4rem'
-                      }}>
-                        <i className={isMemenuhiJP ? "bi bi-award-fill" : "bi bi-hourglass-split"}></i>
-                      </div>
-                      <div>
-                        <h6 className="fw-bold mb-1" style={{ color: isMemenuhiJP ? '#14532d' : '#7c2d12' }}>
-                          Status Pemenuhan Jam Pelajaran ({isPPPK ? 'PPPK' : 'PNS'})
-                        </h6>
-                        <div style={{ fontSize: '0.85rem', color: isMemenuhiJP ? '#166534' : '#9a3412' }}>
-                          Target Regulasi: <strong>{targetJP} JP</strong> per tahun untuk {isPPPK ? 'Pegawai Pemerintah dengan Perjanjian Kerja (PPPK)' : 'Pegawai Negeri Sipil (PNS)'}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      {isMemenuhiJP ? (
-                        <span className="badge px-3 py-2 rounded-pill shadow-sm" style={{ backgroundColor: '#15803d', color: 'white', fontSize: '0.9rem', fontWeight: 600 }}>
-                          <i className="bi bi-check-circle-fill me-1"></i> Sudah Memenuhi
-                        </span>
-                      ) : (
-                        <span className="badge px-3 py-2 rounded-pill shadow-sm" style={{ backgroundColor: '#dc2626', color: 'white', fontSize: '0.9rem', fontWeight: 600 }}>
-                          <i className="bi bi-exclamation-triangle-fill me-1"></i> Belum Memenuhi
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Progress Bar & Keterangan */}
-                  <div className="mt-3">
-                    <div className="d-flex justify-content-between align-items-center mb-1" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                      <span style={{ color: isMemenuhiJP ? '#15803d' : '#9a3412' }}>
-                        Capaian: <strong>{totalJP} JP</strong> dari target <strong>{targetJP} JP</strong>
+                    <div className="d-flex align-items-center gap-2 flex-wrap mt-1">
+                      <span className="fs-5 fw-bold" style={{ color: '#0ea5e9' }}>
+                        {totalJP} JP
                       </span>
-                      <span style={{ color: isMemenuhiJP ? '#15803d' : '#9a3412' }}>
-                        {persentaseJP}%
+                      <span 
+                        className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'} px-2 py-1 fw-bold`}
+                        style={{ fontSize: '0.8rem' }}
+                      >
+                        {statusKepatuhanText}
                       </span>
                     </div>
-                    <div className="progress" style={{ height: '10px', borderRadius: '10px', backgroundColor: 'rgba(0,0,0,0.08)' }}>
-                      <div 
-                        className="progress-bar progress-bar-striped progress-bar-animated" 
-                        role="progressbar" 
-                        style={{ 
-                          width: `${persentaseJP}%`, 
-                          backgroundColor: isMemenuhiJP ? '#16a34a' : '#dc2626',
-                          borderRadius: '10px' 
-                        }} 
-                        aria-valuenow={persentaseJP} 
-                        aria-valuemin={0} 
-                        aria-valuemax={100}
-                      ></div>
-                    </div>
-                    <div className="mt-2" style={{ fontSize: '0.8rem' }}>
-                      {isMemenuhiJP ? (
-                        <span className="text-success fw-medium"><i className="bi bi-check2-circle me-1"></i>Selamat! Anda telah memenuhi kewajiban {targetJP} JP pengembangan kompetensi tahun ini.</span>
-                      ) : (
-                        <span className="text-danger fw-medium"><i className="bi bi-info-circle me-1"></i>Kewajiban Jam Pelajaran Anda belum terpenuhi. Kurang <strong>{sisaJP} JP</strong> lagi untuk mencapai standar minimal {targetJP} JP.</span>
-                      )}
+                    <div className="mt-1" style={{ fontSize: '0.78rem', color: isMemenuhiJP ? '#166534' : '#dc2626' }}>
+                      {isMemenuhiJP 
+                        ? `✅ Memenuhi standar minimal ${statusLabel} (${targetJP} JP/tahun).`
+                        : `⚠️ Kurang ${sisaJP} JP lagi untuk memenuhi standar minimal ${statusLabel} (${targetJP} JP/tahun).`}
                     </div>
                   </div>
                 </div>
 
                 {/* Riwayat Sertifikasi Tersimpan */}
-                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 flex-wrap gap-2">
                   <h5 className="fw-bold mb-0"><i className="bi bi-award-fill me-2 text-primary"></i> Riwayat Sertifikasi Tersimpan</h5>
-                  <span className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'}`}>
-                    Total: {totalJP} / {targetJP} JP ({isMemenuhiJP ? 'Sudah Memenuhi' : 'Belum Memenuhi'})
-                  </span>
+                  <div className="d-flex align-items-center gap-2">
+                    <span className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'} px-3 py-2 fw-bold`} style={{ fontSize: '0.82rem' }}>
+                      <i className={`bi ${isMemenuhiJP ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-1`}></i>
+                      {statusKepatuhanText}
+                    </span>
+                    <span className="badge rounded-pill bg-primary px-3 py-2" style={{ fontSize: '0.82rem' }}>
+                      Total: {totalJP} JP
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="table-responsive border rounded-3 bg-white mb-4">
@@ -851,7 +865,7 @@ export default function DashboardPage() {
                   <div className="menu-desc">Penyusunan rencana pengembangan kompetensi individu.</div>
                 </a>
 
-                {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin') && (
+                {(pegawai?.role === 'admin' || pegawai?.role === 'super_admin' || isAtasan) && (
                   <a onClick={() => router.push('/admin')} className="menu-card mb-3 text-decoration-none" style={{ borderColor: '#86efac' }}>
                     <div className="menu-icon" style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}><i className="bi bi-shield-lock-fill"></i></div>
                     <div className="menu-title text-success">Panel Admin</div>
@@ -885,6 +899,15 @@ export default function DashboardPage() {
                 {(previewUrl.startsWith('data:image') || previewUrl.match(/\.(jpeg|jpg|gif|png)$/i)) ? (
                   <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto', padding: '20px' }}>
                     <img src={previewUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' }} alt="Sertifikat" />
+                  </div>
+                ) : (previewUrl.match(/\.(docx?|doc)($|[?#])/i) || previewUrl.match(/[?&]name=[^&]+\.(docx?|doc)/i)) && !previewUrl.includes('drive.google.com') ? (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '30px' }}>
+                    <i className="bi bi-file-earmark-word-fill text-primary display-1 mb-3"></i>
+                    <h4 className="fw-bold text-dark mb-2">Dokumen Microsoft Word</h4>
+                    <p className="text-muted mb-4 text-center" style={{ maxWidth: '420px' }}>File sertifikat ini berformat Word (.doc / .docx). Anda dapat mengunduh dan membukanya di komputer atau perangkat Anda.</p>
+                    <a href={previewUrl} download className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                      <i className="bi bi-download me-2"></i> Unduh File Word
+                    </a>
                   </div>
                 ) : (
                   <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Dokumen Preview" />

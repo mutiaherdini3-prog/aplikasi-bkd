@@ -281,18 +281,21 @@ export async function GET(request: Request) {
 
     // Pegawai
     let pegawaiData: any = null;
-    const pRows = await getFreshSheetData('pegawai!A:ZZ');
+    const pRows = await getCachedSheetData('pegawai!A:ZZ');
     const pHeaders = pRows[0]?.map((h: string) => h.toLowerCase()) || [];
     const pNipIdx = pHeaders.indexOf('nip');
     const nipAtasanIdx = pHeaders.indexOf('nip_atasan');
     let isAtasan = false;
-    if (pNipIdx !== -1 && nip && nip.trim() !== '') {
-      const cleanNip = nip.trim();
+    const normalizeNip = (val: any) => String(val || '').replace(/['\s]/g, '').trim();
+    const cleanNip = normalizeNip(nip);
+
+    if (pNipIdx !== -1 && cleanNip !== '') {
       for (let i = 1; i < pRows.length; i++) {
-        const rowNip = pRows[i][pNipIdx]?.toString().trim();
+        const rawRowNip = pRows[i][pNipIdx];
+        const rowNip = normalizeNip(rawRowNip);
         if (rowNip && rowNip === cleanNip) {
           pegawaiData = {};
-          pHeaders.forEach((h, idx) => {
+          pHeaders.forEach((h: string, idx: number) => {
             let key = h;
             if (key === 'status pegawai') key = 'status_pegawai';
             if (key === 'jankel' || key === 'jenis kelamin') key = 'jenkel';
@@ -322,7 +325,7 @@ export async function GET(request: Request) {
       // Deteksi status atasan
       if (nipAtasanIdx !== -1) {
         for (let i = 1; i < pRows.length; i++) {
-          if (pRows[i][nipAtasanIdx]?.toString().trim() === cleanNip) {
+          if (normalizeNip(pRows[i][nipAtasanIdx]) === cleanNip) {
             isAtasan = true;
             break;
           }
@@ -337,7 +340,7 @@ export async function GET(request: Request) {
         const ketuaNipIdx = iHeaders.indexOf('nip_ketua');
         if (ketuaNipIdx !== -1) {
           for (let i = 1; i < iRows.length; i++) {
-            if (iRows[i][ketuaNipIdx]?.trim() === nip.trim()) {
+            if (normalizeNip(iRows[i][ketuaNipIdx]) === cleanNip) {
               isAtasan = true;
               break;
             }
@@ -355,7 +358,7 @@ export async function GET(request: Request) {
       if (sNipIdx !== -1) {
         for (let i=1; i<sRows.length; i++) {
           const rowNip = sRows[i][sNipIdx];
-          if (rowNip && rowNip.toString().trim() === nip.trim()) {
+          if (rowNip && normalizeNip(rowNip) === cleanNip) {
             const row: any = { _rowIndex: i + 1 };
             sHeaders.forEach((h: string, idx: number) => {
               row[h] = sRows[i][idx] || '';
@@ -376,7 +379,7 @@ export async function GET(request: Request) {
       if (eNipIdx !== -1) {
         for (let i=1; i<eRows.length; i++) {
           const rowNip = eRows[i][eNipIdx];
-          if (rowNip && rowNip.toString().trim() === nip.trim()) {
+          if (rowNip && normalizeNip(rowNip) === cleanNip) {
             const row: any = { _rowIndex: i + 1 };
             eHeaders.forEach((h: string, idx: number) => {
               row[h] = eRows[i][idx] || '';
@@ -392,7 +395,7 @@ export async function GET(request: Request) {
     } catch(e) {}
 
     // Inject education data from pegawai sheet if exists
-    if (pegawaiData['tingkat pendidikan'] || pegawaiData['jurusan'] || pegawaiData['sekolah']) {
+    if (pegawaiData && (pegawaiData['tingkat pendidikan'] || pegawaiData['jurusan'] || pegawaiData['sekolah'])) {
       const exists = pendidikanData.some(p => 
         (p.tingkat === pegawaiData['tingkat pendidikan'] || p['tingkat pendidikan'] === pegawaiData['tingkat pendidikan'] || p.tingkat_pendidikan === pegawaiData['tingkat pendidikan']) &&
         p.jurusan === pegawaiData['jurusan']
@@ -418,7 +421,7 @@ export async function GET(request: Request) {
       if (iNipIdx !== -1) {
         for (let i=1; i<iRows.length; i++) {
           const rowNip = iRows[i][iNipIdx];
-          if (rowNip && rowNip.toString().trim() === nip.trim()) {
+          if (rowNip && normalizeNip(rowNip) === cleanNip) {
             const row: any = { _rowIndex: i + 1 };
             iHeaders.forEach((h: string, idx: number) => {
               row[h] = iRows[i][idx] || '';
@@ -435,7 +438,10 @@ export async function GET(request: Request) {
     }, {
       headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
     });
-  } catch (e: any) { return NextResponse.json({ success: false }, { status: 500 }); }
+  } catch (e: any) { 
+    console.error('Error in /api/pegawai GET:', e);
+    return NextResponse.json({ success: false, error: e?.message || 'Internal error' }, { status: 500 }); 
+  }
 }
 
 export async function PUT(request: Request) {

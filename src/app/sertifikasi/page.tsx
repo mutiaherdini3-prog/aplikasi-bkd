@@ -29,6 +29,7 @@ export default function SertifikasiPage() {
   }]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<string>('');
   const [agree, setAgree] = useState(false);
   const [previewModal, setPreviewModal] = useState<string | null>(null);
 
@@ -57,7 +58,7 @@ export default function SertifikasiPage() {
       id: Date.now(), 
       jenis_sertifikasi: '', jenis_kursus: '', nama_kursus: '', klasifikasi_kursus: '', institusi_penyelenggara: '',
       nomor_sertifikasi: '', tanggal_mulai: '', tanggal_akhir: '', tahun: '', jumlah_jp: '', pejabat: '', biaya_tipe: 'Berbayar', biaya_nominal: '',
-      file: null, preview: null 
+      file: null, preview: null, uploadedUrl: null, isUploading: false, uploadError: null
     }]);
   };
 
@@ -103,8 +104,8 @@ export default function SertifikasiPage() {
   const handleFileChange = (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 1 * 1024 * 1024) {
-        alert(`File ${file.name} terlalu besar! Maksimal 1MB.`);
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} terlalu besar! Maksimal 5MB.`);
         e.target.value = '';
         return;
       }
@@ -112,6 +113,28 @@ export default function SertifikasiPage() {
       reader.onload = (ev) => {
         handleChange(id, 'file', file);
         handleChange(id, 'preview', ev.target?.result as string);
+        handleChange(id, 'isUploading', true);
+        handleChange(id, 'uploadError', null);
+        handleChange(id, 'uploadedUrl', null);
+
+        // Pre-upload langsung di latar belakang saat pengguna memilih file
+        const formData = new FormData();
+        formData.append('file', file);
+        fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+          .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success && data.url) {
+              setKegiatans(prev => prev.map(k => k.id === id ? { ...k, uploadedUrl: data.url, isUploading: false } : k));
+            } else {
+              setKegiatans(prev => prev.map(k => k.id === id ? { ...k, isUploading: false, uploadError: data.error || 'Gagal unggah' } : k));
+            }
+          })
+          .catch(err => {
+            setKegiatans(prev => prev.map(k => k.id === id ? { ...k, isUploading: false, uploadError: err.message } : k));
+          });
       };
       reader.readAsDataURL(file);
     }
@@ -125,14 +148,18 @@ export default function SertifikasiPage() {
     }
     if (!pegawai) return;
     setIsSubmitting(true);
+    setSubmitStatus('Memeriksa berkas...');
     
     try {
       const processedKegiatans = [];
 
-      for (const k of kegiatans) {
-        let finalUrl = k.preview;
-        
-        if (k.file) {
+      for (let i = 0; i < kegiatans.length; i++) {
+        const k = kegiatans[i];
+        let finalUrl = k.uploadedUrl || k.preview;
+
+        // Jika belum selesai diunggah di latar belakang, unggah sekarang
+        if (!k.uploadedUrl && k.file) {
+          setSubmitStatus(`Mengunggah berkas ${i + 1}/${kegiatans.length}...`);
           const formData = new FormData();
           formData.append('file', k.file);
           const uploadRes = await fetch('/api/upload', {
@@ -149,6 +176,7 @@ export default function SertifikasiPage() {
             } catch (_) {}
             alert("Gagal mengupload dokumen: " + msg);
             setIsSubmitting(false);
+            setSubmitStatus('');
             return;
           }
 
@@ -156,6 +184,7 @@ export default function SertifikasiPage() {
           if (!uploadData.success) {
             alert("Gagal mengupload dokumen: " + (uploadData.error || 'Terjadi kesalahan'));
             setIsSubmitting(false);
+            setSubmitStatus('');
             return;
           }
           finalUrl = uploadData.url;
@@ -177,6 +206,8 @@ export default function SertifikasiPage() {
         });
       }
 
+      setSubmitStatus('Menyimpan ke sistem database...');
+
       const insertRes = await fetch('/api/sertifikasi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -190,15 +221,28 @@ export default function SertifikasiPage() {
         const json = await insertRes.json().catch(() => ({}));
         alert("Data gagal disimpan ke database: " + (json.error || json.message || 'Error ' + insertRes.status));
         setIsSubmitting(false);
+        setSubmitStatus('');
         return;
       }
 
-      router.push('/dashboard');
+      setSubmitStatus('✅ Berhasil disimpan! Membuka dashboard...');
+
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('cached_pegawai');
+        sessionStorage.removeItem('cached_sertifikasi');
+        sessionStorage.removeItem('cached_pendidikan');
+        sessionStorage.removeItem('cached_idp');
+        sessionStorage.removeItem('cached_nip');
+      }
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 300);
     } catch (err: any) {
       console.error('Error handleSubmit sertifikasi:', err);
       alert('Gagal menyimpan: ' + (err?.message || 'Terjadi kesalahan'));
+      setIsSubmitting(false);
+      setSubmitStatus('');
     }
-    setIsSubmitting(false);
   };
 
   return (
@@ -510,22 +554,48 @@ export default function SertifikasiPage() {
                 {step === 2 && (
                   <div>
                     <div className="alert alert-info border-0 bg-info bg-opacity-10 mb-4" style={{fontSize:'0.85rem'}}>
-                      <i className="bi bi-info-circle-fill me-2 text-info"></i> Silakan unggah dokumen sertifikat untuk setiap pelatihan yang Anda daftarkan di Langkah 1. File akan disimpan secara lokal di server.
+                      <i className="bi bi-info-circle-fill me-2 text-info"></i> Silakan unggah dokumen sertifikat untuk setiap pelatihan (Format PDF, Word .doc/.docx, atau JPG/PNG maks. 5MB).
                     </div>
                     {kegiatans.map((k, index) => (
                       <div className="upload-block" key={k.id}>
                         <h6 className="mb-2 text-primary" style={{fontSize:'0.85rem'}}>
                           <span className="badge bg-secondary me-1">Pelatihan {index + 1}</span> {k.nama_kursus} <span className="text-muted fw-normal">(No: {k.nomor_sertifikasi})</span>
                         </h6>
-                        <label className="form-label">Pilih File Sertifikat (PDF/JPG) <span className="text-danger">*</span> <small className="text-muted">(Maks. 1MB)</small></label>
-                        <input type="file" className="form-control mb-3" accept=".pdf, .jpg, .jpeg, .png" required={!k.file} onChange={e => handleFileChange(k.id, e)} />
+                        <label className="form-label">Pilih File Sertifikat (PDF / Word / JPG / PNG) <span className="text-danger">*</span> <small className="text-muted">(Maks. 5MB)</small></label>
+                        <input type="file" className="form-control mb-2" accept=".pdf, .jpg, .jpeg, .png, .doc, .docx, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" required={!k.file} onChange={e => handleFileChange(k.id, e)} />
+                        
+                        {k.isUploading && (
+                          <div className="mb-2 text-primary" style={{ fontSize: '0.85rem' }}>
+                            <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Mengunggah ke Cloud Storage...
+                          </div>
+                        )}
+                        {k.uploadedUrl && (
+                          <div className="mb-2 text-success fw-medium" style={{ fontSize: '0.85rem' }}>
+                            <i className="bi bi-check-circle-fill me-1"></i> Berkas siap disimpan
+                          </div>
+                        )}
+                        {k.uploadError && (
+                          <div className="mb-2 text-danger" style={{ fontSize: '0.85rem' }}>
+                            <i className="bi bi-exclamation-triangle-fill me-1"></i> {k.uploadError}
+                          </div>
+                        )}
+
                         {k.preview && (
                           <div className="mt-2 p-2 border rounded bg-white d-inline-block text-center">
-                            <button type="button" className="btn btn-link p-0 text-decoration-none" onClick={() => setPreviewModal(k.preview)} title="Klik untuk melihat dokumen lengkap">
+                            <button type="button" className="btn btn-link p-0 text-decoration-none" onClick={() => setPreviewModal(k.uploadedUrl || k.preview)} title="Klik untuk melihat dokumen lengkap">
                               {(k.preview.startsWith('data:image') || k.preview.match(/\.(jpeg|jpg|gif|png)$/i)) ? (
                                 <img src={k.preview} alt="Preview Dokumen" className="img-thumbnail" style={{ height: '100px', objectFit: 'cover', cursor: 'pointer' }} />
+                              ) : (k.file?.name?.match(/\.(docx?|doc)$/i) || k.uploadedUrl?.match(/\.(docx?|doc)/i)) ? (
+                                <div className="p-3 bg-light border rounded text-primary">
+                                  <i className="bi bi-file-earmark-word-fill fs-1 text-primary"></i>
+                                  <div className="small fw-semibold text-truncate mt-1" style={{ maxWidth: '140px' }}>{k.file?.name || 'Dokumen Word'}</div>
+                                </div>
                               ) : (
-                                <div className="p-3 bg-light border rounded text-danger"><i className="bi bi-file-earmark-pdf fs-1"></i></div>
+                                <div className="p-3 bg-light border rounded text-danger">
+                                  <i className="bi bi-file-earmark-pdf fs-1"></i>
+                                  <div className="small fw-semibold text-truncate mt-1" style={{ maxWidth: '140px' }}>{k.file?.name || 'Dokumen PDF'}</div>
+                                </div>
                               )}
                               <div className="small mt-1 text-primary"><i className="bi bi-search"></i> Lihat Dokumen</div>
                             </button>
@@ -569,9 +639,19 @@ export default function SertifikasiPage() {
                       <label className="form-check-label text-muted" htmlFor="checkSetuju">Saya menyatakan data yang diisi benar dan dapat dipertanggungjawabkan.</label>
                     </div>
 
-                    <div className="d-flex justify-content-between mt-4 pt-3 border-top">
-                      <button type="button" className="btn btn-outline-secondary btn-action" onClick={() => handleNext(2)}>&lt;&lt; Sebelumnya</button>
-                      <button type="submit" disabled={isSubmitting} className="btn btn-success btn-action"><i className="bi bi-save me-1"></i> {isSubmitting ? 'Menyimpan...' : 'Simpan Final'}</button>
+                    <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                      <button type="button" className="btn btn-outline-secondary btn-action" disabled={isSubmitting} onClick={() => handleNext(2)}>&lt;&lt; Sebelumnya</button>
+                      <div className="d-flex align-items-center gap-3">
+                        {submitStatus && (
+                          <span className="text-primary fw-medium" style={{ fontSize: '0.85rem' }}>
+                            {isSubmitting && <span className="spinner-border spinner-border-sm me-2" role="status"></span>}
+                            {submitStatus}
+                          </span>
+                        )}
+                        <button type="submit" disabled={isSubmitting} className="btn btn-success btn-action">
+                          <i className="bi bi-save me-1"></i> {isSubmitting ? 'Menyimpan...' : 'Simpan Final'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -614,6 +694,19 @@ export default function SertifikasiPage() {
               <div className="modal-body text-center p-0" style={{ height: '70vh' }}>
                 {(previewModal.startsWith('data:image') || previewModal.match(/\.(jpeg|jpg|gif|png)$/i)) ? (
                   <img src={previewModal} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                ) : (previewModal.match(/\.(docx?|doc)($|[?#])/i) || previewModal.match(/[?&]name=[^&]+\.(docx?|doc)/i) || previewModal.startsWith('data:application/msword') || previewModal.startsWith('data:application/vnd.openxmlformats')) && !previewModal.includes('drive.google.com') ? (
+                  <div className="d-flex flex-column align-items-center justify-content-center h-100 p-4 bg-light">
+                    <i className="bi bi-file-earmark-word-fill text-primary display-1 mb-3"></i>
+                    <h5 className="fw-bold text-dark mb-2">Dokumen Microsoft Word</h5>
+                    <p className="text-muted small mb-4" style={{ maxWidth: '420px' }}>
+                      File Word (.doc / .docx) berhasil diunggah. Dokumen Word dapat diunduh atau dibuka langsung di perangkat Anda.
+                    </p>
+                    {previewModal.startsWith('http') && (
+                      <a href={previewModal} download target="_blank" rel="noopener noreferrer" className="btn btn-primary px-4 rounded-pill shadow-sm">
+                        <i className="bi bi-download me-2"></i> Unduh / Buka Dokumen Word
+                      </a>
+                    )}
+                  </div>
                 ) : (
                   <iframe src={previewModal} style={{ width: '100%', height: '100%', border: 'none' }} title="Dokumen Preview" />
                 )}
