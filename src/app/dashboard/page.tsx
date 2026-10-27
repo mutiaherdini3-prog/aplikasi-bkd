@@ -456,20 +456,12 @@ export default function DashboardPage() {
                     </span>
                   )}
 
-                  {/* Indikator Pemenuhan Standar JP (PNS 20 JP / P3K 24 JP) */}
+                  {/* Indikator Pemenuhan Standar JP (PNS 20 JP / P3K 24 JP) - Desain Simpel & Bersih */}
                   <span 
-                    className="badge-status shadow-sm d-inline-flex align-items-center" 
-                    style={{ 
-                      backgroundColor: isMemenuhiJP ? '#dcfce7' : '#fee2e2', 
-                      color: isMemenuhiJP ? '#166534' : '#991b1b',
-                      border: `1px solid ${isMemenuhiJP ? '#86efac' : '#fca5a5'}`,
-                      fontWeight: 700,
-                      fontSize: '0.88rem',
-                      padding: '6px 14px',
-                      borderRadius: '20px'
-                    }}
+                    className={`badge rounded-pill fw-medium ${isMemenuhiJP ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'}`}
+                    style={{ fontSize: '0.8rem', padding: '5px 12px' }}
                   >
-                    <i className={`bi ${isMemenuhiJP ? 'bi-patch-check-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} me-1`}></i>
+                    <i className={`bi ${isMemenuhiJP ? 'bi-check-circle-fill' : 'bi-info-circle-fill'} me-1`}></i>
                     {statusKepatuhanText}
                   </span>
                 </div>
@@ -478,33 +470,6 @@ export default function DashboardPage() {
                 <a href="/edit-profil" className="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-medium">
                   <i className="bi bi-pencil-square me-1"></i> Edit Profil
                 </a>
-              </div>
-            </div>
-
-            {/* Banner Status Pemenuhan JP */}
-            <div className={`p-3 rounded-3 mt-4 shadow-sm border ${isMemenuhiJP ? 'bg-success-subtle border-success-subtle' : 'bg-danger-subtle border-danger-subtle'}`}>
-              <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div className="d-flex align-items-center gap-3">
-                  <div className={`fs-2 ${isMemenuhiJP ? 'text-success' : 'text-danger'}`}>
-                    <i className={`bi ${isMemenuhiJP ? 'bi-patch-check-fill' : 'bi-shield-exclamation'}`}></i>
-                  </div>
-                  <div>
-                    <div className="fw-bold fs-6">
-                      Status Kepatuhan Pengembangan Kompetensi:{' '}
-                      <span className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'} px-3 py-1 ms-1`}>
-                        {statusKepatuhanText}
-                      </span>
-                    </div>
-                    <small className="text-secondary d-block mt-1">
-                      Kategori Pegawai: <strong>{statusLabel}</strong> (Standar minimal: <strong>{targetJP} JP</strong> per tahun). Total perolehan saat ini: <strong className={isMemenuhiJP ? 'text-success' : 'text-danger'}>{totalJP} JP</strong>.
-                    </small>
-                  </div>
-                </div>
-                {!isMemenuhiJP && (
-                  <a href="/sertifikasi" className="btn btn-danger btn-sm rounded-pill px-3 fw-bold text-nowrap shadow-sm">
-                    <i className="bi bi-upload me-1"></i> Upload Sertifikat (Kurang {sisaJP} JP)
-                  </a>
-                )}
               </div>
             </div>
 
@@ -550,21 +515,16 @@ export default function DashboardPage() {
                   </div>
                   <div className="col-sm-6">
                     <div className="info-label">Total Jam Pelajaran (JP)</div>
-                    <div className="d-flex align-items-center gap-2 flex-wrap mt-1">
-                      <span className="fs-5 fw-bold" style={{ color: '#0ea5e9' }}>
+                    <div className="d-flex align-items-center gap-2 mt-1">
+                      <div className="info-value mb-0" style={{ color: '#0284c7', fontWeight: 'bold' }}>
                         {totalJP} JP
-                      </span>
+                      </div>
                       <span 
-                        className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'} px-2 py-1 fw-bold`}
-                        style={{ fontSize: '0.8rem' }}
+                        className={`badge rounded-pill fw-normal px-2 py-1 ${isMemenuhiJP ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'}`}
+                        style={{ fontSize: '0.78rem' }}
                       >
                         {statusKepatuhanText}
                       </span>
-                    </div>
-                    <div className="mt-1" style={{ fontSize: '0.78rem', color: isMemenuhiJP ? '#166534' : '#dc2626' }}>
-                      {isMemenuhiJP 
-                        ? `✅ Memenuhi standar minimal ${statusLabel} (${targetJP} JP/tahun).`
-                        : `⚠️ Kurang ${sisaJP} JP lagi untuk memenuhi standar minimal ${statusLabel} (${targetJP} JP/tahun).`}
                     </div>
                   </div>
                 </div>
@@ -573,11 +533,10 @@ export default function DashboardPage() {
                 <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 flex-wrap gap-2">
                   <h5 className="fw-bold mb-0"><i className="bi bi-award-fill me-2 text-primary"></i> Riwayat Sertifikasi Tersimpan</h5>
                   <div className="d-flex align-items-center gap-2">
-                    <span className={`badge rounded-pill ${isMemenuhiJP ? 'bg-success' : 'bg-danger'} px-3 py-2 fw-bold`} style={{ fontSize: '0.82rem' }}>
-                      <i className={`bi ${isMemenuhiJP ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-1`}></i>
+                    <span className="badge rounded-pill bg-light text-secondary border fw-normal" style={{ fontSize: '0.78rem' }}>
                       {statusKepatuhanText}
                     </span>
-                    <span className="badge rounded-pill bg-primary px-3 py-2" style={{ fontSize: '0.82rem' }}>
+                    <span className="badge rounded-pill bg-primary" style={{ fontSize: '0.8rem' }}>
                       Total: {totalJP} JP
                     </span>
                   </div>
