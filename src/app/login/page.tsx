@@ -11,12 +11,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [profilWeb, setProfilWeb] = useState({
-    bupati_nama: 'Pimpinan Daerah A',
+    bupati_nama: 'MARKUS, S.H.',
     bupati_jabatan: 'BUPATI BANGKA BARAT',
-    bupati_foto: '/img/dummy_pejabat_1.png',
-    wakil_nama: 'Wakil Pimpinan A',
+    bupati_foto: '/api/profil-web/image?target=bupati',
+    wakil_nama: 'H. YUS DERAHMAN',
     wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
-    wakil_foto: '/img/dummy_pejabat_2.png',
+    wakil_foto: '/api/profil-web/image?target=wakil',
     hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
     hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, \ndan evaluasi pemenuhan \nkewajiban Jam Pelajaran (JP) \nbagi seluruh ASN.',
   });

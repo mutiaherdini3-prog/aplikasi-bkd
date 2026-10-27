@@ -17,12 +17,12 @@ export interface ProfilWebData {
 }
 
 const DEFAULT_PROFIL: ProfilWebData = {
-  bupati_nama: 'Pimpinan Daerah A',
+  bupati_nama: 'MARKUS, S.H.',
   bupati_jabatan: 'BUPATI BANGKA BARAT',
-  bupati_foto: '/img/dummy_pejabat_1.png',
-  wakil_nama: 'Wakil Pimpinan A',
+  bupati_foto: '/api/profil-web/image?target=bupati',
+  wakil_nama: 'H. YUS DERAHMAN',
   wakil_jabatan: 'WAKIL BUPATI BANGKA BARAT',
-  wakil_foto: '/img/dummy_pejabat_2.png',
+  wakil_foto: '/api/profil-web/image?target=wakil',
   hero_judul: 'Sistem Informasi Pengembangan Kompetensi',
   hero_subjudul: 'Wadah digital terpadu untuk pencatatan, pemantauan, dan evaluasi pemenuhan kewajiban Jam Pelajaran (JP) bagi seluruh ASN.',
 };
@@ -54,10 +54,48 @@ function saveLocalData(data: ProfilWebData) {
 }
 
 export async function GET() {
-  return NextResponse.json(
-    { success: true, data: getLocalData() },
-    { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
-  );
+  try {
+    let data = { ...DEFAULT_PROFIL, ...getLocalData() };
+
+    try {
+      const sheets = getGoogleSheets();
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: 'profil_web!A:B',
+      });
+      const rows = res.data.values || [];
+
+      if (rows.length > 1) {
+        const parsed: Record<string, string> = {};
+        for (let i = 1; i < rows.length; i++) {
+          const key = rows[i][0]?.trim();
+          const val = rows[i][1]?.trim();
+          if (key && val) {
+            parsed[key] = val;
+          }
+        }
+        data = {
+          bupati_nama: parsed.bupati_nama || data.bupati_nama,
+          bupati_jabatan: parsed.bupati_jabatan || data.bupati_jabatan,
+          bupati_foto: parsed.bupati_foto || data.bupati_foto,
+          wakil_nama: parsed.wakil_nama || data.wakil_nama,
+          wakil_jabatan: parsed.wakil_jabatan || data.wakil_jabatan,
+          wakil_foto: parsed.wakil_foto || data.wakil_foto,
+          hero_judul: parsed.hero_judul || data.hero_judul,
+          hero_subjudul: parsed.hero_subjudul || data.hero_subjudul,
+        };
+      }
+    } catch (sheetErr) {
+      console.warn('Error reading profil_web from Google Sheets:', sheetErr);
+    }
+
+    return NextResponse.json(
+      { success: true, data },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+    );
+  } catch (error: any) {
+    return NextResponse.json({ success: true, data: DEFAULT_PROFIL });
+  }
 }
 
 export async function POST(request: Request) {
