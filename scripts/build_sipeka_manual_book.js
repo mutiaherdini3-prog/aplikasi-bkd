@@ -214,8 +214,8 @@ const handleLogin = async (e: React.FormEvent) => {
     {
       num: 2,
       imageFile: 'image14.png',
-      caption: 'Gambar 2. Tampilan Dashboard Pegawai ASN dengan Banner Pengingat Kepatuhan JP',
-      explanation: 'Halaman Dashboard Pegawai menampilkan rangkuman data kepegawaian, navigasi layanan pengembangan kompetensi, serta sistem pengingat otomatis pemenuhan Jam Pelajaran (JP) tahunan. Sesuai ketentuan pengembangan kompetensi ASN, standar minimal per tahun adalah 20 JP bagi PNS dan 24 JP bagi PPPK/P3K. Pada bagian atas dashboard, sistem menyajikan spanduk pengingat cerdas bergradien lembut (kuning untuk status Belum Memenuhi disertai informasi sisa kekurangan JP dan tombol cepat "Tambah Pelatihan", atau hijau untuk status Memenuhi). Jika ASN belum melengkapi email resmi, spanduk biru notifikasi juga ditampilkan. Pada kartu profil kepegawaian, disematkan lencana status keaktifan ASN dan status kepatuhan JP terpadu pada baris Total Jam Pelajaran.',
+      caption: 'Gambar 2. Tampilan Dashboard Pegawai ASN dengan Banner Pengingat Pemenuhan JP',
+      explanation: 'Halaman Dashboard Pegawai ASN menampilkan profil data kepegawaian aktif, kemajuan kompetensi, serta pembaruan fitur spanduk Pengingat Pemenuhan Jam Pelajaran (JP). Sesuai ketentuan pengembangan kompetensi ASN, standar minimal tahunan adalah 20 JP bagi PNS dan 24 JP bagi PPPK/P3K. Pada bagian atas dashboard, sistem menyajikan spanduk pengingat cerdas bergradien lembut (kuning untuk status Belum Memenuhi disertai rincian sisa kekurangan JP dan tombol cepat "Tambah Pelatihan", atau hijau untuk status Memenuhi). Pada contoh akun aktif Pegawai Nabila Safira (PPPK dengan capaian 9 JP), sistem secara otomatis menghitung sisa 15 JP yang dibutuhkan untuk mencapai target 24 JP serta menyematkan status "P3K 24 JP (Belum Memenuhi)" di spanduk dan di rincian Total Jam Pelajaran.',
       codeTitle: 'Source Code Terkait: Kalkulasi Target Jam Pelajaran, Logika Pengingat & Render Banner (src/app/dashboard/page.tsx)',
       code: `// 1. Kalkulasi Akumulasi Jam Pelajaran (JP) dari Seluruh Sertifikasi Tersimpan
 let sum = 0;
